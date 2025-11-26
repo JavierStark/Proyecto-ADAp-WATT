@@ -1,0 +1,29 @@
+<header 
+  class="bg-green-600 text-white p-4 fixed top-0 left-0 w-full z-10 transition-all duration-300 ease-in-out"
+  [ngClass]="{ 'transform -translate-y-full': !showHeader }">
+  <!-- Logo de Cudeca -->
+  <div class="flex justify-between items-center">
+    <img src="../assets/images/logo-cudeca.jpg" alt="Cudeca Logo" class="h-12">
+    <div class="space-x-4">
+      <button 
+        (click)="goToLogin()" 
+        class="bg-white text-green-600 py-2 px-6 rounded-md hover:bg-green-50 transition-all">
+        Iniciar sesión
+      </button>
+      <button 
+        (click)="goToSignUp()" 
+        class="bg-white text-green-600 py-2 px-6 rounded-md hover:bg-green-50 transition-all">
+        Registrarse
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Router Outlet: donde se renderizan los componentes -->
+<main class="pt-20 pb-8">
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="bg-green-800 text-white py-4 text-center">
+  <p>&copy; 2025 Cudeca - Todos los derechos reservados</p>
+</footer>

@@ -1,0 +1,25 @@
+/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+h1::after {
+  content: '';
+  display: inline-block;
+  width: 1px;                /* cursor fino */
+  height: 1em;
+  background-color: white;   /* color del cursor */
+  margin-left: 4px;
+  animation: blink 1s step-start infinite;
+  vertical-align: bottom;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+
