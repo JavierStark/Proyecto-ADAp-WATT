@@ -1,6 +1,43 @@
 @Backend_HostAddress = http://localhost:5156
 
-GET {{Backend_HostAddress}}/weatherforecast/
+### Test Hello World endpoint
+GET {{Backend_HostAddress}}/
+Accept: application/json
+
+###
+
+### Test GetEvents endpoint - Valid request with 3 events
+GET {{Backend_HostAddress}}/eventos/3
+Accept: application/json
+
+###
+
+### Test GetEvents endpoint - Valid request with 10 events
+GET {{Backend_HostAddress}}/eventos/10
+Accept: application/json
+
+###
+
+### Test GetEvents endpoint - Valid request with 1 event
+GET {{Backend_HostAddress}}/eventos/1
+Accept: application/json
+
+###
+
+### Test GetEvents endpoint - Invalid request (zero)
+GET {{Backend_HostAddress}}/eventos/0
+Accept: application/json
+
+###
+
+### Test GetEvents endpoint - Invalid request (negative number)
+GET {{Backend_HostAddress}}/eventos/-5
+Accept: application/json
+
+###
+
+### Test GetEvents endpoint - Invalid request (non-numeric)
+GET {{Backend_HostAddress}}/eventos/abc
 Accept: application/json
 
 ###

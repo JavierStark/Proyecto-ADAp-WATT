@@ -1,3 +1,5 @@
+using Backend;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -17,6 +19,12 @@ app.UseHttpsRedirection();
 
 app.MapGet("/", () => "Hello World!")
     .WithName("GetHelloWorld")
+    .WithOpenApi();
+
+
+
+app.MapGet("/eventos/{numeroEventosString}", Test.GetEvents)
+    .WithName("GetEvents")
     .WithOpenApi();
 
 app.Run();
