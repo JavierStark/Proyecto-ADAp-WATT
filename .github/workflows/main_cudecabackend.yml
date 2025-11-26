@@ -21,13 +21,13 @@ jobs:
           dotnet-version: '9.x'
 
       - name: Restore dependencies
-        run: dotnet restore Backend/Backend.csproj
+        run: dotnet restore Backend/Backend/Backend.csproj
 
       - name: Build
-        run: dotnet build Backend/Backend.csproj --configuration Release --no-restore
+        run: dotnet build Backend/Backend/Backend.csproj --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish Backend/Backend.csproj -c Release -o ./publish
+        run: dotnet publish Backend/Backend/Backend.csproj -c Release -o ./publish
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
@@ -61,3 +61,4 @@ jobs:
           app-name: 'CudecaBackend'
           slot-name: 'Production'
           package: .
+
