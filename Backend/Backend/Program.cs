@@ -127,7 +127,6 @@ IResult TestSupabase(Supabase.Client supabase)
     }
 }
 
-// IResult RegisterUser(RegisterDto dto) => Results.Ok();
 async Task<IResult> RegisterUser(RegisterDto dto, Supabase.Client client)
 {
     // Comprobamos que los datos no sean nulos
@@ -163,7 +162,47 @@ async Task<IResult> RegisterUser(RegisterDto dto, Supabase.Client client)
     }
 }
 
-IResult LoginUser(LoginDto dto) => Results.Ok();
+async Task<IResult> LoginUser(LoginDto dto, Supabase.Client client)
+{
+    // Comprobamos que los datos no sean nulos
+    if (string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
+    {
+        return Results.BadRequest(new { error = "El email y la contraseña son obligatorios." });
+    }
+
+    try
+    {
+        // Llamamos a Supabase para preguntar a Supabase si los datos son correctos
+        var session = await client.Auth.SignIn(dto.Email, dto.Password);
+        
+        // Supabase devuelve una "Session" que contiene el Token de acceso.
+        if (session == null || session.AccessToken == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        return Results.Ok(new 
+        { 
+            status = "success",
+            message = "Login correcto",
+            
+            // Llave para futuras peticiones
+            token = session.AccessToken, 
+            refreshToken = session.RefreshToken,
+            user = new 
+            { 
+                id = session.User.Id,       // Esta comprobado que no sea nula
+                email = session.User.Email 
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        // Devolvemos un 400
+        return Results.BadRequest(new { error = "Credenciales inválidas (Usuario o contraseña incorrectos)." });
+    }
+}
+
 IResult LogoutUser() => Results.Ok();
 IResult RefreshToken() => Results.Ok();
 
