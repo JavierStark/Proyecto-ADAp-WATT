@@ -34,7 +34,11 @@
       <div class="mt-4 text-center">
         <p class="text-sm text-gray-600">
           ¿No tienes cuenta? 
-          <a routerLink="/auth/sign-up" class="text-green-600 hover:text-green-800">Regístrate aquí</a>
+          <button
+            (click)="goToSignUp()" 
+            class="text-green-600 hover:text-green-800">
+            Regístrate aquí
+          </button>
         </p>
       </div>
     </div>
