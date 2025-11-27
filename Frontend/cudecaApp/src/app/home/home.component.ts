@@ -10,7 +10,7 @@ export class HomeComponent {
 title = 'oratoristWeb';
 
   texto = '';
-  frase = 'Compra tus entradas aquí';
+  frase = 'Con tu donación, transformas el dolor en dignidad y acompañamiento para cientos de pacientes y sus familias. Por favor, colabora hoy con Cudeca y haz que cada momento cuente.';
   i = 0;
 
   ngOnInit() {
@@ -21,7 +21,7 @@ title = 'oratoristWeb';
     if (this.i < this.frase.length) {
       this.texto += this.frase[this.i];
       this.i++;
-      setTimeout(() => this.escribirTexto(), 80); // velocidad por letra
+      setTimeout(() => this.escribirTexto(), 50); // velocidad por letra
     }
   }
   
