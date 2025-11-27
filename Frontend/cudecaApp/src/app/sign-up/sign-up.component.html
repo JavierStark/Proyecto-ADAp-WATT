@@ -1,5 +1,14 @@
 <section class="relative w-full h-screen overflow-hidden bg-cover bg-center"
          style="background-image: url('../../assets/images/fondoCudeca.png');">
+  <!-- Botón volver arriba a la derecha -->
+  <button type="button" (click)="goBack()"
+          aria-label="Volver"
+          class="absolute top-4 right-4 z-20 p-2 bg-white bg-opacity-90 rounded-full shadow-md text-green-600 hover:bg-opacity-100 focus:outline-none">
+    <!-- Icono chevron-left SVG -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd" d="M12.293 15.293a1 1 0 01-1.414 0L6.586 11l4.293-4.293a1 1 0 011.414 1.414L9.414 11l2.879 2.879a1 1 0 010 1.414z" clip-rule="evenodd"/>
+    </svg>
+  </button>
   <!-- Filtro de oscuridad -->
   <div class="absolute inset-0 bg-black opacity-50 z-0"></div>
 
@@ -41,7 +50,11 @@
       <div class="mt-4 text-center">
         <p class="text-sm text-gray-600">
           ¿Ya tienes cuenta? 
-          <a routerLink="/auth/log-in" class="text-green-600 hover:text-green-800">Inicia sesión aquí</a>
+          <button
+            (click)="goToLogin()" 
+            class="text-green-600 hover:text-green-800">
+            Iniciar sesión aquí
+          </button>
         </p>
       </div>
     </div>
