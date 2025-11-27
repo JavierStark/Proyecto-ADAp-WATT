@@ -1,28 +1,46 @@
-using Backend;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var supabaseSettings = builder.Configuration.GetSection("Supabase").Get<SupabaseSettings>();
+if (supabaseSettings == null || string.IsNullOrEmpty(supabaseSettings.Url) || string.IsNullOrEmpty(supabaseSettings.Key))
+{
+    throw new InvalidOperationException(
+        "Supabase configuration is missing. Please configure Supabase:Url and Supabase:Key in user secrets:\n" +
+        "  dotnet user-secrets set \"Supabase:Url\" \"https://your-project.supabase.co\"\n" +
+        "  dotnet user-secrets set \"Supabase:Key\" \"your-anon-key\"");
+}
+
+builder.Services.AddSingleton<Supabase.Client>(_ =>
+{
+    var options = new Supabase.SupabaseOptions
+    {
+        AutoRefreshToken = true,
+        AutoConnectRealtime = true
+    };
+    
+    var client = new Supabase.Client(supabaseSettings.Url, supabaseSettings.Key, options);
+    client.InitializeAsync().Wait();
+    return client;
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseSwagger();
+//     app.UseSwaggerUI();
+// }
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
 app.MapGet("/", () => "CUDECA API");
 
+app.MapGet("/test/supabase", TestSupabase);
 
-// =========================
-// AUTH ENDPOINTS
-// =========================
 var auth = app.MapGroup("/auth");
 auth.MapPost("/register", RegisterUser);
 auth.MapPost("/login", LoginUser);
@@ -30,9 +48,6 @@ auth.MapPost("/logout", LogoutUser);
 auth.MapPost("/refresh", RefreshToken);
 
 
-// =========================
-// USERS ENDPOINTS
-// =========================
 var users = app.MapGroup("/users/me");
 users.MapGet("", GetMyProfile);
 users.MapPut("", UpdateMyProfile);
@@ -45,51 +60,33 @@ users.MapGet("/donations", GetMyDonations);
 users.MapGet("/donations/summary", GetMyDonationSummary);
 
 
-// =========================
-// EVENTS ENDPOINTS
-// =========================
 var events = app.MapGroup("/events");
 events.MapGet("", ListEvents);
 events.MapGet("/{eventId}", GetEvent);
 
 
-// =========================
-// TICKETS / PURCHASE
-// =========================
 var tickets = app.MapGroup("/tickets");
 
 tickets.MapPost("/purchase/start", StartPurchase);
 tickets.MapPost("/purchase/confirm", ConfirmPurchase);
 
 
-// =========================
-// DONATIONS
-// =========================
 var donations = app.MapGroup("/donations");
 
 donations.MapPost("", CreateDonation);
 donations.MapGet("/{donationId}/certificate", GetDonationCertificate);
 
 
-// =========================
-// PAYMENTS
-// =========================
 var payments = app.MapGroup("/payments");
 
 payments.MapGet("/methods", GetPaymentMethods);
 
 
-// =========================
-// DISCOUNTS
-// =========================
 var discounts = app.MapGroup("/discounts");
 
 discounts.MapPost("/validate", ValidateDiscount);
 
 
-// =========================
-// ADMIN ENDPOINTS
-// =========================
 var admin = app.MapGroup("/admin/events");
 
 admin.MapGet("", AdminListEvents);
@@ -98,19 +95,43 @@ admin.MapPut("/{eventId}", AdminUpdateEvent);
 admin.MapDelete("/{eventId}", AdminDeleteEvent);
 
 app.Run();
+return;
 
+IResult TestSupabase(Supabase.Client supabase)
+{
+    try
+    {
+        var maskedUrl = supabaseSettings.Url.Length > 20 
+            ? supabaseSettings.Url[..20] + "..." 
+            : supabaseSettings.Url;
+        
+        return Results.Ok(new
+        {
+            status = "success",
+            message = "Supabase client initialized successfully",
+            connection = new
+            {
+                url = maskedUrl,
+                initialized = true,
+                timestamp = DateTime.UtcNow
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            title: "Supabase Connection Error",
+            detail: ex.Message,
+            statusCode: 500
+        );
+    }
+}
 
-// ===================================
-// HANDLERS (boilerplate empty methods)
-// ===================================
-
-// -------- AUTH ----------
 IResult RegisterUser(RegisterDto dto) => Results.Ok();
 IResult LoginUser(LoginDto dto) => Results.Ok();
 IResult LogoutUser() => Results.Ok();
 IResult RefreshToken() => Results.Ok();
 
-// -------- USERS ----------
 IResult GetMyProfile() => Results.Ok();
 IResult UpdateMyProfile(UserUpdateDto dto) => Results.Ok();
 IResult PartialUpdateProfile(UserUpdatePartialDto dto) => Results.Ok();
@@ -122,25 +143,19 @@ IResult GetMyTicketById(int ticketId) => Results.Ok();
 IResult GetMyDonations() => Results.Ok();
 IResult GetMyDonationSummary() => Results.Ok();
 
-// -------- EVENTS ----------
 IResult ListEvents(string? query) => Results.Ok();
 IResult GetEvent(int eventId) => Results.Ok();
 
-// -------- PURCHASE ----------
 IResult StartPurchase(PurchaseStartDto dto) => Results.Ok();
 IResult ConfirmPurchase(PurchaseConfirmDto dto) => Results.Ok();
 
-// -------- DONATIONS ----------
 IResult CreateDonation(DonationDto dto) => Results.Ok();
 IResult GetDonationCertificate(int donationId) => Results.File("dummy.pdf");
 
-// -------- PAYMENTS ----------
 IResult GetPaymentMethods() => Results.Ok();
 
-// -------- DISCOUNTS ----------
 IResult ValidateDiscount(DiscountCheckDto dto) => Results.Ok();
 
-// -------- ADMIN ----------
 IResult AdminListEvents() => Results.Ok();
 IResult AdminCreateEvent(EventAdminCreateDto dto) => Results.Ok();
 IResult AdminUpdateEvent(int eventId, EventAdminUpdateDto dto) => Results.Ok();
@@ -168,3 +183,6 @@ record DiscountCheckDto(string Code);
 
 record EventAdminCreateDto(string Title, string Description, DateTime Date);
 record EventAdminUpdateDto(string? Title, string? Description, DateTime? Date);
+
+record SupabaseSettings(string Url, string Key);
+

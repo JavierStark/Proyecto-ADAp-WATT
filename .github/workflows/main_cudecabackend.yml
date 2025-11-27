@@ -15,10 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.x'
+          dotnet-version: '8.x'
 
       - name: Restore dependencies
         run: dotnet restore Backend/Backend/Backend.csproj
@@ -47,6 +47,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: published-app
+          path: ./publish
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -60,5 +61,15 @@ jobs:
         with:
           app-name: 'CudecaBackend'
           slot-name: 'Production'
-          package: .
+          package: ./publish
 
+      - name: Configure Azure App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'CudecaBackend'
+          slot-name: 'Production'
+          app-settings-json: |
+            [
+              { "name": "Supabase__Url", "value": "${{ secrets.SUPABASE_URL }}", "slotSetting": false },
+              { "name": "Supabase__Key", "value": "${{ secrets.SUPABASE_KEY }}", "slotSetting": false }
+            ]
