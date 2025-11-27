@@ -127,7 +127,42 @@ IResult TestSupabase(Supabase.Client supabase)
     }
 }
 
-IResult RegisterUser(RegisterDto dto) => Results.Ok();
+// IResult RegisterUser(RegisterDto dto) => Results.Ok();
+async Task<IResult> RegisterUser(RegisterDto dto, Supabase.Client client)
+{
+    // Comprobamos que los datos no sean nulos
+    if (string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
+    {
+        return Results.BadRequest(new { error = "El email y la contraseña son obligatorios." });
+    }
+
+    try
+    {
+        // Llamamos a Supabase para crear el usuario
+        var session = await client.Auth.SignUp(dto.Email, dto.Password);
+
+        // Verificamos si Supabase respondió con un usuario
+        // Nota: A veces devuelve sesión nula si requiere confirmación de email, pero User no debería ser nulo.
+        if (session?.User == null)
+        {
+            return Results.BadRequest(new { error = "No se pudo registrar el usuario. Inténtalo de nuevo." });
+        }
+
+        // Devolvemos un 200 OK
+        return Results.Ok(new 
+        { 
+            status = "success", 
+            message = "Usuario creado correctamente. ¡Revisa tu correo para confirmar la cuenta!",
+            userId = session.User.Id
+        });
+    }
+    catch (Exception ex)
+    {
+        // Si algo falla devolvemos el error
+        return Results.BadRequest(new { error = ex.Message });
+    }
+}
+
 IResult LoginUser(LoginDto dto) => Results.Ok();
 IResult LogoutUser() => Results.Ok();
 IResult RefreshToken() => Results.Ok();
