@@ -1,15 +1,29 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, Router } from '@angular/router';
+import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import {HostListener } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common'; 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [RouterOutlet, NgClass],
+  imports: [RouterOutlet, NgClass, CommonModule],
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  constructor(private router: Router) {}
+
+   isAuthRoute: boolean = false;
+  constructor(private router: Router) {
+
+     // Detectar cambios en la ruta
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.isAuthRoute = event.urlAfterRedirects.includes('/log-in') || event.urlAfterRedirects.includes('/sign-up');
+        console.log('isAuthRoute:', this.isAuthRoute);
+      }
+    });
+
+  }
 
   showHeader = true;  // Por defecto el header es visible
     private lastScrollTop = 0;  // Última posición de scroll
@@ -27,14 +41,18 @@ export class AppComponent {
 
       this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // Evitar desplazamiento negativo
     }
+
+ 
+
+ 
   
 
   goToLogin() {
-    this.router.navigate(['/auth/log-in']);  // Navega a la página de login
+    this.router.navigate(['/log-in']);  // Navega a la página de login
   }
 
   goToSignUp() {
-    this.router.navigate(['/auth/sign-up']); // Navega a la página de registro
+    this.router.navigate(['/sign-up']); // Navega a la página de registro
   }
 
   

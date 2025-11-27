@@ -1,0 +1,10 @@
+/* Estilos personalizados para el formulario de login */
+.form-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+input, button {
+  margin-top: 1rem;
+}

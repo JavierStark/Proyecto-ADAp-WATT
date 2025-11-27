@@ -1,11 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component'; // Asegúrate de crear el HomeComponent
+import { LoginComponent } from './login/login.component';  // Importa tu LoginComponent
+import { SignUpComponent } from './sign-up/sign-up.component';  // Importa tu SignUpComponent
+import { EmptyLayoutComponent } from './layouts/empty-layout/empty-layout.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Ruta por defecto que carga el HomeComponent
-  // Puedes agregar más rutas aquí, como:
-  // { path: 'about', component: AboutComponent }
+  { path: 'log-in', component: LoginComponent },  // Ruta para login
+  { path: 'sign-up', component: SignUpComponent },  // Ruta para registrarse
 ];
 
 @NgModule({
