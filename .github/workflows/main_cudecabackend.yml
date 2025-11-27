@@ -25,9 +25,15 @@ jobs:
 
       - name: Build
         run: dotnet build Backend/Backend/Backend.csproj --configuration Release --no-restore
+        env:
+          Supabase__Url: ${{ secrets.SUPABASE_URL }}
+          Supabase__Key: ${{ secrets.SUPABASE_KEY }}
 
       - name: Publish
         run: dotnet publish Backend/Backend/Backend.csproj -c Release -o ./publish
+        env:
+          Supabase__Url: ${{ secrets.SUPABASE_URL }}
+          Supabase__Key: ${{ secrets.SUPABASE_KEY }}
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
@@ -61,4 +67,23 @@ jobs:
           app-name: 'CudecaBackend'
           slot-name: 'Production'
           package: .
+
+      - name: Configure Azure App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'CudecaBackend'
+          slot-name: 'Production'
+          app-settings-json: |
+            [
+              {
+                "name": "Supabase__Url",
+                "value": "${{ secrets.SUPABASE_URL }}",
+                "slotSetting": false
+              },
+              {
+                "name": "Supabase__Key",
+                "value": "${{ secrets.SUPABASE_KEY }}",
+                "slotSetting": false
+              }
+            ]
 
