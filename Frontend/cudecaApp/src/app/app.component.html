@@ -1,20 +1,35 @@
 <header 
   *ngIf="!isAuthRoute"
-  class="bg-green-600 text-white p-4 fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out"
+  class="text-white p-4 fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out"
   [ngClass]="{ 'transform -translate-y-full': !showHeader }">
   <!-- Logo de Cudeca -->
   <div class="flex justify-between items-center">
     <img src="../assets/images/logo-cudeca.jpg" alt="Cudeca Logo" class="h-12">
     <div class="space-x-4">
       <button 
-        (click)="goToLogin()" 
+        (click)="goToSignUp()" 
         class="bg-white text-green-600 py-2 px-6 rounded-md hover:bg-green-50 transition-all">
-        Iniciar sesión
+        Inicio
       </button>
       <button 
         (click)="goToSignUp()" 
         class="bg-white text-green-600 py-2 px-6 rounded-md hover:bg-green-50 transition-all">
-        Registrarse
+        Eventos
+      </button>
+      <button 
+        (click)="goToSignUp()" 
+        class="bg-white text-green-600 py-2 px-6 rounded-md hover:bg-green-50 transition-all">
+        Donar
+      </button>
+      <button 
+        (click)="goToSignUp()" 
+        class="bg-white text-green-600 py-2 px-6 rounded-md hover:bg-green-50 transition-all">
+        Cuenta
+      </button>
+      <button 
+        (click)="goToLogin()" 
+        class="bg-white text-green-600 py-2 px-6 rounded-md hover:bg-green-50 transition-all">
+        Iniciar sesión
       </button>
     </div>
   </div>
