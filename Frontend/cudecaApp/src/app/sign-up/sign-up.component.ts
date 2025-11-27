@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
+
 
 @Component({
   selector: 'app-sign-up',
@@ -9,7 +11,7 @@ import { Router } from '@angular/router';
   styleUrl: './sign-up.component.css'
 })
 export class SignUpComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private location: Location) {}
   username: string = '';  // Propiedad para ngModel
   email: string = '';  // Propiedad para ngModel
   password: string = '';  // Propiedad para ngModel
@@ -21,6 +23,11 @@ export class SignUpComponent {
 
   goToLogin() {
     this.router.navigate(['./log-in']);
+  }
+
+  // Volver a la página anterior
+  goBack() {
+    this.location.back();
   }
 
 }
