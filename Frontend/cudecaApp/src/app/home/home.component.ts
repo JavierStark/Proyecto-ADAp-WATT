@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -7,6 +8,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./home.component.css'] 
 })
 export class HomeComponent {
+  constructor(private router: Router) {}
 title = 'oratoristWeb';
 
   texto = '';
@@ -21,8 +23,16 @@ title = 'oratoristWeb';
     if (this.i < this.frase.length) {
       this.texto += this.frase[this.i];
       this.i++;
-      setTimeout(() => this.escribirTexto(), 50); // velocidad por letra
+      setTimeout(() => this.escribirTexto(), 30); // velocidad por letra
     }
+  }
+  
+  goToLogin() {
+    this.router.navigate(['/log-in']);
+  }
+
+  goToSignUp() {
+    this.router.navigate(['/sign-up']);
   }
   
   
