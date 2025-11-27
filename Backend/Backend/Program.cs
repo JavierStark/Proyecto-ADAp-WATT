@@ -203,7 +203,6 @@ async Task<IResult> LoginUser(LoginDto dto, Supabase.Client client)
     }
 }
 
-//IResult LogoutUser() => Results.Ok();
 async Task<IResult> LogoutUser(Supabase.Client client)
 {
     try 
@@ -221,7 +220,43 @@ async Task<IResult> LogoutUser(Supabase.Client client)
     }
 }
 
-IResult RefreshToken() => Results.Ok();
+async Task<IResult> RefreshToken(RefreshTokenDto dto, Supabase.Client client)
+{
+    // Comprobamos que ninguno de los tokens sea nulo
+    if (string.IsNullOrEmpty(dto.AccessToken) || string.IsNullOrEmpty(dto.RefreshToken))
+    {
+        return Results.BadRequest(new { error = "Se requieren el AccessToken y el RefreshToken antiguos." });
+    }
+
+    try
+    {
+        // Cargamos los tokens antiguos en el cliente
+        await client.Auth.SetSession(dto.AccessToken, dto.RefreshToken);
+        
+        // Pedimos a Supabase que nos renueve la sesión
+        // Supabase verifica si el RefreshToken es válido y no ha caducado.
+        var session = await client.Auth.RefreshSession();
+
+        if (session == null || session.AccessToken == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        // Devolvemos los nuevos tokens
+        return Results.Ok(new 
+        { 
+            status = "success",
+            message = "Token renovado correctamente",
+            token = session.AccessToken,
+            refreshToken = session.RefreshToken
+        });
+    }
+    catch (Exception ex)
+    {
+        // Si el refresh token ya caducó o fue revocado (logout)
+        return Results.Unauthorized();
+    }
+}
 
 IResult GetMyProfile() => Results.Ok();
 IResult UpdateMyProfile(UserUpdateDto dto) => Results.Ok();
@@ -255,6 +290,7 @@ IResult AdminDeleteEvent(int eventId) => Results.Ok();
 
 record RegisterDto(string Email, string Password);
 record LoginDto(string Email, string Password);
+record RefreshTokenDto(string AccessToken, string RefreshToken);
 record UserUpdateDto(string Name, string Email, string Phone);
 record UserUpdatePartialDto(string? Name, string? Phone);
 
