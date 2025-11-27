@@ -7,10 +7,13 @@
   />
 
   <!-- Filtro de oscuridad (capa semitransparente) -->
-  <div class="absolute inset-0 bg-black opacity-50 z-1"></div>
+  <div class="absolute inset-0 bg-green-600 opacity-50 z-1"></div>
 
-  <!-- Contenido con texto dinámico centrado tanto vertical como horizontal -->
-  <div class="relative z-10 flex items-center justify-center w-full h-full text-center px-4">
-    <h1 class="text-white text-4xl sm:text-6xl font-bold">{{ texto }}</h1> <!-- Texto dinámico -->
+  <!-- Degradado blanco desde la izquierda -->
+  <div class="absolute inset-0 z-2" style="background: linear-gradient(to right, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 40%, transparent 70%);"></div>
+
+  <!-- Contenido con texto dinámico alineado a la izquierda -->
+  <div class="relative z-10 flex items-center justify-start w-full h-full px-8 sm:px-16"> <!--sm:px-16 es la distancia al margen izq-->>
+    <h1 class="text-white text-2xl sm:text-4xl font-bold text-left max-w-3xl">{{ texto }}</h1> <!-- Texto dinámico -->
   </div>
 </section>
