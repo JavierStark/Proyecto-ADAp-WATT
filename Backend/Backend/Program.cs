@@ -203,7 +203,24 @@ async Task<IResult> LoginUser(LoginDto dto, Supabase.Client client)
     }
 }
 
-IResult LogoutUser() => Results.Ok();
+//IResult LogoutUser() => Results.Ok();
+async Task<IResult> LogoutUser(Supabase.Client client)
+{
+    try 
+    {
+        // Avisamos a Supabase que esta sesión ya no es válida.
+        // Esto invalida el "Refresh Token"
+        await client.Auth.SignOut();
+
+        return Results.Ok(new { message = "Has cerrado sesión correctamente." });
+    }
+    catch (Exception ex)
+    {
+        // Aunque falle el usuario ya ha cerrado sesión
+        return Results.Ok(new { message = "Sesión cerrada." });
+    }
+}
+
 IResult RefreshToken() => Results.Ok();
 
 IResult GetMyProfile() => Results.Ok();
