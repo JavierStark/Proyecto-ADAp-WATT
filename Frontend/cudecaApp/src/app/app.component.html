@@ -4,7 +4,7 @@
   [ngClass]="{ 'transform -translate-y-full': !showHeader }">
   <!-- Logo de Cudeca -->
   <div class="flex justify-between items-center">
-    <img src="../assets/images/logo-cudeca.jpg" alt="Cudeca Logo" class="h-12">
+    <img src="../assets/images/cudeca-logo.png" alt="Cudeca Logo" class="h-20 md:h-24">
     <div class="space-x-4">
       <button 
         (click)="goToSignUp()" 
@@ -36,10 +36,10 @@
 </header>
 
 <!-- Router Outlet: donde se renderizan los componentes -->
-<main class="pt-20 pb-8">
+<main class="">
   <router-outlet></router-outlet>
 </main>
 
-<footer *ngIf="!isAuthRoute" class="bg-green-800 text-white py-4 text-center">
+<footer *ngIf="!isAuthRoute" class="relative  bg-green-800 text-white py-4 text-center w-full">
   <p>&copy; 2025 Cudeca - Todos los derechos reservados</p>
 </footer>
