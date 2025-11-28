@@ -6,15 +6,6 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: 'pages'
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: windows-latest
@@ -28,17 +19,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: Frontend/cudecaApp/package-lock.json
-      
-      - name: Install dependencies
-        working-directory: Frontend/cudecaApp
-        run: npm ci
 
       - name: Restore dependencies
         run: dotnet restore Backend/Backend/Backend.csproj
@@ -54,18 +34,6 @@ jobs:
         with:
           name: published-app
           path: ./publish
-
-      - name: Build Angular App
-        working-directory: frontend/cudecaApp
-        run: npx ng build --configuration production --base-href "/Proyecto-ADAp-WATT/"
-
-      - name: Add .nojekyll file
-        run: echo "" > Frontend/cudecaApp/dist/cudeca-app/browser/.nojekyll
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: Frontend/cudecaApp/dist/cudeca-app/browser    
 
   deploy:
     runs-on: windows-latest
@@ -105,10 +73,3 @@ jobs:
               { "name": "Supabase__Url", "value": "${{ secrets.SUPABASE_URL }}", "slotSetting": false },
               { "name": "Supabase__Key", "value": "${{ secrets.SUPABASE_KEY }}", "slotSetting": false }
             ]
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
