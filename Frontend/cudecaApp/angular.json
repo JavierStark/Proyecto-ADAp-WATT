@@ -14,6 +14,7 @@
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "dist/cudeca-app",
+            "baseHref": "/Proyecto-ADAp-WATT/",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
