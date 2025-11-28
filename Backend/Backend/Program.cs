@@ -127,6 +127,8 @@ IResult TestSupabase(Supabase.Client supabase)
     }
 }
 
+// Registro, inicio, cerrar y refrescar sesión
+//=====================================================
 async Task<IResult> RegisterUser(RegisterDto dto, Supabase.Client client)
 {
     // Comprobamos que los datos no sean nulos
@@ -198,7 +200,7 @@ async Task<IResult> LoginUser(LoginDto dto, Supabase.Client client)
     }
     catch (Exception ex)
     {
-        // Devolvemos un 400
+        // Devolvemos un 400/401
         return Results.BadRequest(new { error = "Credenciales inválidas (Usuario o contraseña incorrectos)." });
     }
 }
@@ -258,6 +260,8 @@ async Task<IResult> RefreshToken(RefreshTokenDto dto, Supabase.Client client)
     }
 }
 
+// Extraer y actualizar el perfil
+//=====================================================
 IResult GetMyProfile() => Results.Ok();
 IResult UpdateMyProfile(UserUpdateDto dto) => Results.Ok();
 IResult PartialUpdateProfile(UserUpdatePartialDto dto) => Results.Ok();
