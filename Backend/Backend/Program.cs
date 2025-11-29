@@ -422,3 +422,47 @@ record EventAdminUpdateDto(string? Title, string? Description, DateTime? Date);
 
 record SupabaseSettings(string Url, string Key);
 
+// Tablas de la BD
+[Table("usuario")]
+public class Usuario : BaseModel
+{
+    // Clave primaria numérica (1, 2, 3...)
+    [PrimaryKey("id_usuario")]
+    public long IdUsuario { get; set; }
+
+    // El puente con el login (UUID)
+    [Column("id_auth_supabase")]
+    public string IdAuthSupabase { get; set; }
+
+    [Column("Email")]
+    public string? Email { get; set; }
+
+    [Column("dni")]
+    public string? Dni { get; set; }
+
+    [Column("nombre")]
+    public string? Nombre { get; set; }
+
+    [Column("apellidos")]
+    public string? Apellidos { get; set; }
+
+    [Column("telefono")]
+    public string? Telefono { get; set; }
+}
+
+[Table("cliente")]
+public class Cliente : BaseModel
+{
+    // Coincide con el ID_usuario
+    [PrimaryKey("id_cliente")]
+    public long IdCliente { get; set; }
+
+    [Column("direccion")]
+    public string? Direccion { get; set; }
+
+    [Column("suscritonewsletter")]
+    public bool SuscritoNewsletter { get; set; } // bool normal (true/false)
+
+    [Column("Tipo")]
+    public string? Tipo { get; set; } // "Socio" o "Corporativo"
+}
