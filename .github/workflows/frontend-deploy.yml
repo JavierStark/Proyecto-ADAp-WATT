@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Angular App
         working-directory: Frontend/cudecaApp
-        run: npx ng build --configuration production --base-href "/Proyecto-ADAp-WATT/"
+        run: npx ng build --configuration production --base-href "/"
 
       - name: Add .nojekyll file
         run: echo "" > Frontend/cudecaApp/dist/cudeca-app/browser/.nojekyll
