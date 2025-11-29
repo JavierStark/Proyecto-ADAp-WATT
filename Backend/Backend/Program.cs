@@ -1,7 +1,52 @@
+// Sirve para obtener información de la cabecera
+using Microsoft.AspNetCore.Mvc;
+
+// Sirve para declarar las tablas de supabase
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
+
+// He tenido que cambiar la seguridad para pasar el token de sesion al metodo GetMyProfile
+// sin que este quede reflejado en la URL
+
+// Configuración del Candado (Security Definition)
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Cudeca API", Version = "v1" });
+
+    // Definimos el esquema de seguridad "Bearer"
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "Autenticación JWT usando el esquema Bearer.\r\n\r\nEscribe 'Bearer' [espacio] y tu token.\r\n\r\nEjemplo: \"Bearer eyJhbGc...\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    // Aplicamos el esquema a todos los endpoints
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement()
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+            },
+            new List<string>()
+        }
+    });
+});
 
 var supabaseSettings = builder.Configuration.GetSection("Supabase").Get<SupabaseSettings>();
 if (supabaseSettings == null || string.IsNullOrEmpty(supabaseSettings.Url) || string.IsNullOrEmpty(supabaseSettings.Key))
@@ -262,7 +307,67 @@ async Task<IResult> RefreshToken(RefreshTokenDto dto, Supabase.Client client)
 
 // Extraer y actualizar el perfil
 //=====================================================
-IResult GetMyProfile() => Results.Ok();
+//IResult GetMyProfile() => Results.Ok();
+async Task<IResult> GetMyProfile([FromHeader(Name = "Authorization")] string? authHeader, Supabase.Client client)
+{
+    // Obtener Token y validar
+    if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
+
+    // Limpiar el token (Quitar "Bearer " y comillas si las hubiera)
+    string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
+        .Replace("\"", "")
+        .Trim();
+
+    if (string.IsNullOrEmpty(token)) return Results.Unauthorized();
+
+    try 
+    {
+        // Identificar al usuario logueado (UUID)
+        await client.Auth.SetSession(token, "token_falso");
+        var userAuth = client.Auth.CurrentUser;
+        if (userAuth == null) return Results.Unauthorized();
+
+        // CONSULTA 1: Datos Generales (Tabla Usuario)
+        // Buscamos por el UUID de Supabase
+        var usuarioDb = await client
+            .From<Usuario>()
+            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+            .Single(); // Si falla aquí es que el usuario no existe en tu tabla
+
+        // CONSULTA 2: Datos Específicos (Tabla Cliente)
+        // Usamos el ID numérico que acabamos de obtener
+        var clienteDb = await client
+            .From<Cliente>()
+            .Filter("id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+            .Single(); 
+
+        // COMBINAR DATOS
+        // Creamos un objeto para el frontend
+        var perfilCompleto = new 
+        {
+            // Datos de identificación
+            id_interno = usuarioDb.IdUsuario,
+            email = usuarioDb.Email,
+            
+            // Datos personales (Tabla Usuario)
+            dni = usuarioDb.Dni,
+            nombre = usuarioDb.Nombre,
+            apellidos = usuarioDb.Apellidos,
+            telefono = usuarioDb.Telefono,
+
+            // Datos de cliente (Tabla Cliente)
+            direccion = clienteDb.Direccion,
+            suscrito_newsletter = clienteDb.SuscritoNewsletter,
+        };
+
+        return Results.Ok(perfilCompleto);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error obteniendo el perfil completo: " + ex.Message);
+    }
+}
+
 IResult UpdateMyProfile(UserUpdateDto dto) => Results.Ok();
 IResult PartialUpdateProfile(UserUpdatePartialDto dto) => Results.Ok();
 
@@ -317,3 +422,47 @@ record EventAdminUpdateDto(string? Title, string? Description, DateTime? Date);
 
 record SupabaseSettings(string Url, string Key);
 
+// Tablas de la BD
+[Table("usuario")]
+public class Usuario : BaseModel
+{
+    // Clave primaria numérica (1, 2, 3...)
+    [PrimaryKey("id_usuario")]
+    public long IdUsuario { get; set; }
+
+    // El puente con el login (UUID)
+    [Column("id_auth_supabase")]
+    public string IdAuthSupabase { get; set; }
+
+    [Column("Email")]
+    public string? Email { get; set; }
+
+    [Column("dni")]
+    public string? Dni { get; set; }
+
+    [Column("nombre")]
+    public string? Nombre { get; set; }
+
+    [Column("apellidos")]
+    public string? Apellidos { get; set; }
+
+    [Column("telefono")]
+    public string? Telefono { get; set; }
+}
+
+[Table("cliente")]
+public class Cliente : BaseModel
+{
+    // Coincide con el ID_usuario
+    [PrimaryKey("id_cliente")]
+    public long IdCliente { get; set; }
+
+    [Column("direccion")]
+    public string? Direccion { get; set; }
+
+    [Column("suscritonewsletter")]
+    public bool SuscritoNewsletter { get; set; } // bool normal (true/false)
+
+    [Column("Tipo")]
+    public string? Tipo { get; set; } // "Socio" o "Corporativo"
+}
