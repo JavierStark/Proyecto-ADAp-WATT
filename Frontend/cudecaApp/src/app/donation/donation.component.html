@@ -1,65 +1,64 @@
 <!-- Contenedor principal de la página de donaciones (fondo, altura mínima y flujo vertical) -->
 <div class="min-h-screen flex flex-col relative overflow-x-hidden fondo-floral">
   <!-- Wrapper central que centra la tarjeta y deja espacio superior para el header fijo -->
-  <div class="flex-grow flex items-center justify-center relative z-10" style="padding:var(--page-padding); padding-top:var(--page-top-offset);">
+  <div class="flex-grow flex items-center justify-center relative z-10" style="padding:1.2vw; padding-top:5vw;">
     
         <!-- Tarjeta principal blanca: contiene imagen (izquierda) y zona de donación (derecha) -->
-        <div class="bg-white rounded-[2.5vw] shadow-xl w-full max-w-4xl flex flex-row p-[2.5vw] gap-[2.5vw]">
+        <div class="bg-white rounded-[1.5vw] shadow-xl w-[55vw] max-w-[50vw] flex p-[1.5vw] gap-[1.5vw]">
       
       <!-- Columna izquierda: imagen ilustrativa (persona beneficiaria) -->
-      <div class="w-1/2 flex-shrink-0">
+      <div class="w-[25vw] flex-shrink-0">
         <img 
           src="assets/images/abuela.png" 
           alt="Señora mayor sonriendo"
-          class="w-full h-auto object-cover shadow-sm aspect-square ui-img"
-          style="border-radius:var(--img-radius);"
+          class="w-full h-auto object-cover shadow-sm"
+          style="border-radius:1.2vw; aspect-ratio:1;"
         >
       </div>
 
       <!-- Columna derecha: título, botones de importes predefinidos, campo personalizado y botón de pago -->
-      <div class="w-1/2 flex flex-col items-center justify-center">
-        <h2 class="font-bold text-green-700 mb-8 ui-title" style="margin-bottom:var(--spacing-lg);">¡Dona ahora!</h2>
+      <div class="w-[22vw] flex flex-col items-center justify-center">
+        <h2 class="font-bold text-green-700 mb-[1.2vw] text-[1.6vw]">¡Dona ahora!</h2>
 
         <!-- Presets de importes rápidos (botones redondos) -->
-        <div class="grid grid-cols-4 gap-4 mb-6 w-full max-w-md">
+        <div class="grid grid-cols-4 gap-[0.8vw] mb-[1.2vw] w-full">
           <button *ngFor="let amount of presetAmounts"
                   (click)="selectPreset(amount)"
                   [ngClass]="{'bg-green-100 border-green-600 font-bold': selectedAmount === amount, 'border-green-300 text-green-600 hover:border-green-500 hover:bg-green-50': selectedAmount !== amount}"
                   class="border-2 rounded-full transition-all duration-200"
-                  style="padding:var(--btn-pad-vert) 0; font-size:var(--btn-font);">
+                  style="padding:0.6vw 0; font-size:0.9vw;">
             {{ amount }}€
           </button>
         </div>
 
         <!-- Controles: botón 'Otro' para activar input personalizado y el input con símbolo € -->
-        <div class="flex gap-4 mb-10 w-full max-w-md">
+        <div class="flex gap-[0.8vw] mb-[1.6vw] w-full">
           <button 
             (click)="enableCustomAmount()"
             [ngClass]="{'bg-green-100 border-green-600 font-bold': isCustomAmountMode, 'border-green-300 text-green-600 hover:border-green-500 hover:bg-green-50': !isCustomAmountMode}"
-            class="border-2 rounded-full transition-all duration-200 w-1/3 whitespace-nowrap"
-            style="padding:var(--btn-pad-vert) 0; font-size:var(--btn-font);">
+            class="border-2 rounded-full transition-all duration-200 w-[30%] whitespace-nowrap"
+            style="padding:0.6vw 0; font-size:0.9vw;">
             Otro
           </button>
           
           <!-- Wrapper relativo para posicionar el símbolo € sobre el input -->
-          <div class="relative w-2/3">
+          <div class="relative w-[70%]">
             <input 
               type="number" 
               [(ngModel)]="customAmountValue"
               [disabled]="!isCustomAmountMode"
               placeholder="Personalizado"
-              class="w-full border-2 border-green-300 rounded-full text-right text-green-700 focus:outline-none focus:border-green-600 disabled:bg-gray-50 disabled:text-gray-400 transition-all ui-input"
-              style="padding:var(--input-pad-vert) var(--input-pad-horiz); font-size:var(--font-base);"
-            >
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-green-600" style="font-size:var(--font-base)">€</span>
+              class="w-full border-2 border-green-300 rounded-full text-right text-green-700 focus:outline-none focus:border-green-600 disabled:bg-gray-50 disabled:text-gray-400 transition-all"
+              style="padding:0.6vw 0.9vw 0.6vw 0.5vw; font-size:0.85vw; padding-right:1.8vw;">
+            <span class="absolute right-[0.6vw] top-1/2 -translate-y-1/2 text-green-600 font-medium" style="font-size:0.85vw; pointer-events:none;">€</span>
           </div>
         </div>
 
         <!-- Botón de acción para procesar el pago -->
         <button 
           (click)="processPayment()"
-          class="w-full max-w-md bg-[#8FBD9F] hover:bg-[#7da88c] text-white rounded-full shadow-md transition-colors duration-300 font-medium ui-btn-lg"
-          style="font-size:var(--btn-font-lg); padding:var(--btn-pad-vert) var(--btn-pad-horiz);">
+          class="w-full bg-[#8FBD9F] hover:bg-[#7da88c] text-white rounded-full shadow-md transition-colors duration-300 font-medium"
+          style="font-size:1.1vw; padding:0.6vw 1.2vw;">
           Pagar
         </button>
 
