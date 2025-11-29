@@ -5,15 +5,14 @@
 
 
 
-h1::after {
+h2::after {
   content: '';
   display: inline-block;
-  width: 1px;                /* cursor fino */
+  width: 0.1vw;                /* cursor fino */
   height: 1em;
-  background-color: white;   /* color del cursor */
-  margin-left: 4px;
+  background-color: rgb(2, 162, 2);   /* color del cursor */
+  margin-left: 0.1vw;
   animation: blink 1s step-start infinite;
-  vertical-align: bottom;
 }
 
 @keyframes blink {
