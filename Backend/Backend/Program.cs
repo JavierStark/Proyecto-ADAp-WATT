@@ -307,7 +307,67 @@ async Task<IResult> RefreshToken(RefreshTokenDto dto, Supabase.Client client)
 
 // Extraer y actualizar el perfil
 //=====================================================
-IResult GetMyProfile() => Results.Ok();
+//IResult GetMyProfile() => Results.Ok();
+async Task<IResult> GetMyProfile([FromHeader(Name = "Authorization")] string? authHeader, Supabase.Client client)
+{
+    // Obtener Token y validar
+    if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
+
+    // Limpiar el token (Quitar "Bearer " y comillas si las hubiera)
+    string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
+        .Replace("\"", "")
+        .Trim();
+
+    if (string.IsNullOrEmpty(token)) return Results.Unauthorized();
+
+    try 
+    {
+        // Identificar al usuario logueado (UUID)
+        await client.Auth.SetSession(token, "token_falso");
+        var userAuth = client.Auth.CurrentUser;
+        if (userAuth == null) return Results.Unauthorized();
+
+        // CONSULTA 1: Datos Generales (Tabla Usuario)
+        // Buscamos por el UUID de Supabase
+        var usuarioDb = await client
+            .From<Usuario>()
+            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+            .Single(); // Si falla aquí es que el usuario no existe en tu tabla
+
+        // CONSULTA 2: Datos Específicos (Tabla Cliente)
+        // Usamos el ID numérico que acabamos de obtener
+        var clienteDb = await client
+            .From<Cliente>()
+            .Filter("id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+            .Single(); 
+
+        // COMBINAR DATOS
+        // Creamos un objeto para el frontend
+        var perfilCompleto = new 
+        {
+            // Datos de identificación
+            id_interno = usuarioDb.IdUsuario,
+            email = usuarioDb.Email,
+            
+            // Datos personales (Tabla Usuario)
+            dni = usuarioDb.Dni,
+            nombre = usuarioDb.Nombre,
+            apellidos = usuarioDb.Apellidos,
+            telefono = usuarioDb.Telefono,
+
+            // Datos de cliente (Tabla Cliente)
+            direccion = clienteDb.Direccion,
+            suscrito_newsletter = clienteDb.SuscritoNewsletter,
+        };
+
+        return Results.Ok(perfilCompleto);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error obteniendo el perfil completo: " + ex.Message);
+    }
+}
+
 IResult UpdateMyProfile(UserUpdateDto dto) => Results.Ok();
 IResult PartialUpdateProfile(UserUpdatePartialDto dto) => Results.Ok();
 
