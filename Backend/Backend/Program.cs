@@ -368,7 +368,87 @@ async Task<IResult> GetMyProfile([FromHeader(Name = "Authorization")] string? au
     }
 }
 
-IResult UpdateMyProfile(UserUpdateDto dto) => Results.Ok();
+async Task<IResult> UpdateMyProfile([FromHeader(Name = "Authorization")] string? authHeader, UserUpdateDto dto, Supabase.Client client)
+{
+    // Obtener Token y validar
+    if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
+
+    // Limpiar el token
+    string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
+        .Replace("\"", "")
+        .Trim();
+
+    if (string.IsNullOrEmpty(token)) return Results.Unauthorized();
+
+    try
+    {
+        // Identificar al usuario logueado (UUID)
+        await client.Auth.SetSession(token, "token_falso");
+        var userAuth = client.Auth.CurrentUser;
+        if (userAuth == null) return Results.Unauthorized();
+
+        // Obtener el usuario actual de la BD
+        var usuarioDb = await client
+            .From<Usuario>()
+            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+            .Single();
+
+        // Preparar un objeto Usuario con los campos a actualizar
+        var usuarioToUpdate = new Usuario
+        {
+            IdUsuario = usuarioDb.IdUsuario,
+            IdAuthSupabase = usuarioDb.IdAuthSupabase,
+            Email = usuarioDb.Email,
+            Nombre = string.IsNullOrEmpty(dto.Nombre) ? usuarioDb.Nombre : dto.Nombre,
+            Apellidos = string.IsNullOrEmpty(dto.Apellidos) ? usuarioDb.Apellidos : dto.Apellidos,
+            Telefono = string.IsNullOrEmpty(dto.Telefono) ? usuarioDb.Telefono : dto.Telefono,
+            Dni = string.IsNullOrEmpty(dto.Dni) ? usuarioDb.Dni : dto.Dni
+        };
+
+        // Actualizar la tabla usuario usando el modelo (evita sobrecarga ambigua)
+        await client
+            .From<Usuario>()
+            .Where(x => x.IdUsuario == usuarioDb.IdUsuario)
+            .Update(usuarioToUpdate);
+
+        // Nota: cambiar el email en Supabase Auth no se realiza aquí.
+        // Si el cliente solicitó cambiar el email, devolver una instrucción
+        if (!string.IsNullOrEmpty(dto.Email) && dto.Email != usuarioDb.Email)
+        {
+            return Results.BadRequest(new { error = "Para cambiar el email debe usar el flujo de verificación de correo (no soportado en este endpoint)." });
+        }
+
+        // Obtener los datos actualizados
+        var usuarioActualizado = await client
+            .From<Usuario>()
+            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+            .Single();
+
+        var clienteDb = await client
+            .From<Cliente>()
+            .Filter("id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioActualizado.IdUsuario.ToString())
+            .Single();
+
+        var perfilActualizado = new
+        {
+            id_interno = usuarioActualizado.IdUsuario,
+            email = usuarioActualizado.Email,
+            dni = usuarioActualizado.Dni,
+            nombre = usuarioActualizado.Nombre,
+            apellidos = usuarioActualizado.Apellidos,
+            telefono = usuarioActualizado.Telefono,
+            direccion = clienteDb.Direccion,
+            suscrito_newsletter = clienteDb.SuscritoNewsletter,
+        };
+
+        return Results.Ok(new { status = "success", message = "Perfil actualizado correctamente", data = perfilActualizado });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error actualizando el perfil: " + ex.Message);
+    }
+}
+
 IResult PartialUpdateProfile(UserUpdatePartialDto dto) => Results.Ok();
 
 IResult GetMyTickets() => Results.Ok();
@@ -400,7 +480,7 @@ IResult AdminDeleteEvent(int eventId) => Results.Ok();
 record RegisterDto(string Email, string Password);
 record LoginDto(string Email, string Password);
 record RefreshTokenDto(string AccessToken, string RefreshToken);
-record UserUpdateDto(string Name, string Email, string Phone);
+record UserUpdateDto(string? Nombre, string? Apellidos, string? Email, string? Telefono, string? Dni);
 record UserUpdatePartialDto(string? Name, string? Phone);
 
 record PurchaseStartDto(
@@ -432,7 +512,7 @@ public class Usuario : BaseModel
 
     // El puente con el login (UUID)
     [Column("id_auth_supabase")]
-    public string IdAuthSupabase { get; set; }
+    public string? IdAuthSupabase { get; set; }
 
     [Column("Email")]
     public string? Email { get; set; }
