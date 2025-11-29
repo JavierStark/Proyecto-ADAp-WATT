@@ -371,8 +371,88 @@ async Task<IResult> GetMyProfile([FromHeader(Name = "Authorization")] string? au
 IResult UpdateMyProfile(UserUpdateDto dto) => Results.Ok();
 IResult PartialUpdateProfile(UserUpdatePartialDto dto) => Results.Ok();
 
-IResult GetMyTickets() => Results.Ok();
-IResult GetMyTicketById(int ticketId) => Results.Ok();
+async Task<IResult> GetMyTickets([FromHeader(Name = "Authorization")] string authHeader, Supabase.Client client)
+{
+    // 1. Limpieza y validación del Token
+    if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
+    string token = authHeader.Replace("Bearer ", "").Replace("\"", "").Trim();
+
+    try 
+    {
+        // 2. Autenticar al usuario en Supabase
+        await client.Auth.SetSession(token, "dummy");
+        var currentUser = client.Auth.CurrentUser;
+        
+        if (currentUser == null) return Results.Unauthorized();
+
+        // 3. Obtener el ID numérico del usuario (id_usuario)
+        // Buscamos en la tabla 'usuario' usando el UUID de Auth
+        var usuarioDb = await client
+            .From<Usuario>()
+            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, currentUser.Id)
+            .Single();
+            
+        if (usuarioDb == null) return Results.Problem("Usuario no encontrado en base de datos.");
+
+        // 4. Obtener los tickets
+        // Usamos .Select("*, evento(*)") para hacer un JOIN y traer los datos del evento
+        var result = await client
+            .From<Ticket>()
+            .Select("*, evento(*)") 
+            .Filter("id_usuario", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario)
+            .Order("fecha_compra", Supabase.Postgrest.Constants.Ordering.Descending)
+            .Get();
+
+        return Results.Ok(result.Models);
+    }
+    catch (Exception ex)
+    {
+        // Manejo de errores (ej. token expirado)
+        return Results.Unauthorized();
+    }
+}
+
+async Task<IResult> GetMyTicketById(int ticketId, [FromHeader(Name = "Authorization")] string authHeader, Supabase.Client client)
+{
+    // 1. Validación del Token
+    if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
+    string token = authHeader.Replace("Bearer ", "").Replace("\"", "").Trim();
+
+    try 
+    {
+        // 2. Autenticar
+        await client.Auth.SetSession(token, "dummy");
+        var currentUser = client.Auth.CurrentUser;
+        if (currentUser == null) return Results.Unauthorized();
+
+        // 3. Obtener ID numérico del usuario
+        var usuarioDb = await client
+            .From<Usuario>()
+            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, currentUser.Id)
+            .Single();
+
+        // 4. Buscar el Ticket específico
+        // Filtramos por ID del ticket Y por ID del usuario (Seguridad)
+        var result = await client
+            .From<Ticket>()
+            .Select("*, evento(*)")
+            .Filter("id_ticket", Supabase.Postgrest.Constants.Operator.Equals, ticketId)
+            .Filter("id_usuario", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario) // ¡Seguridad clave!
+            .Single();
+
+        if (result == null) 
+        {
+            return Results.NotFound(new { error = "Ticket no encontrado o no te pertenece." });
+        }
+
+        return Results.Ok(result);
+    }
+    catch (Exception ex)
+    {
+        return Results.NotFound(new { error = "Ticket no encontrado." });
+    }
+}
+
 
 
 IResult GetMyDonations() => Results.Ok();
@@ -466,3 +546,54 @@ public class Cliente : BaseModel
     [Column("Tipo")]
     public string? Tipo { get; set; } // "Socio" o "Corporativo"
 }
+
+[Table("evento")]
+public class Evento : BaseModel
+{
+    [PrimaryKey("id_evento")]
+    public long IdEvento { get; set; }
+
+    [Column("titulo")]
+    public string Titulo { get; set; }
+
+    [Column("descripcion")]
+    public string? Descripcion { get; set; }
+
+    [Column("fecha_evento")]
+    public DateTime FechaEvento { get; set; }
+
+    [Column("precio_entrada")]
+    public decimal PrecioEntrada { get; set; }
+
+    [Column("aforo_maximo")]
+    public int AforoMaximo { get; set; }
+
+    [Column("entradas_vendidas")]
+    public int EntradasVendidas { get; set; }
+}
+
+[Table("ticket")]
+public class Ticket : BaseModel
+{
+    [PrimaryKey("id_ticket")]
+    public long IdTicket { get; set; }
+
+    [Column("id_usuario")]
+    public long IdUsuario { get; set; }
+
+    [Column("id_evento")]
+    public long IdEvento { get; set; }
+
+    [Column("fecha_compra")]
+    public DateTime FechaCompra { get; set; }
+
+    [Column("cantidad")]
+    public int Cantidad { get; set; }
+    
+    [Column("importe_total")]
+    public decimal ImporteTotal { get; set; }
+    
+    [Reference(typeof(Evento))] 
+    public Evento Evento { get; set; }
+}
+
