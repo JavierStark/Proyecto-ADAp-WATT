@@ -1,4 +1,4 @@
-<section class="relative w-full h-screen overflow-hidden">
+<section class="relative w-full h-screen overflow-hidden"> <!-- fixed height -->
   <!-- Imagen de fondo -->
   <img
     src="assets/images/fondoCudeca.png" 
@@ -12,23 +12,22 @@
   <!-- Degradado blanco desde la izquierda -->
   <div class="left-fade"></div>
 
-  <!-- Contenido con texto dinámico alineado a la izquierda -->
-  <div class="relative z-10 flex flex-col gap-[1.5vw] items-start justify-center w-full h-full px-[2vw] sm:px-[3vw] pt-[2vw] sm:pt-[2vw]">
+  <!-- Contenido con texto dinámico (tamaños fijos para no variar) -->
+  <div class="relative z-10 flex flex-col gap-[1.5vw] items-start justify-center w-[45vw] h-full pl-[4vw] pt-[4vw]">
     <!-- Texto estático encima del título -->
-    <h1 class="text-green-800 text-[3vw] sm:text-[4vw] font-bold text-left max-w-[30vw]">Donaciones y Eventos</h1>
-    <h2 class="text-green-600 text-[1.5vw] sm:text-[1.8vw] font-bold text-left max-w-[40vw] min-h-[2vw] sm:min-h-[5vw] leading-snug">{{ texto }}</h2> <!-- Texto dinámico (altura reservada para evitar reflujo) -->
+    <h1 class="text-green-800 text-[4vw] font-bold text-left max-w-[30vw]">Donaciones y Eventos</h1>
+    <h2 class="text-green-600 text-[2vw] font-bold text-left max-w-[50vw] min-h-[14vw] leading-snug">{{ texto }}</h2> <!-- dynamic text fixed in vw units -->
     <div class="flex gap-[4vw] mt-[2vw]">
       <button
         (click)="goToSignUp()" 
-        class="bg-green-600 text-white text-[2vw] py-[1vw] px-[4.5vw] rounded-[1.8vw] hover:bg-green-800 transition-all">
+        class="bg-green-600 text-white text-[2.5vw] py-[1vw] px-[4.5vw] rounded-[1.8vw] hover:bg-green-800 transition-all">
         Eventos
       </button>
       <button 
         (click)="goToDonation()" 
-        class="bg-green-600 text-white text-[2vw] py-[1vw] px-[5vw] rounded-[1.8vw] hover:bg-green-800 transition-all">
+        class="bg-green-600 text-white text-[2.5vw] py-[1vw] px-[5vw] rounded-[1.8vw] hover:bg-green-800 transition-all">
         Donar
       </button>
-      
     </div>
   </div>
 </section>
