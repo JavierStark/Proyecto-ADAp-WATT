@@ -1,0 +1,21 @@
+/* Estilos adicionales para el componente de eventos */
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Animación hover para las cards */
+.bg-white:hover {
+  transform: translateY(-0.5vw);
+  transition: transform 0.3s ease;
+}

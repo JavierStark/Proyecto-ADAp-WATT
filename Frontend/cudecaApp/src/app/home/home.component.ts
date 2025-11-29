@@ -34,6 +34,11 @@ title = 'oratoristWeb';
   goToSignUp() {
     this.router.navigate(['/sign-up']);
   }
+
+  goToEventos() {
+    this.router.navigate(['/eventos']);
+  }
+
   goToDonation() {
     this.router.navigate(['/donation']);
   }

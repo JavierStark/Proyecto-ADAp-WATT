@@ -61,5 +61,7 @@ export class AppComponent {
     this.router.navigate(['/']); // Navega a la raíz (Home)
   }
 
-  
+  goToEventos() {
+    this.router.navigate(['/eventos']); // Navega a la página de eventos
+  }
 }
