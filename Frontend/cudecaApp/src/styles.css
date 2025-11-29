@@ -22,4 +22,32 @@ h1::after {
   }
 }
 
+/* Variables responsivas basadas en vw con límites para evitar extremos */
+:root{
+  --font-base: clamp(12px, 1.8vw, 20px);
+  --font-lg: clamp(14px, 2.2vw, 24px);
+  --title-size: clamp(20px, 3.2vw, 36px);
 
+  --btn-font: clamp(14px, 2.2vw, 24px);
+  --btn-font-lg: clamp(18px, 2.6vw, 32px);
+  --btn-pad-vert: clamp(8px, 1.2vw, 18px);
+  --btn-pad-horiz: clamp(12px, 2.5vw, 36px);
+
+  --card-padding: clamp(16px, 2.5vw, 40px);
+  --card-gap: clamp(12px, 1.6vw, 32px);
+  --card-radius: clamp(12px, 1.8vw, 40px);
+  --img-radius: clamp(12px, 1.8vw, 32px);
+
+  --input-pad-vert: clamp(8px, 1.2vw, 18px);
+  --input-pad-horiz: clamp(12px, 2.2vw, 28px);
+  --spacing-lg: clamp(12px, 2vw, 28px);
+}
+
+/* Utilidades simples para usar estas variables desde HTML si se prefiere */
+.ui-title{font-size:var(--title-size)}
+.ui-text{font-size:var(--font-base)}
+.ui-btn{font-size:var(--btn-font);padding:var(--btn-pad-vert) var(--btn-pad-horiz)}
+.ui-btn-lg{font-size:var(--btn-font-lg);padding:var(--btn-pad-vert) calc(var(--btn-pad-horiz) * 1.1)}
+.ui-card{padding:var(--card-padding);gap:var(--card-gap);border-radius:var(--card-radius)}
+.ui-img{border-radius:var(--img-radius)}
+.ui-input{padding:var(--input-pad-vert) var(--input-pad-horiz);font-size:var(--font-base)}
