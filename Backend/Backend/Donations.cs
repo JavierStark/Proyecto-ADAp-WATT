@@ -56,7 +56,46 @@ static class Donations
         return Results.Problem("Error obteniendo donaciones: " + ex.Message);
     }
 }
-    public static IResult GetMyDonationSummary() => Results.Ok();
+    public static async Task<IResult> GetMyDonationSummary([FromHeader(Name = "Authorization")] string? authHeader, 
+        Supabase.Client client)
+    {
+        // Validar Token
+        if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
+        string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("\"", "")
+            .Trim();
+
+        try
+        {
+            // Identificar al usuario
+            await client.Auth.SetSession(token, "dummy");
+            var userAuth = client.Auth.CurrentUser;
+            if (userAuth == null) return Results.Unauthorized();
+
+            // Buscar su ID numérico
+            var usuarioDb = await client
+                .From<Usuario>()
+                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Single();
+
+            // CONSULTA: Traer donaciones + pago
+            var response = await client
+                .From<Donacion>()
+                .Select("*, Pago:fk_don_pago!inner(*)") 
+                .Filter("Pago.id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Get();
+            
+            // Sumamos los montos (usamos 0 si por error algún pago viene nulo)
+            decimal total = response.Models.Sum(d => d.Pago?.Monto ?? 0);
+
+            // Devolver el resultado simple
+            return Results.Ok(new DonationSummaryDto(total));
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error calculando el total: " + ex.Message);
+        }
+    }
     public static IResult CreateDonation(DonationDto dto) => Results.Ok();
     public static IResult GetDonationCertificate(int donationId) => Results.File("dummy.pdf");
     
@@ -67,6 +106,7 @@ static class Donations
         string Estado, 
         string? MetodoPago
     );
+    record DonationSummaryDto(decimal TotalDonado);
     public record DonationDto(decimal Amount);
     
     [Table("pago")]
