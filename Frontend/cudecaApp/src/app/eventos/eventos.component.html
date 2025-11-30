@@ -1,97 +1,90 @@
 <section class="relative w-full min-h-screen overflow-hidden">
-  <!-- Imagen de fondo -->
+  
   <img
     src="assets/images/fondoCudeca.png" 
     alt="Fondo"
     class="absolute inset-0 w-full h-full object-cover"
   />
 
-  <!-- Filtro verde semitransparente -->
   <div class="absolute inset-0 bg-green-400 opacity-30 z-0"></div>
 
-  <!-- Contenido principal -->
   <div class="relative z-10 pt-[8vh] pb-[4vh] px-[4vw]">
     
-    <!-- Encabezado -->
     <div class="text-center mb-[4vh]">
-      <h1 class="text-green-800 text-[4vw] font-bold mb-[1vh] pt-[3vw]">Eventos Cudeca</h1>
-      <p class="text-green-700 text-[1.5vw] max-w-[60vw] mx-auto">
+      <h1 class="text-green-900 text-[4vw] font-bold mb-[1vh] pt-[3vw]">Mis eventos</h1>
+      <p class="text-green-800 text-[1.5vw] max-w-[60vw] mx-auto font-medium">
         Participa en nuestros eventos solidarios y ayuda a marcar la diferencia
       </p>
     </div>
 
-    <!-- Grid de eventos -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[2vw] max-w-[90vw] mx-auto">
+    <div class="flex flex-col gap-[2vw] max-w-[90vw] mx-auto">
       
-      <!-- Card de evento -->
       <div *ngFor="let evento of eventos" 
-           class="bg-white rounded-[1vw] shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+           class="bg-white rounded-[1vw] shadow-lg border border-green-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row h-auto md:min-h-[16vw]">
         
-        <!-- Imagen del evento -->
-        <div class="relative h-[15vw] bg-gray-200 overflow-hidden">
+        <div class="relative w-full md:w-[28%] h-[40vw] md:h-auto bg-gray-200 shrink-0">
           <img 
-            [src]="evento.imagen" 
-            [alt]="evento.titulo"
+            src="assets/images/fondoCudeca.png" 
+            alt="Ilustración decorativa"
             class="w-full h-full object-cover"
-            (error)="$any($event.target).src='assets/images/fondoCudeca.png'"
           />
-          <!-- Badge de fecha -->
-          <div class="absolute top-[1vw] right-[1vw] bg-green-600 text-white px-[1vw] py-[0.5vw] rounded-[0.5vw] text-[0.9vw] font-bold">
+          
+          <div class="absolute top-[1vw] left-[1vw] bg-green-700 text-white px-[1.2vw] py-[0.4vw] rounded-full text-[0.9vw] font-bold shadow-md z-10">
             {{ evento.fecha | date:'dd/MM/yyyy' }}
           </div>
         </div>
 
-        <!-- Contenido del card -->
-        <div class="p-[1.5vw]">
-          <h3 class="text-[1.5vw] font-bold text-green-800 mb-[0.5vw]">
-            {{ evento.titulo }}
-          </h3>
+        <div class="p-[1.5vw] flex-1 flex flex-col justify-between">
           
-          <p class="text-[0.9vw] text-gray-600 mb-[1vw] line-clamp-3">
-            {{ evento.descripcion }}
-          </p>
+          <div>
+            <div class="flex justify-between items-start mb-[0.5vw]">
+               <h3 class="text-[2vw] md:text-[1.8vw] font-bold text-green-900 leading-tight">
+                {{ evento.titulo }}
+              </h3>
+              
+              <span *ngIf="evento.capacidad" class="hidden md:inline-flex items-center bg-green-50 text-green-800 text-[0.8vw] font-medium px-[0.8vw] py-[0.4vw] rounded-lg border border-green-200">
+                 {{ evento.inscritos || 0 }} / {{ evento.capacidad }} inscritos
+              </span>
+            </div>
 
-          <!-- Información adicional -->
-          <div class="space-y-[0.5vw] mb-[1vw]">
-            <div *ngIf="evento.ubicacion" class="flex items-center text-[0.85vw] text-gray-500">
-              <svg class="w-[1vw] h-[1vw] mr-[0.5vw]" fill="currentColor" viewBox="0 0 20 20">
+            <p class="text-[1.2vw] md:text-[1vw] text-gray-600 mb-[1vw] line-clamp-2 md:line-clamp-3">
+              {{ evento.descripcion }}
+            </p>
+
+            <div *ngIf="evento.ubicacion" class="flex items-center text-[1vw] text-gray-500 mb-[1vw]">
+              <svg class="w-[1.2vw] h-[1.2vw] mr-[0.5vw] text-green-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
               </svg>
               {{ evento.ubicacion }}
             </div>
-            
-            <div *ngIf="evento.capacidad" class="flex items-center text-[0.85vw] text-gray-500">
-              <svg class="w-[1vw] h-[1vw] mr-[0.5vw]" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-              </svg>
-              {{ evento.inscritos || 0 }} / {{ evento.capacidad }} inscritos
-            </div>
           </div>
 
-          <!-- Botones de acción -->
-          <div class="flex gap-[1vw]">
+          <div class="flex gap-[1vw] md:justify-end mt-[1vw]">
             <button 
               (click)="verDetalles(evento.id)"
-              class="flex-1 bg-green-600 text-white text-[0.9vw] py-[0.6vw] px-[1vw] rounded-[0.5vw] hover:bg-green-700 transition-colors">
+              class="flex-1 md:flex-none bg-emerald-500 text-white text-[1vw] font-semibold py-[0.7vw] px-[2vw] rounded-lg hover:bg-emerald-600 transition-colors shadow-sm">
               Ver detalles
             </button>
+            
             <button 
               (click)="inscribirseEvento(evento.id)"
               [disabled]="evento.inscritos === evento.capacidad"
               [class.opacity-50]="evento.inscritos === evento.capacidad"
               [class.cursor-not-allowed]="evento.inscritos === evento.capacidad"
-              class="flex-1 bg-green-800 text-white text-[0.9vw] py-[0.6vw] px-[1vw] rounded-[0.5vw] hover:bg-green-900 transition-colors">
+              class="flex-1 md:flex-none bg-green-800 text-white text-[1vw] font-semibold py-[0.7vw] px-[2vw] rounded-lg hover:bg-green-900 transition-colors shadow-sm">
               Inscribirse
             </button>
           </div>
+
         </div>
       </div>
 
     </div>
 
-    <!-- Mensaje si no hay eventos -->
     <div *ngIf="eventos.length === 0" class="text-center py-[4vh]">
-      <p class="text-green-700 text-[1.5vw]">No hay eventos disponibles en este momento.</p>
+      <div class="bg-white/80 backdrop-blur-sm inline-block px-[2vw] py-[1vw] rounded-xl shadow-sm">
+        <p class="text-green-900 text-[1.5vw] font-medium">No hay eventos disponibles en este momento.</p>
+      </div>
     </div>
 
   </div>

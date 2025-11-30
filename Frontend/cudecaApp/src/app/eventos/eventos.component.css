@@ -1,4 +1,4 @@
-/* Estilos adicionales para el componente de eventos */
+/* Estilos adicionales */
 
 .line-clamp-3 {
   display: -webkit-box;
@@ -7,15 +7,16 @@
   overflow: hidden;
 }
 
-/* Responsive para pantallas más pequeñas */
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: 1fr !important;
-  }
+/* Hover suave para la tarjeta horizontal */
+.bg-white:hover {
+  transform: translateX(0.3vw); /* Mueve ligeramente a la derecha en lugar de arriba */
+  border-color: #059669; /* Un verde más intenso en el borde */
 }
 
-/* Animación hover para las cards */
-.bg-white:hover {
-  transform: translateY(-0.5vw);
-  transition: transform 0.3s ease;
+/* Ajustes Responsive */
+@media (max-width: 768px) {
+  /* En móvil volvemos al comportamiento vertical estándar */
+  .bg-white:hover {
+    transform: translateY(-0.5vw);
+  }
 }
