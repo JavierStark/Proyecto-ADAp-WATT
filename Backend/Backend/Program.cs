@@ -540,6 +540,16 @@ record PurchaseConfirmDto(
     string PaymentToken);
 
 record DonationDto(decimal Amount);
+record EventoDto(
+    long Id, 
+    string Nombre, 
+    string? Descripcion, 
+    DateTime Fecha,
+    string? Ubicacion,
+    int Aforo, 
+    bool EntradaValida,
+    string ObjetoRecaudacion
+);
 record DiscountCheckDto(string Code);
 
 record EventAdminCreateDto(string Title, string Description, DateTime Date);
