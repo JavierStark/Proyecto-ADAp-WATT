@@ -17,8 +17,7 @@ public static class WebApplicationExtensions
     {
         var users = app.MapGroup("/users/me");
         users.MapGet("", Profile.GetMyProfile);
-        users.MapPut("", Profile.UpdateMyProfile);
-        users.MapPatch("", Profile.PartialUpdateProfile);
+        users.MapPut("", Profile.UpdateProfile);
         users.MapGet("/tickets", Tickets.GetMyTickets);
         users.MapGet("/tickets/{ticketId:int}", Tickets.GetMyTicketById);
         users.MapGet("/donations", Donations.GetMyDonations);
