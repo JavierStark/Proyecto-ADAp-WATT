@@ -96,7 +96,71 @@ static class Donations
             return Results.Problem("Error calculando el total: " + ex.Message);
         }
     }
-    public static IResult CreateDonation(DonationDto dto) => Results.Ok();
+    public static async Task<IResult> CreateDonation(DonationDto dto, [FromHeader(Name = "Authorization")] string? authHeader, 
+    Supabase.Client client)
+{
+    // Validaciones
+    if (dto.Amount <= 0) return Results.BadRequest(new { error = "El monto debe ser mayor a 0." });
+    if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
+
+    string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
+                             .Replace("\"", "")
+                             .Trim();
+
+    try
+    {
+        // Identificar al usuario
+        await client.Auth.SetSession(token, "dummy");
+        var userAuth = client.Auth.CurrentUser;
+        if (userAuth == null) return Results.Unauthorized();
+
+        // Buscar su ID numérico (id_cliente)
+        var usuarioDb = await client
+            .From<Usuario>()
+            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+            .Single();
+
+        // Crear el registro en la tabla PAGO
+        var nuevoPago = new Pago
+        {
+            Monto = dto.Amount,
+            Fecha = DateTime.UtcNow,
+            Estado = "Pagado", // Asumimos que el pago es inmediato para simplificar
+            MetodoDePago = dto.PaymentMethod ?? "Tarjeta",
+            IdCliente = usuarioDb.IdUsuario // Vinculamos el pago al usuario
+        };
+
+        // Insertamos y pedimos que nos devuelva el objeto creado (para obtener el ID)
+        var pagoResponse = await client
+            .From<Pago>()
+            .Insert(nuevoPago);
+
+        var pagoCreado = pagoResponse.Models.First();
+
+        // Crear el registro en la tabla DONACION
+        // Vinculamos esta donación al pago que acabamos de crear
+        var nuevaDonacion = new Donacion
+        {
+            IdPago = pagoCreado.IdPago
+        };
+
+        await client
+            .From<Donacion>()
+            .Insert(nuevaDonacion);
+
+        // Respuesta de éxito
+        return Results.Ok(new 
+        { 
+            status = "success", 
+            message = $"¡Gracias! Donación de {dto.Amount}€ realizada correctamente.",
+            id_donacion = pagoCreado.IdPago
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error procesando la donación: " + ex.Message);
+    }
+}
     public static IResult GetDonationCertificate(int donationId) => Results.File("dummy.pdf");
     
     record DonationHistoryDto(
@@ -107,7 +171,7 @@ static class Donations
         string? MetodoPago
     );
     record DonationSummaryDto(decimal TotalDonado);
-    public record DonationDto(decimal Amount);
+    public record DonationDto(decimal Amount, String PaymentMethod); // Ej: "Tarjeta", "PayPal", "Bizum"
     
     [Table("pago")]
     public class Pago : BaseModel
