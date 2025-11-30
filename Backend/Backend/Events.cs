@@ -86,6 +86,16 @@ static class Events
     public static IResult GetPaymentMethods() => Results.Ok();
     public static IResult ValidateDiscount(DiscountCheckDto dto) => Results.Ok();
     
+    record EventoDto(
+        long Id, 
+        string Nombre, 
+        string? Descripcion, 
+        DateTime Fecha,
+        string? Ubicacion,
+        int Aforo, 
+        bool EntradaValida,
+        string ObjetoRecaudacion
+    );
     public record PurchaseStartDto(
         int EventId,
         int Quantity,
