@@ -543,6 +543,9 @@ async Task<IResult> GetEvent(int eventId, Supabase.Client client)
     }
 }
 
+//=====================================================
+// Compras
+//=====================================================
 IResult StartPurchase(PurchaseStartDto dto) => Results.Ok();
 IResult ConfirmPurchase(PurchaseConfirmDto dto) => Results.Ok();
 
@@ -554,6 +557,8 @@ IResult GetPaymentMethods() => Results.Ok();
 IResult ValidateDiscount(DiscountCheckDto dto) => Results.Ok();
 
 IResult AdminListEvents() => Results.Ok();
+// Cuando un administrador quiere crear un evento el id_evento debe crearse automáticamente
+// Implementar este trigger en supabase
 IResult AdminCreateEvent(EventAdminCreateDto dto) => Results.Ok();
 IResult AdminUpdateEvent(int eventId, EventAdminUpdateDto dto) => Results.Ok();
 IResult AdminDeleteEvent(int eventId) => Results.Ok();
