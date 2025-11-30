@@ -161,8 +161,117 @@ static class Donations
         return Results.Problem("Error procesando la donación: " + ex.Message);
     }
 }
-    public static IResult GetDonationCertificate(int donationId) => Results.File("dummy.pdf");
-    
+
+    public static async Task<IResult> GetDonationCertificate(
+        int? year, // Opcional: si es null, usaremos el año pasado
+        [FromHeader(Name = "Authorization")] string? authHeader,
+        Supabase.Client client)
+    {
+        // Validar Token
+        if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
+        string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("\"", "")
+            .Trim();
+
+        try
+        {
+            // Auth
+            await client.Auth.SetSession(token, "dummy");
+            var userAuth = client.Auth.CurrentUser;
+            if (userAuth == null) return Results.Unauthorized();
+
+            var usuarioDb = await client
+                .From<Usuario>()
+                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Single();
+
+            // Si no nos pasan año, asumimos el año anterior (para la renta)
+            int targetYear = year ?? DateTime.Now.Year - 1;
+
+            // Formato ISO 8601 para Supabase: "YYYY-MM-DD"
+            string fechaInicio = $"{targetYear}-01-01T00:00:00";
+            string fechaFin = $"{targetYear}-12-31T23:59:59";
+
+            // CONSULTA CON FILTRO DE FECHAS
+            var response = await client
+                .From<Donacion>()
+                .Select("*, Pago:fk_don_pago!inner(*)")
+                .Filter("Pago.id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+                // Filtros de fecha (Mayor o igual a Enero 1, Menor o igual a Dic 31)
+                .Filter("Pago.fecha", Supabase.Postgrest.Constants.Operator.GreaterThanOrEqual, fechaInicio)
+                .Filter("Pago.fecha", Supabase.Postgrest.Constants.Operator.LessThanOrEqual, fechaFin)
+                .Get();
+
+            var donacionesAnuales = response.Models
+                .OrderBy(d => d.Pago?.Fecha) // Ordenamos aquí
+                .ToList();
+
+            if (donacionesAnuales.Count == 0)
+            {
+                return Results.NotFound(new { error = $"No se encontraron donaciones en el año fiscal {targetYear}." });
+            }
+
+            // CÁLCULOS
+            decimal totalAnual = donacionesAnuales.Sum(d => d.Pago?.Monto ?? 0);
+
+            // GENERAR DOCUMENTO (Texto simulando PDF)
+            // Usamos StringBuilder para construir una tabla de texto
+            var sb = new System.Text.StringBuilder();
+
+            sb.AppendLine("-------------------------------------------------------");
+            sb.AppendLine("         CERTIFICADO FISCAL DE DONACIONES");
+            sb.AppendLine("                FUNDACIÓN CUDECA");
+            sb.AppendLine("-------------------------------------------------------");
+            sb.AppendLine("");
+            sb.AppendLine($"EJERCICIO FISCAL: {targetYear}");
+            sb.AppendLine($"FECHA DE EMISIÓN: {DateTime.Now.ToShortDateString()}");
+            sb.AppendLine("");
+            sb.AppendLine("DATOS DEL DONANTE:");
+            sb.AppendLine($"Nombre:   {usuarioDb.Nombre} {usuarioDb.Apellidos}");
+            sb.AppendLine($"NIF/DNI:  {usuarioDb.Dni ?? "NO INFORMADO"}");
+            sb.AppendLine($"Email:    {usuarioDb.Email}");
+            sb.AppendLine("");
+            sb.AppendLine("DETALLE DE APORTACIONES:");
+            sb.AppendLine("-------------------------------------------------------");
+            sb.AppendLine(String.Format("{0,-12} | {1,-25} | {2,10}", "FECHA", "MÉTODO", "IMPORTE"));
+            sb.AppendLine("-------------------------------------------------------");
+
+            foreach (var d in donacionesAnuales)
+            {
+                if (d.Pago != null)
+                {
+                    sb.AppendLine(String.Format("{0,-12} | {1,-25} | {2,10} EUR",
+                        d.Pago.Fecha.ToShortDateString(),
+                        d.Pago.MetodoDePago ?? "General",
+                        d.Pago.Monto));
+                }
+            }
+
+            sb.AppendLine("-------------------------------------------------------");
+            sb.AppendLine(String.Format("{0,-37} | {1,10} EUR", "TOTAL APORTADO:", totalAnual));
+            sb.AppendLine("-------------------------------------------------------");
+            sb.AppendLine("");
+            sb.AppendLine("Fundación Cudeca certifica que los donativos arriba");
+            sb.AppendLine("indicados se han realizado de forma irrevocable.");
+            sb.AppendLine("");
+            sb.AppendLine("Este documento es válido a efectos del Impuesto sobre");
+            sb.AppendLine("la Renta de las Personas Físicas (IRPF).");
+
+            // Retornar archivo
+            var archivoBytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+
+            return Results.File(
+                archivoBytes,
+                "text/plain",
+                $"Certificado_Fiscal_{targetYear}_{usuarioDb.Dni ?? "Donante"}.txt"
+            );
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error generando certificado fiscal: " + ex.Message);
+        }
+    }
+
     record DonationHistoryDto(
         long IdDonacion, 
         decimal Monto, 
