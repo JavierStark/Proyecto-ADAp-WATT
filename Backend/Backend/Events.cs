@@ -81,8 +81,7 @@ static class Events
             return Results.Problem("Error interno: " + ex.Message);
         }
     }
-    public static IResult ListEvents(string? query) => Results.Ok();
-    public static IResult GetEvent(int eventId) => Results.Ok();
+    
     public static IResult StartPurchase(PurchaseStartDto dto) => Results.Ok();
     public static IResult ConfirmPurchase(PurchaseConfirmDto dto) => Results.Ok();
     
