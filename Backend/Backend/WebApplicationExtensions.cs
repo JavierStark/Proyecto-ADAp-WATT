@@ -49,7 +49,7 @@ public static class WebApplicationExtensions
     {
         var donations = app.MapGroup("/donations");
         donations.MapPost("", Donations.CreateDonation);
-        donations.MapGet("/{donationId:int}/certificate", Donations.GetDonationCertificate);
+        donations.MapGet("/certificate/annual", Donations.GetDonationCertificate);
         
         return app;
     }
