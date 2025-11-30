@@ -172,6 +172,7 @@ IResult TestSupabase(Supabase.Client supabase)
     }
 }
 
+//=====================================================
 // Registro, inicio, cerrar y refrescar sesión
 //=====================================================
 async Task<IResult> RegisterUser(RegisterDto dto, Supabase.Client client)
@@ -305,9 +306,9 @@ async Task<IResult> RefreshToken(RefreshTokenDto dto, Supabase.Client client)
     }
 }
 
+//=====================================================
 // Extraer y actualizar el perfil
 //=====================================================
-//IResult GetMyProfile() => Results.Ok();
 async Task<IResult> GetMyProfile([FromHeader(Name = "Authorization")] string? authHeader, Supabase.Client client)
 {
     // Obtener Token y validar
@@ -371,21 +372,24 @@ async Task<IResult> GetMyProfile([FromHeader(Name = "Authorization")] string? au
 IResult UpdateMyProfile(UserUpdateDto dto) => Results.Ok();
 IResult PartialUpdateProfile(UserUpdatePartialDto dto) => Results.Ok();
 
+//=====================================================
+// Tickets
+//=====================================================
 async Task<IResult> GetMyTickets([FromHeader(Name = "Authorization")] string authHeader, Supabase.Client client)
 {
-    // 1. Limpieza y validación del Token
+    // Limpieza y validación del Token
     if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
     string token = authHeader.Replace("Bearer ", "").Replace("\"", "").Trim();
 
     try 
     {
-        // 2. Autenticar al usuario en Supabase
+        // Autenticar al usuario en Supabase
         await client.Auth.SetSession(token, "dummy");
         var currentUser = client.Auth.CurrentUser;
         
         if (currentUser == null) return Results.Unauthorized();
 
-        // 3. Obtener el ID numérico del usuario (id_usuario)
+        // Obtener el ID numérico del usuario (id_usuario)
         // Buscamos en la tabla 'usuario' usando el UUID de Auth
         var usuarioDb = await client
             .From<Usuario>()
@@ -394,7 +398,7 @@ async Task<IResult> GetMyTickets([FromHeader(Name = "Authorization")] string aut
             
         if (usuarioDb == null) return Results.Problem("Usuario no encontrado en base de datos.");
 
-        // 4. Obtener los tickets
+        // Obtener los tickets
         // Usamos .Select("*, evento(*)") para hacer un JOIN y traer los datos del evento
         var result = await client
             .From<Ticket>()
@@ -414,24 +418,24 @@ async Task<IResult> GetMyTickets([FromHeader(Name = "Authorization")] string aut
 
 async Task<IResult> GetMyTicketById(int ticketId, [FromHeader(Name = "Authorization")] string authHeader, Supabase.Client client)
 {
-    // 1. Validación del Token
+    // Validación del Token
     if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
     string token = authHeader.Replace("Bearer ", "").Replace("\"", "").Trim();
 
     try 
     {
-        // 2. Autenticar
+        // Autenticar
         await client.Auth.SetSession(token, "dummy");
         var currentUser = client.Auth.CurrentUser;
         if (currentUser == null) return Results.Unauthorized();
 
-        // 3. Obtener ID numérico del usuario
+        // Obtener ID numérico del usuario
         var usuarioDb = await client
             .From<Usuario>()
             .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, currentUser.Id)
             .Single();
 
-        // 4. Buscar el Ticket específico
+        // Buscar el Ticket específico
         // Filtramos por ID del ticket Y por ID del usuario (Seguridad)
         var result = await client
             .From<Ticket>()
@@ -453,11 +457,15 @@ async Task<IResult> GetMyTicketById(int ticketId, [FromHeader(Name = "Authorizat
     }
 }
 
-
-
+//=====================================================
+// Donaciones
+//=====================================================
 IResult GetMyDonations() => Results.Ok();
 IResult GetMyDonationSummary() => Results.Ok();
 
+//=====================================================
+// Eventos
+//=====================================================
 IResult ListEvents(string? query) => Results.Ok();
 IResult GetEvent(int eventId) => Results.Ok();
 
