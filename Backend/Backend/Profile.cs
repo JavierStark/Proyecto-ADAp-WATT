@@ -1,7 +1,4 @@
 ﻿using Backend.Models;
-using Microsoft.AspNetCore.Mvc;
-using Supabase.Postgrest.Attributes;
-using Supabase.Postgrest.Models;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
@@ -10,42 +7,35 @@ static class Profile
 {
     public static async Task<IResult> GetMyProfile(Supabase.Client client)
     {
-
         try
         {
-            var userAuth = client.Auth.CurrentUser;
+            var userAuth = client.Auth.CurrentUser!;
 
-            // CONSULTA 1: Datos Generales (Tabla Usuario)
-            // Buscamos por el UUID de Supabase
-            var usuarioDb = await client
+            var usuario = await client
                 .From<Usuario>()
                 .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
-                .Single(); // Si falla aquí es que el usuario no existe en tu tabla
-
-            // CONSULTA 2: Datos Específicos (Tabla Cliente)
-            // Usamos el ID numérico que acabamos de obtener
-            var clienteDb = await client
-                .From<Cliente>()
-                .Filter("id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
                 .Single();
 
-            // COMBINAR DATOS
-            // Creamos un objeto para el frontend
+            var cliente = await client
+                .From<Cliente>()
+                .Filter("id_cliente", Operator.Equals, usuario.IdUsuario.ToString())
+                .Single();
+
             var perfilCompleto = new
             {
                 // Datos de identificación
-                id_interno = usuarioDb.IdUsuario,
-                email = usuarioDb.Email,
+                id_interno = usuario.IdUsuario,
+                email = usuario.Email,
 
                 // Datos personales (Tabla Usuario)
-                dni = usuarioDb.Dni,
-                nombre = usuarioDb.Nombre,
-                apellidos = usuarioDb.Apellidos,
-                telefono = usuarioDb.Telefono,
+                dni = usuario.Dni,
+                nombre = usuario.Nombre,
+                apellidos = usuario.Apellidos,
+                telefono = usuario.Telefono,
 
                 // Datos de cliente (Tabla Cliente)
-                direccion = clienteDb.Direccion,
-                suscrito_newsletter = clienteDb.SuscritoNewsletter,
+                direccion = cliente.Direccion,
+                suscrito_newsletter = cliente.SuscritoNewsletter,
             };
 
             return Results.Ok(perfilCompleto);
@@ -62,50 +52,45 @@ static class Profile
         {
             var userAuth = client.Auth.CurrentUser;
 
-            // Obtener los DATOS ACTUALES
-            var usuarioDb = await client
+            var usuario = await client
                 .From<Usuario>()
                 .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
                 .Single();
 
-            var clienteDb = await client
+            var cliente = await client
                 .From<Cliente>()
-                .Filter("id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("id_cliente", Operator.Equals, usuario.IdUsuario.ToString())
                 .Single();
 
-            // Actualizar Tabla USUARIO
             var usuarioUpdate = new Usuario
             {
-                IdUsuario = usuarioDb.IdUsuario, // PK obligatoria para update
-                IdAuthSupabase = usuarioDb.IdAuthSupabase,
-                Email = usuarioDb.Email, // El email no se toca aquí
+                IdUsuario = usuario.IdUsuario, // PK obligatoria para update
+                IdAuthSupabase = usuario.IdAuthSupabase,
+                Email = usuario.Email, // El email no se toca aquí
                 
-                Nombre = !string.IsNullOrEmpty(dto.Nombre) ? dto.Nombre : usuarioDb.Nombre,
-                Apellidos = !string.IsNullOrEmpty(dto.Apellidos) ? dto.Apellidos : usuarioDb.Apellidos,
-                Dni = !string.IsNullOrEmpty(dto.Dni) ? dto.Dni : usuarioDb.Dni,
-                Telefono = !string.IsNullOrEmpty(dto.Telefono) ? dto.Telefono : usuarioDb.Telefono
+                Nombre = !string.IsNullOrEmpty(dto.Nombre) ? dto.Nombre : usuario.Nombre,
+                Apellidos = !string.IsNullOrEmpty(dto.Apellidos) ? dto.Apellidos : usuario.Apellidos,
+                Dni = !string.IsNullOrEmpty(dto.Dni) ? dto.Dni : usuario.Dni,
+                Telefono = !string.IsNullOrEmpty(dto.Telefono) ? dto.Telefono : usuario.Telefono
             };
 
-            // Enviamos update a Usuario
             var usuarioResponse = await client.From<Usuario>().Update(usuarioUpdate);
             var usuarioNuevo = usuarioResponse.Models.First();
 
             // Actualizar Tabla CLIENTE ---
             var clienteUpdate = new Cliente
             {
-                IdCliente = clienteDb.IdCliente, // PK obligatoria
-                Tipo = clienteDb.Tipo, // No dejamos cambiar el tipo
+                IdCliente = cliente.IdCliente, // PK obligatoria
+                Tipo = cliente.Tipo, // No dejamos cambiar el tipo
                 
-                Direccion = !string.IsNullOrEmpty(dto.Direccion) ? dto.Direccion : clienteDb.Direccion,
+                Direccion = !string.IsNullOrEmpty(dto.Direccion) ? dto.Direccion : cliente.Direccion,
                 
-                SuscritoNewsletter = dto.SuscritoNewsletter ?? clienteDb.SuscritoNewsletter
+                SuscritoNewsletter = dto.SuscritoNewsletter ?? cliente.SuscritoNewsletter
             };
 
-            // Enviamos update a Cliente
             var clienteResponse = await client.From<Cliente>().Update(clienteUpdate);
             var clienteNuevo = clienteResponse.Models.First();
 
-            // Respuesta Combinada
             var resultado = new
             {
                 status = "success",
