@@ -19,7 +19,7 @@ public static class WebApplicationExtensions
         users.MapGet("", Profile.GetMyProfile);
         users.MapPut("", Profile.UpdateProfile);
         users.MapGet("/tickets", Tickets.GetMyTickets);
-        users.MapGet("/tickets/{ticketId:int}", Tickets.GetMyTicketById);
+        users.MapGet("/tickets/{ticketId:int}", Tickets.GetMyTickets);
         users.MapGet("/donations", Donations.GetMyDonations);
         users.MapGet("/donations/summary", Donations.GetMyDonationSummary);
         

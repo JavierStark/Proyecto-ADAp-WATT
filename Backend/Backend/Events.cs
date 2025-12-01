@@ -10,20 +10,16 @@ static class Events
     {
         try
         {
-            // Consulta a la tabla eventos
-            var dbQuery = client.From<Evento>().Select("*");
-
+            var dbQuery = 
+                client.From<Evento>()
+                    .Select("*")
+                    .Order("fecha_y_hora", Supabase.Postgrest.Constants.Ordering.Ascending);
+            
             if (!string.IsNullOrEmpty(query))
-            {
                 dbQuery = dbQuery.Filter("nombre", Supabase.Postgrest.Constants.Operator.ILike, $"%{query}%");
-            }
 
-            dbQuery = dbQuery.Order("fecha_y_hora", Supabase.Postgrest.Constants.Ordering.Ascending);
-
-            // Ejecutar consulta
             var response = await dbQuery.Get();
         
-            // Convertimos la lista de modelos de Supabase a una lista de DTOs simples
             var eventos = response.Models.Select(e => new EventoDto(
                 e.IdEvento,
                 e.Nombre,
@@ -35,7 +31,6 @@ static class Events
                 e.ObjetoRecaudacion ?? "Sin especificar"
             ));
 
-            // Devolver la lista limpia
             return Results.Ok(eventos);
         }
         catch (Exception ex)
@@ -48,22 +43,16 @@ static class Events
     {
         try
         {
-            // Buscamos en la base de datos por el ID exacto
             var response = await client
                 .From<Evento>()
                 .Filter("id_evento", Supabase.Postgrest.Constants.Operator.Equals, eventId)
                 .Get();
 
-            // Comprobamos si se encontró algo
-            // Usamos FirstOrDefault() que devuelve null si la lista está vacía
             var eventoDb = response.Models.FirstOrDefault();
 
             if (eventoDb == null)
-            {
                 return Results.NotFound(new { error = $"No se encontró ningún evento con el ID {eventId}" });
-            }
 
-            // Convertimos a DTO 
             var eventoDto = new EventoDto(
                 eventoDb.IdEvento,
                 eventoDb.Nombre,
