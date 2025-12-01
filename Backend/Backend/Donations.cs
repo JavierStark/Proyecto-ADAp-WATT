@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
+using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
@@ -15,13 +16,13 @@ static class Donations
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
                 .Single();
 
             var response = await client
                 .From<Donacion>()
                 .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("pago.id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("pago.id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
                 .Get();
 
             var historial = response.Models
@@ -51,13 +52,13 @@ static class Donations
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
                 .Single();
 
             var response = await client
                 .From<Donacion>()
                 .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("Pago.id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("Pago.id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
                 .Get();
 
             decimal total = response.Models.Sum(d => d.Pago?.Monto ?? 0);
@@ -79,7 +80,7 @@ static class Donations
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
                 .Single();
 
             var nuevoPago = new Pago
@@ -131,7 +132,7 @@ static class Donations
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
                 .Single();
 
             // Si no nos pasan año, asumimos el año anterior (para la renta)
@@ -145,10 +146,10 @@ static class Donations
             var response = await client
                 .From<Donacion>()
                 .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("Pago.id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("Pago.id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
                 // Filtros de fecha (Mayor o igual a Enero 1, Menor o igual a Dic 31)
-                .Filter("Pago.fecha", Supabase.Postgrest.Constants.Operator.GreaterThanOrEqual, fechaInicio)
-                .Filter("Pago.fecha", Supabase.Postgrest.Constants.Operator.LessThanOrEqual, fechaFin)
+                .Filter("Pago.fecha", Operator.GreaterThanOrEqual, fechaInicio)
+                .Filter("Pago.fecha", Operator.LessThanOrEqual, fechaFin)
                 .Get();
 
             var donacionesAnuales = response.Models

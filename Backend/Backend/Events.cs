@@ -1,6 +1,7 @@
 ﻿using Backend.Models;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
+using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
@@ -13,10 +14,10 @@ static class Events
             var dbQuery = 
                 client.From<Evento>()
                     .Select("*")
-                    .Order("fecha_y_hora", Supabase.Postgrest.Constants.Ordering.Ascending);
+                    .Order("fecha_y_hora", Ordering.Ascending);
             
             if (!string.IsNullOrEmpty(query))
-                dbQuery = dbQuery.Filter("nombre", Supabase.Postgrest.Constants.Operator.ILike, $"%{query}%");
+                dbQuery = dbQuery.Filter("nombre", Operator.ILike, $"%{query}%");
 
             var response = await dbQuery.Get();
         
@@ -45,7 +46,7 @@ static class Events
         {
             var response = await client
                 .From<Evento>()
-                .Filter("id_evento", Supabase.Postgrest.Constants.Operator.Equals, eventId)
+                .Filter("id_evento", Operator.Equals, eventId)
                 .Get();
 
             var eventoDb = response.Models.FirstOrDefault();

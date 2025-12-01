@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
+using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
@@ -18,14 +19,14 @@ static class Profile
             // Buscamos por el UUID de Supabase
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
                 .Single(); // Si falla aquí es que el usuario no existe en tu tabla
 
             // CONSULTA 2: Datos Específicos (Tabla Cliente)
             // Usamos el ID numérico que acabamos de obtener
             var clienteDb = await client
                 .From<Cliente>()
-                .Filter("id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
                 .Single();
 
             // COMBINAR DATOS
@@ -64,12 +65,12 @@ static class Profile
             // Obtener los DATOS ACTUALES
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
                 .Single();
 
             var clienteDb = await client
                 .From<Cliente>()
-                .Filter("id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
                 .Single();
 
             // Actualizar Tabla USUARIO

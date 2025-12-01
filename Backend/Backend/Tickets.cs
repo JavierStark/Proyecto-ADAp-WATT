@@ -1,5 +1,6 @@
 ﻿using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
@@ -9,11 +10,11 @@ static class Tickets
     {
         try
         {
-            var currentUser = client.Auth.CurrentUser;
+            var currentUser = client.Auth.CurrentUser!;
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, currentUser.Id)
+                .Filter("id_auth_supabase", Operator.Equals, currentUser.Id)
                 .Single();
             
             if (usuarioDb == null) return Results.Unauthorized();
@@ -21,11 +22,11 @@ static class Tickets
             var query = client
                 .From<Ticket>()
                 .Select("*, evento(*)")
-                .Filter("id_usuario", Supabase.Postgrest.Constants.Operator.Equals,
+                .Filter("id_usuario", Operator.Equals,
                     usuarioDb.IdUsuario); // ¡Seguridad clave!
 
             if (ticketId != null)
-                query.Filter("id_ticket", Supabase.Postgrest.Constants.Operator.Equals, ticketId);
+                query.Filter("id_ticket", Operator.Equals, ticketId);
             
             var result = await query.Get();
                 
