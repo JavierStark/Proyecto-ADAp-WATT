@@ -15,7 +15,7 @@ public static class WebApplicationExtensions
 
     public static WebApplication MapUserEndpoints(this WebApplication app)
     {
-        var users = app.MapGroup("/users/me");
+        var users = app.MapGroup("/users/me").AddEndpointFilter<SupabaseAuthFilter>();
         users.MapGet("", Profile.GetMyProfile);
         users.MapPut("", Profile.UpdateProfile);
         users.MapGet("/tickets", Tickets.GetMyTickets);
@@ -46,7 +46,7 @@ public static class WebApplicationExtensions
 
     public static WebApplication MapDonationEndpoints(this WebApplication app)
     {
-        var donations = app.MapGroup("/donations");
+        var donations = app.MapGroup("/donations").AddEndpointFilter<SupabaseAuthFilter>();
         donations.MapPost("", Donations.CreateDonation);
         donations.MapGet("/certificate/annual", Donations.GetDonationCertificate);
         

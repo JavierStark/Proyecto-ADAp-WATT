@@ -5,18 +5,11 @@ namespace Backend;
 
 static class Tickets
 {
-    public static async Task<IResult> GetMyTickets(int? ticketId, [FromHeader(Name = "Authorization")] string authHeader,
-        Supabase.Client client)
+    public static async Task<IResult> GetMyTickets(int? ticketId, Supabase.Client client)
     {
-        if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
-        string token = authHeader.Replace("Bearer ", "").Replace("\"", "").Trim();
-
         try
         {
-            await client.Auth.SetSession(token, "dummy");
             var currentUser = client.Auth.CurrentUser;
-            
-            if (currentUser == null) return Results.Unauthorized();
 
             var usuarioDb = await client
                 .From<Usuario>()

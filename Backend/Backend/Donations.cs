@@ -7,88 +7,61 @@ namespace Backend;
 
 static class Donations
 {
-    public static async Task<IResult> GetMyDonations([FromHeader(Name = "Authorization")] string? authHeader, 
-        Supabase.Client client)
-{
-    // Validar Token
-    if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
-    string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
-                             .Replace("\"", "")
-                             .Trim();
-
-    try
+    public static async Task<IResult> GetMyDonations(Supabase.Client client)
     {
-        // Identificar al usuario
-        await client.Auth.SetSession(token, "dummy");
-        var userAuth = client.Auth.CurrentUser;
-        if (userAuth == null) return Results.Unauthorized();
-
-        // Buscar su ID numérico en tabla Usuario
-        var usuarioDb = await client
-            .From<Usuario>()
-            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
-            .Single();
-
-        // Consulta JOIN (id_cliente del pago == mi id"
-        var response = await client
-            .From<Donacion>()
-            .Select("*, Pago:fk_don_pago!inner(*)")
-            .Filter("pago.id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
-            .Get();
-
-        // Mapear a DTO
-        // Ordenamos en memoria por fecha
-        var historial = response.Models
-            .Select(d => new DonationHistoryDto(
-                d.IdDonacion,
-                d.Pago != null ? d.Pago.Monto : 0, // Protección por si pago viniera nulo
-                d.Pago != null ? d.Pago.Fecha : DateTime.MinValue,
-                d.Pago != null ? d.Pago.Estado : "Desconocido",
-                d.Pago?.MetodoDePago
-            ))
-            .OrderByDescending(x => x.Fecha)
-            .ToList();
-
-        return Results.Ok(historial);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem("Error obteniendo donaciones: " + ex.Message);
-    }
-}
-    public static async Task<IResult> GetMyDonationSummary([FromHeader(Name = "Authorization")] string? authHeader, 
-        Supabase.Client client)
-    {
-        // Validar Token
-        if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
-        string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
-            .Replace("\"", "")
-            .Trim();
-
         try
         {
-            // Identificar al usuario
-            await client.Auth.SetSession(token, "dummy");
             var userAuth = client.Auth.CurrentUser;
-            if (userAuth == null) return Results.Unauthorized();
 
-            // Buscar su ID numérico
             var usuarioDb = await client
                 .From<Usuario>()
                 .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
                 .Single();
 
-            // CONSULTA: Traer donaciones + pago
             var response = await client
                 .From<Donacion>()
-                .Select("*, Pago:fk_don_pago!inner(*)") 
+                .Select("*, Pago:fk_don_pago!inner(*)")
+                .Filter("pago.id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Get();
+
+            var historial = response.Models
+                .Select(d => new DonationHistoryDto(
+                    d.IdDonacion,
+                    d.Pago != null ? d.Pago.Monto : 0, // Protección por si pago viniera nulo
+                    d.Pago != null ? d.Pago.Fecha : DateTime.MinValue,
+                    d.Pago != null ? d.Pago.Estado : "Desconocido",
+                    d.Pago?.MetodoDePago
+                ))
+                .OrderByDescending(x => x.Fecha)
+                .ToList();
+
+            return Results.Ok(historial);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error obteniendo donaciones: " + ex.Message);
+        }
+    }
+
+    public static async Task<IResult> GetMyDonationSummary(Supabase.Client client)
+    {
+        try
+        {
+            var userAuth = client.Auth.CurrentUser;
+
+            var usuarioDb = await client
+                .From<Usuario>()
+                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Single();
+
+            var response = await client
+                .From<Donacion>()
+                .Select("*, Pago:fk_don_pago!inner(*)")
                 .Filter("Pago.id_cliente", Supabase.Postgrest.Constants.Operator.Equals, usuarioDb.IdUsuario.ToString())
                 .Get();
-            
-            // Sumamos los montos (usamos 0 si por error algún pago viene nulo)
+
             decimal total = response.Models.Sum(d => d.Pago?.Monto ?? 0);
 
-            // Devolver el resultado simple
             return Results.Ok(new DonationSummaryDto(total));
         }
         catch (Exception ex)
@@ -96,89 +69,65 @@ static class Donations
             return Results.Problem("Error calculando el total: " + ex.Message);
         }
     }
-    public static async Task<IResult> CreateDonation(DonationDto dto, [FromHeader(Name = "Authorization")] string? authHeader, 
-    Supabase.Client client)
-{
-    // Validaciones
-    if (dto.Amount <= 0) return Results.BadRequest(new { error = "El monto debe ser mayor a 0." });
-    if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
 
-    string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
-                             .Replace("\"", "")
-                             .Trim();
-
-    try
+    public static async Task<IResult> CreateDonation(DonationDto dto, Supabase.Client client)
     {
-        // Identificar al usuario
-        await client.Auth.SetSession(token, "dummy");
-        var userAuth = client.Auth.CurrentUser;
-        if (userAuth == null) return Results.Unauthorized();
-
-        // Buscar su ID numérico (id_cliente)
-        var usuarioDb = await client
-            .From<Usuario>()
-            .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
-            .Single();
-
-        // Crear el registro en la tabla PAGO
-        var nuevoPago = new Pago
+        if (dto.Amount <= 0) return Results.BadRequest(new { error = "El monto debe ser mayor a 0." });
+        try
         {
-            Monto = dto.Amount,
-            Fecha = DateTime.UtcNow,
-            Estado = "Pagado", // Asumimos que el pago es inmediato para simplificar
-            MetodoDePago = dto.PaymentMethod ?? "Tarjeta",
-            IdCliente = usuarioDb.IdUsuario // Vinculamos el pago al usuario
-        };
+            var userAuth = client.Auth.CurrentUser;
 
-        // Insertamos y pedimos que nos devuelva el objeto creado (para obtener el ID)
-        var pagoResponse = await client
-            .From<Pago>()
-            .Insert(nuevoPago);
+            var usuarioDb = await client
+                .From<Usuario>()
+                .Filter("id_auth_supabase", Supabase.Postgrest.Constants.Operator.Equals, userAuth.Id)
+                .Single();
 
-        var pagoCreado = pagoResponse.Models.First();
+            var nuevoPago = new Pago
+            {
+                Monto = dto.Amount,
+                Fecha = DateTime.UtcNow,
+                Estado = "Pagado", // Asumimos que el pago es inmediato para simplificar
+                MetodoDePago = dto.PaymentMethod ?? "Tarjeta",
+                IdCliente = usuarioDb.IdUsuario // Vinculamos el pago al usuario
+            };
 
-        // Crear el registro en la tabla DONACION
-        // Vinculamos esta donación al pago que acabamos de crear
-        var nuevaDonacion = new Donacion
+            var pagoResponse = await client
+                .From<Pago>()
+                .Insert(nuevoPago);
+
+            var pagoCreado = pagoResponse.Models.First();
+
+            // Crear el registro en la tabla DONACION
+            // Vinculamos esta donación al pago que acabamos de crear
+            var nuevaDonacion = new Donacion
+            {
+                IdPago = pagoCreado.IdPago
+            };
+
+            await client
+                .From<Donacion>()
+                .Insert(nuevaDonacion);
+
+            return Results.Ok(new
+            {
+                status = "success",
+                message = $"¡Gracias! Donación de {dto.Amount}€ realizada correctamente.",
+                id_donacion = pagoCreado.IdPago
+            });
+        }
+        catch (Exception ex)
         {
-            IdPago = pagoCreado.IdPago
-        };
-
-        await client
-            .From<Donacion>()
-            .Insert(nuevaDonacion);
-
-        // Respuesta de éxito
-        return Results.Ok(new 
-        { 
-            status = "success", 
-            message = $"¡Gracias! Donación de {dto.Amount}€ realizada correctamente.",
-            id_donacion = pagoCreado.IdPago
-        });
+            return Results.Problem("Error procesando la donación: " + ex.Message);
+        }
     }
-    catch (Exception ex)
-    {
-        return Results.Problem("Error procesando la donación: " + ex.Message);
-    }
-}
 
     public static async Task<IResult> GetDonationCertificate(
         int? year, // Opcional: si es null, usaremos el año pasado
-        [FromHeader(Name = "Authorization")] string? authHeader,
         Supabase.Client client)
     {
-        // Validar Token
-        if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
-        string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
-            .Replace("\"", "")
-            .Trim();
-
         try
         {
-            // Auth
-            await client.Auth.SetSession(token, "dummy");
             var userAuth = client.Auth.CurrentUser;
-            if (userAuth == null) return Results.Unauthorized();
 
             var usuarioDb = await client
                 .From<Usuario>()
@@ -273,16 +222,14 @@ static class Donations
     }
 
     record DonationHistoryDto(
-        long IdDonacion, 
-        decimal Monto, 
-        DateTime Fecha, 
-        string Estado, 
+        long IdDonacion,
+        decimal Monto,
+        DateTime Fecha,
+        string Estado,
         string? MetodoPago
     );
-    record DonationSummaryDto(decimal TotalDonado);
-    public record DonationDto(decimal Amount, String PaymentMethod); // Ej: "Tarjeta", "PayPal", "Bizum"
-    
-    
 
-    
+    record DonationSummaryDto(decimal TotalDonado);
+
+    public record DonationDto(decimal Amount, String PaymentMethod); // Ej: "Tarjeta", "PayPal", "Bizum"
 }

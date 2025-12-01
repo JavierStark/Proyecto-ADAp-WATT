@@ -7,22 +7,12 @@ namespace Backend;
 
 static class Profile
 {
-    public static async Task<IResult> GetMyProfile([FromHeader(Name = "Authorization")] string? authHeader, Supabase.Client client)
+    public static async Task<IResult> GetMyProfile(Supabase.Client client)
     {
-        // Obtener Token y validar
-        if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
-
-        string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
-            .Replace("\"", "")
-            .Trim();
-
-        if (string.IsNullOrEmpty(token)) return Results.Unauthorized();
 
         try
         {
-            await client.Auth.SetSession(token, "token_falso");
             var userAuth = client.Auth.CurrentUser;
-            if (userAuth == null) return Results.Unauthorized();
 
             // CONSULTA 1: Datos Generales (Tabla Usuario)
             // Buscamos por el UUID de Supabase
@@ -65,20 +55,11 @@ static class Profile
         }
     }
 
-    public static async Task<IResult> UpdateProfile(
-        [FromHeader(Name = "Authorization")] string? authHeader, 
-        ProfileUpdateDto dto, 
-        Supabase.Client client)
+    public static async Task<IResult> UpdateProfile(ProfileUpdateDto dto,Supabase.Client client)
     {
-        // Validación
-        if (string.IsNullOrEmpty(authHeader)) return Results.Unauthorized();
-        string token = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase).Replace("\"", "").Trim();
-
         try
         {
-            await client.Auth.SetSession(token, "token_falso");
             var userAuth = client.Auth.CurrentUser;
-            if (userAuth == null) return Results.Unauthorized();
 
             // Obtener los DATOS ACTUALES
             var usuarioDb = await client
