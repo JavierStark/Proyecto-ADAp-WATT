@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class AuthService {
 
   // URL del Backend
-  private apiUrl = 'http://localhost:5000'; 
+  private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/'; 
 
   constructor(private http: HttpClient) { }
 
