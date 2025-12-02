@@ -32,9 +32,16 @@ export class LoginComponent {
         console.log('Login correcto:', response);
         this.router.navigate(['/']); 
       },
-      error: (error) => {
-        console.error('Error login:', error);
-        alert('Usuario o contraseña incorrectos.');
+      error: (err) => {
+        console.error('Error login:', err);
+
+        const backendMessage = err.error?.error;
+
+        if (backendMessage) {
+          alert(backendMessage);
+        } else {
+          alert('Usuario o contraseña incorrectos.');
+        }
       }
     });
   }

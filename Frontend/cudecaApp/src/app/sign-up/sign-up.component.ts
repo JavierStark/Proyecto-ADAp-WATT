@@ -40,7 +40,7 @@ export class SignUpComponent {
     this.authService.register(credentials).subscribe({
       next: (response) => {
         console.log('Registro exitoso:', response);
-        alert('Cuenta creada con éxito. Por favor inicia sesión.');
+        alert('Cuenta creada con éxito. HEMOS ENVIADO UN CORREO DE CONFIRMACIÓN. Por favor, revísalo y haz clic en el enlace para activar tu cuenta antes de iniciar sesión.');
         
         // Redirigir al Login para que entre
         this.router.navigate(['/log-in']); 
