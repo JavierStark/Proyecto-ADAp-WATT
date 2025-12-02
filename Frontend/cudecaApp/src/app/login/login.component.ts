@@ -10,14 +10,14 @@ import { AuthService } from '../services/auth.service';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-
-  email: string = '';  // Propiedad para ngModel
-  password: string = '';  // Propiedad para ngModel
+  
+  email: string = '';
+  password: string = '';
 
   constructor(
     private router: Router,
     private authService: AuthService
-  ){}
+  ) {}
 
   onSubmit() {
     console.log('Intentando iniciar sesión...', this.email);
@@ -28,27 +28,21 @@ export class LoginComponent {
     };
 
     this.authService.login(credentials).subscribe({
-      
       next: (response) => {
         console.log('Login correcto:', response);
-        this.authService.setSession(response);
-        this.router.navigate(['/']);
+        this.router.navigate(['/']); 
       },
-
       error: (error) => {
-        console.error('Error login:', error)
+        console.error('Error login:', error);
         alert('Usuario o contraseña incorrectos.');
       }
-
     });
-
   }
 
   goToSignUp() {
     this.router.navigate(['/sign-up']);
   }
 
-  // Ir a inicio
   goToHome() {
     this.router.navigate(['/']);
   }
