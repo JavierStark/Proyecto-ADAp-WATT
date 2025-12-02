@@ -34,41 +34,79 @@ static class Admin
         }
     }
     
-    public static async Task<IResult> AdminCreateEvent(EventoModificarDto dto, Supabase.Client client)
+    public static async Task<IResult> AdminCreateEvent(EventoCreateDto dto, Supabase.Client client)
     {
         try
         {
-            // Validaciones básicas
+            // Validaciones
             if (string.IsNullOrWhiteSpace(dto.Nombre))
                 return Results.BadRequest(new { error = "El título del evento es obligatorio." });
 
-            if (!dto.Fecha.HasValue)
-                return Results.BadRequest(new { error = "La fecha del evento es obligatoria." });
-
-            if (dto.Fecha.Value < DateTime.UtcNow)
+            if (dto.Fecha < DateTime.UtcNow)
                 return Results.BadRequest(new { error = "La fecha del evento no puede ser en el pasado." });
 
+            if (dto.CantidadGeneral <= 0)
+                return Results.BadRequest(new { error = "Debes crear al menos 1 entrada General." });
+
+            if (dto.PrecioGeneral < 0)
+                return Results.BadRequest(new { error = "El precio General no puede ser negativo." });
+
+            // Validación VIP 
+            bool tieneVip = dto.PrecioVip.HasValue && dto.CantidadVip.HasValue;
+            if ((dto.PrecioVip.HasValue && !dto.CantidadVip.HasValue) || (!dto.PrecioVip.HasValue && dto.CantidadVip.HasValue))
+            {
+                return Results.BadRequest(new { error = "Para crear entradas VIP debes indicar tanto el precio como la cantidad." });
+            }
+            
+            int aforoTotal = dto.CantidadGeneral + (tieneVip ? dto.CantidadVip!.Value : 0);
+            
             var nuevoEvento = new Evento
             {
                 Nombre = dto.Nombre,
                 Descripcion = dto.Descripcion,
-                FechaEvento = dto.Fecha.Value,
+                FechaEvento = dto.Fecha,
                 Ubicacion = dto.Ubicacion,
-                Aforo = dto.Aforo ?? 0,
-                EntradaValida = dto.EntradaValida ?? false,
+                Aforo = aforoTotal,
+                EntradaValida = dto.EntradaValida,
                 ObjetoRecaudacion = dto.ObjetoRecaudacion
             };
 
-            var response = await client
+            var eventResponse = await client
                 .From<Evento>()
                 .Insert(nuevoEvento);
 
-            var eventoCreado = response.Models.First();
+            var eventoCreado = eventResponse.Models.First();
 
+            // Insertar las entradas
+            var entradasAInsertar = new List<EntradaEvento>();
+
+            // Entrada General
+            entradasAInsertar.Add(new EntradaEvento
+            {
+                IdEvento = eventoCreado.IdEvento,
+                Tipo = "General",
+                Precio = dto.PrecioGeneral,
+                Numero = dto.CantidadGeneral
+            });
+
+            // Entrada VIP
+            if (tieneVip)
+            {
+                entradasAInsertar.Add(new EntradaEvento
+                {
+                    IdEvento = eventoCreado.IdEvento,
+                    Tipo = "VIP",
+                    Precio = dto.PrecioVip!.Value,
+                    Numero = dto.CantidadVip!.Value
+                });
+            }
+            
+            await client.From<EntradaEvento>().Insert(entradasAInsertar);
+            
             return Results.Created($"/events/{eventoCreado.IdEvento}", new
             {
                 status = "success",
-                message = "Evento creado correctamente.",
+                message = "Evento y tickets creados correctamente.",
                 evento = new EventoAdminDto(
                     eventoCreado.IdEvento,
                     eventoCreado.Nombre,
@@ -78,16 +116,17 @@ static class Admin
                     eventoCreado.Aforo ?? 0,
                     eventoCreado.EntradaValida,
                     eventoCreado.ObjetoRecaudacion ?? "Sin especificar"
-                )
+                ),
+                tickets_creados = entradasAInsertar.Select(t => new { t.Tipo, t.Precio, Stock = t.Numero })
             });
         }
         catch (Exception ex)
         {
-            return Results.Problem("Error al crear el evento: " + ex.Message);
+            return Results.Problem("Error al crear el evento y sus entradas: " + ex.Message);
         }
     }
     
-    public static async Task<IResult> AdminUpdateEvent(int eventId, EventoModificarDto dto, Supabase.Client client)
+    public static async Task<IResult> AdminUpdateEvent(int eventId, EventoAdminModificarDto dto, Supabase.Client client)
     {
         try
         {
@@ -205,7 +244,24 @@ static class Admin
         string ObjetoRecaudacion
     );
     
-    public record EventoModificarDto(
+    public record EventoCreateDto(
+        long Id,
+        string Nombre,
+        string? Descripcion,
+        DateTime Fecha,
+        string? Ubicacion,
+        int Aforo,
+        bool EntradaValida,
+        string ObjetoRecaudacion,
+        
+        decimal PrecioGeneral,
+        int CantidadGeneral,
+        
+        decimal? PrecioVip,
+        int? CantidadVip
+    );
+    
+    public record EventoAdminModificarDto(
         string? Nombre,
         string? Descripcion,
         DateTime? Fecha,
@@ -213,5 +269,21 @@ static class Admin
         int? Aforo,
         bool? EntradaValida,
         string? ObjetoRecaudacion
+    );
+    
+    public record EventoModifyDto(
+        string? Nombre,
+        string? Descripcion,
+        DateTime? Fecha,
+        string? Ubicacion,
+        int? Aforo,
+        bool? EntradaValida,
+        string? ObjetoRecaudacion,
+        
+        decimal? PrecioGeneral,
+        int? CantidadGeneral,
+            
+        decimal? PrecioVip,
+        int? CantidadVip
     );
 }

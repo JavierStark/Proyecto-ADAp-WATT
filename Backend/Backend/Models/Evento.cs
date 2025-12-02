@@ -30,3 +30,27 @@ public class Evento : BaseModel
     [Column("objetorecaudacion")]
     public string? ObjetoRecaudacion { get; set; }
 }
+
+[Table("entrada_evento")]
+public class EntradaEvento : BaseModel
+{
+    // BIGINT en SQL -> long en C#
+    [PrimaryKey("id_entrada_evento")]
+    public long IdEntradaEvento { get; set; }
+
+    // FK hacia la tabla Evento
+    [Column("id_evento")]
+    public long IdEvento { get; set; }
+
+    // Ej: "General", "VIP"
+    [Column("tipo")]
+    public string Tipo { get; set; }
+
+    // Stock disponible (INT en SQL -> int en C#)
+    [Column("numero")]
+    public int Numero { get; set; }
+
+    // Precio específico (DECIMAL en SQL -> decimal en C#)
+    [Column("precio")]
+    public decimal Precio { get; set; }
+}
