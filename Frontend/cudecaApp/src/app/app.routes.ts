@@ -12,7 +12,7 @@ import { publicGuard } from './guards/public.guard';
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Ruta por defecto que carga el HomeComponent
   { path: 'log-in', component: LoginComponent, canActivate: [publicGuard]}, // Ruta para login
-  { path: 'sign-up', component: SignUpComponent,canActivate: [publicGuard] },  // Ruta para registrarse
+  { path: 'sign-up', component: SignUpComponent},  // Ruta para registrarse
   { path: 'donation', component: DonationComponent }, // Ruta para donaciones
   { path: 'eventos', component: EventosComponent }, // Ruta para eventos
 ];

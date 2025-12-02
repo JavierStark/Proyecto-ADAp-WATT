@@ -11,6 +11,7 @@ export const publicGuard: CanActivateFn = (route, state) => {
   // (Asegúrate de tener la función isLoggedIn en tu AuthService, si no la tienes, avísame)
   if (authService.isLoggedIn()) {
     console.log('Ya estás logueado, redirigiendo al home...');
+    alert('Ya has iniciado sesión. Redirigiéndote al inicio...');
     router.navigate(['/']); // Lo mandamos a home
     return false; // Bloqueamos la entrada al login
   }
