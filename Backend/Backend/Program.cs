@@ -15,6 +15,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(SwaggerAuthSetup);
+builder.Services.AddCors();
 
 var supabaseSettings = builder.Configuration.GetSection("Supabase").Get<SupabaseSettings>();
 
