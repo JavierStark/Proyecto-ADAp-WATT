@@ -73,7 +73,82 @@ static class Events
         }
     }
     
-    public static IResult StartPurchase(PurchaseStartDto dto) => Results.Ok();
+    public static async Task<IResult> StartPurchase(PurchaseStartDto dto, Supabase.Client client)
+    {
+        if (dto.Quantity <= 0) 
+            return Results.BadRequest(new { error = "La cantidad debe ser mayor a 0." });
+        
+        try
+        {
+            var userAuth = client.Auth.CurrentUser;
+            if (userAuth == null) 
+                return Results.Unauthorized();
+
+            // Obtener evento para verificar que existe y obtener precio
+            var eventoResponse = await client
+                .From<Evento>()
+                .Filter("id_evento", Operator.Equals, dto.EventId)
+                .Get();
+
+            var evento = eventoResponse.Models.FirstOrDefault();
+            if (evento == null)
+                return Results.NotFound(new { error = "El evento no existe." });
+
+            // Verificar aforo disponible
+            var ticketsExistentes = await client
+                .From<Ticket>()
+                .Filter("id_evento", Operator.Equals, dto.EventId)
+                .Get();
+
+            int totalVendidos = ticketsExistentes.Models.Sum(t => t.Cantidad);
+            int disponibles = (evento.Aforo ?? 0) - totalVendidos;
+
+            if (disponibles < dto.Quantity)
+                return Results.BadRequest(new { 
+                    error = $"No hay suficientes entradas disponibles. Disponibles: {disponibles}" 
+                });
+
+            // Obtener usuario para validaciones
+            var usuarioResponse = await client
+                .From<Usuario>()
+                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
+                .Get();
+
+            var usuario = usuarioResponse.Models.FirstOrDefault();
+            if (usuario == null)
+                return Results.Unauthorized();
+
+            // Calcular precio total (asumimos 50€ por entrada, o configurar según lógica de negocio)
+            decimal precioUnitario = 50; // TODO: obtener del evento o configuración
+            decimal importeTotal = precioUnitario * dto.Quantity;
+
+            // Crear resumen del carrito (sin persistir aún, es el "carrito de compra")
+            var resumenCarrito = new
+            {
+                status = "success",
+                message = "Carrito de compra iniciado",
+                carrito = new
+                {
+                    id_evento = evento.IdEvento,
+                    nombre_evento = evento.Nombre,
+                    cantidad_entradas = dto.Quantity,
+                    precio_unitario = precioUnitario,
+                    importe_total = importeTotal,
+                    direccion_facturacion = dto.BillingAddress,
+                    es_empresa = dto.IsCompany,
+                    descuento_aplicado = dto.DiscountCode,
+                    fecha_evento = evento.FechaEvento
+                }
+            };
+
+            return Results.Ok(resumenCarrito);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error iniciando la compra: " + ex.Message);
+        }
+    }
+
     public static IResult ConfirmPurchase(PurchaseConfirmDto dto) => Results.Ok();
     
     public static IResult GetPaymentMethods() => Results.Ok();
