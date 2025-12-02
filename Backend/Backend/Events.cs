@@ -149,8 +149,69 @@ static class Events
         }
     }
 
-    public static IResult ConfirmPurchase(PurchaseConfirmDto dto) => Results.Ok();
-    
+    public static async Task<IResult> ConfirmPurchase(PurchaseConfirmDto dto, Supabase.Client client)
+    {
+        if (string.IsNullOrEmpty(dto.PaymentMethod) || string.IsNullOrEmpty(dto.PaymentToken))
+            return Results.BadRequest(new { error = "Método de pago y token de pago son requeridos." });
+
+        try
+        {
+            var userAuth = client.Auth.CurrentUser;
+            if (userAuth == null)
+                return Results.Unauthorized();
+
+            // Obtener usuario
+            var usuarioResponse = await client
+                .From<Usuario>()
+                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
+                .Get();
+
+            var usuario = usuarioResponse.Models.FirstOrDefault();
+            if (usuario == null)
+                return Results.Unauthorized();
+
+            // TODO: Validar token de pago con proveedor (Stripe, PayPal, etc.)
+            // Por ahora asumimos que es válido. En producción se debe verificar aquí.
+
+            // Crear registro de pago
+            var nuevoPago = new Pago
+            {
+                Monto = 0, // Se debe pasar desde el carrito guardado, pero aquí no tenemos persistencia de carrito
+                Fecha = DateTime.UtcNow,
+                Estado = "Pagado",
+                MetodoDePago = dto.PaymentMethod,
+                IdCliente = usuario.IdUsuario
+            };
+
+            var pagoResponse = await client
+                .From<Pago>()
+                .Insert(nuevoPago);
+
+            var pagoCreado = pagoResponse.Models.First();
+
+            // TODO: Crear ticket con los datos del carrito (necesitaríamos guardar el carrito en StartPurchase)
+            // Por ahora retornamos confirmación exitosa del pago
+
+            return Results.Ok(new
+            {
+                status = "success",
+                message = "Pago confirmado exitosamente",
+                pago = new
+                {
+                    id_pago = pagoCreado.IdPago,
+                    monto = pagoCreado.Monto,
+                    fecha = pagoCreado.Fecha,
+                    estado = pagoCreado.Estado,
+                    metodo_pago = pagoCreado.MetodoDePago
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error confirmando el pago: " + ex.Message);
+        }
+    }
+
     public static IResult GetPaymentMethods() => Results.Ok();
     public static IResult ValidateDiscount(DiscountCheckDto dto) => Results.Ok();
     
