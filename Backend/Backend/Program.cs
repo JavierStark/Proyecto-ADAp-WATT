@@ -42,6 +42,17 @@ builder.Services.AddSingleton<Supabase.Client>(_ =>
 
 var app = builder.Build();
 
+app.UseCors(policy => 
+    policy.WithOrigins(
+        "http://localhost:4200",             
+        "https://cudeca-watt.es",            
+        "https://www.cudeca-watt.es"         
+    )
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials() 
+);
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
