@@ -8,7 +8,7 @@ import { Observable, tap } from 'rxjs';
 export class AuthService {
 
   // Tu URL de Azure (sin barra al final)
-  private apiUrl = 'https://tu-proyecto.azurewebsites.net'; 
+  private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/'; 
 
   constructor(private http: HttpClient) { }
 
