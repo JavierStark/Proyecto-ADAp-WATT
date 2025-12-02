@@ -54,9 +54,15 @@ export class AppComponent {
   goToSignUp() {
     this.router.navigate(['/sign-up']); // Navega a la página de registro
   }
-   goToDonation() {
+
+  goToDonation() {
     this.router.navigate(['/donation']);
   }
+
+  goToCuenta() {
+    this.router.navigate(['/cuenta']);
+  }
+
   goToHome() {
     this.router.navigate(['/']); // Navega a la raíz (Home)
   }
