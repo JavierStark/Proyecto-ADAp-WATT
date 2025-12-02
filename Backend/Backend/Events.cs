@@ -212,8 +212,70 @@ static class Events
         }
     }
 
-    public static IResult GetPaymentMethods() => Results.Ok();
-    public static IResult ValidateDiscount(DiscountCheckDto dto) => Results.Ok();
+    public static IResult GetPaymentMethods()
+    {
+        var metodos = new[]
+        {
+            new { id = 1, nombre = "Tarjeta de Crédito", codigo = "CARD" },
+            new { id = 2, nombre = "Tarjeta de Débito", codigo = "DEBIT" },
+            new { id = 3, nombre = "PayPal", codigo = "PAYPAL" },
+            new { id = 4, nombre = "Transferencia Bancaria", codigo = "BANK" }
+        };
+
+        return Results.Ok(new
+        {
+            status = "success",
+            message = "Métodos de pago disponibles",
+            metodos = metodos
+        });
+    }
+
+    public static async Task<IResult> ValidateDiscount(DiscountCheckDto dto, Supabase.Client client)
+    {
+        if (string.IsNullOrEmpty(dto.Code))
+            return Results.BadRequest(new { error = "El código de descuento no puede estar vacío." });
+
+        try
+        {
+            // Validación básica de formato (ej: DESCUENTO2025, PROMO50)
+            if (dto.Code.Length < 3 || dto.Code.Length > 20)
+                return Results.BadRequest(new { error = "El código debe tener entre 3 y 20 caracteres." });
+
+            // Simulación: descuentos válidos conocidos
+            var codigosValidos = new Dictionary<string, (decimal porcentaje, string descripcion)>
+            {
+                { "DESCUENTO2025", (15m, "15% de descuento") },
+                { "PROMO50", (25m, "25% de descuento especial") },
+                { "NAVIDAD", (10m, "10% Navidad") },
+                { "VIP", (30m, "30% VIP") }
+            };
+
+            var codigoUpper = dto.Code.ToUpper();
+
+            if (codigosValidos.ContainsKey(codigoUpper))
+            {
+                var (porcentaje, descripcion) = codigosValidos[codigoUpper];
+                return await Task.FromResult(Results.Ok(new
+                {
+                    status = "success",
+                    message = "Código de descuento válido",
+                    descuento = new
+                    {
+                        codigo = codigoUpper,
+                        porcentaje = porcentaje,
+                        descripcion = descripcion,
+                        valido = true
+                    }
+                }));
+            }
+
+            return await Task.FromResult(Results.NotFound(new { error = "El código de descuento no es válido." }));
+        }
+        catch (Exception ex)
+        {
+            return await Task.FromResult(Results.Problem("Error validando descuento: " + ex.Message));
+        }
+    }
     
     record EventoDto(
         long Id, 
