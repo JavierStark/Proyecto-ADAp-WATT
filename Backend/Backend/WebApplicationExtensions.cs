@@ -71,7 +71,7 @@ public static class WebApplicationExtensions
 
     public static WebApplication MapAdminEndpoints(this WebApplication app)
     {
-        var admin = app.MapGroup("/admin/events");
+        var admin = app.MapGroup("/admin/events").AddEndpointFilter<AdminAuthFilter>();
         admin.MapGet("", Admin.AdminListEvents);
         admin.MapPost("", Admin.AdminCreateEvent);
         admin.MapPut("/{eventId:int}", Admin.AdminUpdateEvent);

@@ -1,11 +1,17 @@
 using Backend;
+using System.Text.Json;
 
 // Sirve para declarar las tablas de supabase
-using Supabase.Postgrest.Attributes;
-using Supabase.Postgrest.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure JSON options for DateTime handling
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNameCaseInsensitive = true;
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(SwaggerAuthSetup);

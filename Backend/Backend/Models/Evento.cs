@@ -1,4 +1,4 @@
-﻿using Supabase.Postgrest.Attributes;
+﻿﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
 namespace Backend.Models;
@@ -6,7 +6,7 @@ namespace Backend.Models;
 [Table("evento")] 
 public class Evento : BaseModel
 {
-    [PrimaryKey("id_evento")]
+    [PrimaryKey("id_evento", shouldInsert: false)]
     public long IdEvento { get; set; }
 
     [Column("nombre")]

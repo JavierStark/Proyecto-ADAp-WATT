@@ -1,4 +1,4 @@
-﻿using Supabase.Postgrest.Attributes;
+﻿﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
 namespace Backend.Models;
@@ -9,7 +9,7 @@ namespace Backend.Models;
 class Cliente : BaseModel
 {
     // Coincide con el ID_usuario
-    [PrimaryKey("id_cliente")] public long IdCliente { get; set; }
+    [PrimaryKey("id_cliente", shouldInsert: false)] public long IdCliente { get; set; }
 
     [Column("direccion")] public string? Direccion { get; set; }
 
