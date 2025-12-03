@@ -1,6 +1,4 @@
 ﻿using Backend.Models;
-using Supabase.Postgrest.Attributes;
-using Supabase.Postgrest.Models;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;

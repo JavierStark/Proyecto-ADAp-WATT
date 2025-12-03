@@ -1,7 +1,4 @@
 ﻿using Backend.Models;
-using Microsoft.AspNetCore.Mvc;
-using Supabase.Postgrest.Attributes;
-using Supabase.Postgrest.Models;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
