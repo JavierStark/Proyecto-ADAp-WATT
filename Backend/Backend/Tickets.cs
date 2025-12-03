@@ -1,31 +1,34 @@
 ﻿using Backend.Models;
+using Supabase.Gotrue;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
 static class Tickets
 {
-    public static async Task<IResult> GetMyTickets(int? ticketId, Supabase.Client client)
+    public static async Task<IResult> GetMyTickets(string? ticketId, Supabase.Client client)
     {
         try
         {
-            var currentUser = client.Auth.CurrentUser!;
+            var parsed = Guid.Parse(client.Auth.CurrentUser!.Id!);
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Operator.Equals, currentUser.Id)
+                .Where(u => u.Id == parsed)
                 .Single();
             
             if (usuarioDb == null) return Results.Unauthorized();
             
             var query = client
                 .From<Entrada>()
-                .Select("*, evento(*)")
-                .Filter("id_usuario", Operator.Equals,
-                    usuarioDb.Id); // ¡Seguridad clave!
+                .Select("*, Evento(*)")
+                .Where(e => e.FkUsuario == usuarioDb.Id); 
 
             if (ticketId != null)
-                query.Filter("id_ticket", Operator.Equals, ticketId);
+            {
+                var parsedTicketId = Guid.Parse(ticketId);
+                query.Where(e => e.Id == parsedTicketId);
+            }
             
             var result = await query.Get();
                 

@@ -14,9 +14,7 @@ static class Auth
             var session = await client.Auth.SignUp(dto.Email, dto.Password);
 
             if (session?.User == null)
-            {
                 return Results.BadRequest(new { error = "No se pudo registrar el usuario. Inténtalo de nuevo." });
-            }
 
             return Results.Ok(new
             {
@@ -34,18 +32,14 @@ static class Auth
     public static async Task<IResult> LoginUser(LoginDto dto, Supabase.Client client)
     {
         if (string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
-        {
             return Results.BadRequest(new { error = "El email y la contraseña son obligatorios." });
-        }
 
         try
         {
             var session = await client.Auth.SignIn(dto.Email, dto.Password);
 
             if (session?.AccessToken == null)
-            {
                 return Results.Unauthorized();
-            }
 
             return Results.Ok(new
             {
@@ -64,9 +58,8 @@ static class Auth
         catch (Exception ex)
         {
             if (ex.Message.Contains("Email not confirmed") || ex.Message.Contains("confirm"))
-            {
                 return Results.BadRequest(new { error = "¡Aún no has confirmado tu correo! Revisa tu bandeja de entrada." });
-            }
+            
             return Results.BadRequest(new { error = "Credenciales inválidas (Usuario o contraseña incorrectos)." });
         }
     }
@@ -96,14 +89,10 @@ static class Auth
         {
             await client.Auth.SetSession(dto.AccessToken, dto.RefreshToken);
 
-            // Pedimos a Supabase que nos renueve la sesión
-            // Supabase verifica si el RefreshToken es válido y no ha caducado.
             var session = await client.Auth.RefreshSession();
 
             if (session?.AccessToken == null)
-            {
                 return Results.Unauthorized();
-            }
 
             return Results.Ok(new
             {
@@ -115,7 +104,6 @@ static class Auth
         }
         catch (Exception)
         {
-            // Si el refresh token ya caducó o fue revocado (logout)
             return Results.Unauthorized();
         }
     }

@@ -30,7 +30,7 @@ public static class WebApplicationExtensions
     {
         var events = app.MapGroup("/events");
         events.MapGet("", Events.ListEvents);
-        events.MapGet("/{eventId:int}", Events.GetEvent);
+        events.MapGet("/{eventId}", Events.GetEvent);
         
         return app;
     }

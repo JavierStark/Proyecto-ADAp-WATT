@@ -40,9 +40,9 @@ static class Donations
     {
         try
         {
-            var userAuth = client.Auth.CurrentUser;
+            var userAuth = client.Auth.CurrentUser!;
 
-            var usuarioDb = await client
+            var usuario = await client
                 .From<Usuario>()
                 .Filter("id", Operator.Equals, userAuth.Id)
                 .Single();
@@ -50,7 +50,7 @@ static class Donations
             var response = await client
                 .From<Donacion>()
                 .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("Pago.id_cliente", Operator.Equals, usuarioDb.Id.ToString())
+                .Filter("Pago.id_cliente", Operator.Equals, usuario!.Id.ToString())
                 .Get();
 
             decimal total = response.Models.Sum(d => d.Pago?.Monto ?? 0);
@@ -65,14 +65,16 @@ static class Donations
 
     public static async Task<IResult> CreateDonation(DonationDto dto, Supabase.Client client)
     {
-        if (dto.Amount <= 0) return Results.BadRequest(new { error = "El monto debe ser mayor a 0." });
+        if (dto.Amount <= 0) 
+            return Results.BadRequest(new { error = "El monto debe ser mayor a 0." });
+        
         try
         {
-            var userAuth = client.Auth.CurrentUser;
+            var userId = Guid.Parse(client.Auth.CurrentUser.Id);
 
-            var usuarioDb = await client
+            var usuario = await client
                 .From<Usuario>()
-                .Filter("id", Operator.Equals, userAuth.Id)
+                .Where(u => u.Id == userId)
                 .Single();
 
             var nuevoPago = new Pago
@@ -81,7 +83,7 @@ static class Donations
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado", // Asumimos que el pago es inmediato para simplificar
                 MetodoDePago = dto.PaymentMethod ?? "Tarjeta",
-                FkCliente = usuarioDb.Id // Vinculamos el pago al usuario
+                FkCliente = usuario!.Id // Vinculamos el pago al usuario
             };
 
             var pagoResponse = await client
@@ -90,10 +92,7 @@ static class Donations
 
             var pagoCreado = pagoResponse.Models.First();
 
-            var nuevaDonacion = new Donacion
-            {
-                FkPago = pagoCreado.Id
-            };
+            var nuevaDonacion = new Donacion { FkPago = pagoCreado.Id };
 
             await client
                 .From<Donacion>()
@@ -112,18 +111,16 @@ static class Donations
         }
     }
 
-    public static async Task<IResult> GetDonationCertificate(
-        int? year, // Opcional: si es null, usaremos el año pasado
-        Supabase.Client client)
+    public static async Task<IResult> GetDonationCertificate(int? year, Supabase.Client client)
     {
         try
         {
-            var userAuth = client.Auth.CurrentUser;
+            var userId = Guid.Parse(client.Auth.CurrentUser!.Id!);
 
-            var usuarioDb = await client
+            var usuario = (await client
                 .From<Usuario>()
-                .Filter("id", Operator.Equals, userAuth.Id)
-                .Single();
+                .Where(u => u.Id == userId)
+                .Single())!;
 
             // Si no nos pasan año, asumimos el año anterior (para la renta)
             int targetYear = year ?? DateTime.Now.Year - 1;
@@ -135,8 +132,8 @@ static class Donations
             // CONSULTA CON FILTRO DE FECHAS
             var response = await client
                 .From<Donacion>()
-                .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("Pago.id_cliente", Operator.Equals, usuarioDb.Id.ToString())
+                .Select("*, Pago:fk_pago!inner(*)")
+                .Filter("Pago.fk_cliente", Operator.Equals, usuario.Id.ToString())
                 // Filtros de fecha (Mayor o igual a Enero 1, Menor o igual a Dic 31)
                 .Filter("Pago.fecha", Operator.GreaterThanOrEqual, fechaInicio)
                 .Filter("Pago.fecha", Operator.LessThanOrEqual, fechaFin)
@@ -147,9 +144,7 @@ static class Donations
                 .ToList();
 
             if (donacionesAnuales.Count == 0)
-            {
                 return Results.NotFound(new { error = $"No se encontraron donaciones en el año fiscal {targetYear}." });
-            }
 
             // CÁLCULOS
             decimal totalAnual = donacionesAnuales.Sum(d => d.Pago?.Monto ?? 0);
@@ -167,9 +162,9 @@ static class Donations
             sb.AppendLine($"FECHA DE EMISIÓN: {DateTime.Now.ToShortDateString()}");
             sb.AppendLine("");
             sb.AppendLine("DATOS DEL DONANTE:");
-            sb.AppendLine($"Nombre:   {usuarioDb.Nombre} {usuarioDb.Apellidos}");
-            sb.AppendLine($"NIF/DNI:  {usuarioDb.Dni ?? "NO INFORMADO"}");
-            sb.AppendLine($"Email:    {usuarioDb.Email}");
+            sb.AppendLine($"Nombre:   {usuario.Nombre} {usuario.Apellidos}");
+            sb.AppendLine($"NIF/DNI:  {usuario.Dni ?? "NO INFORMADO"}");
+            sb.AppendLine($"Email:    {usuario.Email}");
             sb.AppendLine("");
             sb.AppendLine("DETALLE DE APORTACIONES:");
             sb.AppendLine("-------------------------------------------------------");
@@ -203,7 +198,7 @@ static class Donations
             return Results.File(
                 archivoBytes,
                 "text/plain",
-                $"Certificado_Fiscal_{targetYear}_{usuarioDb.Dni ?? "Donante"}.txt"
+                $"Certificado_Fiscal_{targetYear}_{usuario.Dni ?? "Donante"}.txt"
             );
         }
         catch (Exception ex)

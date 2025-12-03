@@ -1,4 +1,5 @@
 ﻿using Backend.Models;
+using Supabase.Gotrue;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
@@ -43,9 +44,11 @@ static class Events
     {
         try
         {
+            var parsed = Guid.Parse(eventId);
+
             var response = await client
                 .From<Evento>()
-                .Where(e => e.Id == Guid.Parse(eventId))
+                .Where(e => e.Id == parsed)
                 .Get();
 
             var eventoDb = response.Models.FirstOrDefault();
@@ -144,11 +147,11 @@ static class Events
     {
         try
         {
-            var userAuth = client.Auth.CurrentUser!;
+            var parsed = Guid.Parse(client.Auth.CurrentUser!.Id!);
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Where(u => u.Id == Guid.Parse(userAuth.Id!))
+                .Where(u => u.Id == parsed)
                 .Single();
 
             decimal totalPagar = 0;
@@ -232,7 +235,7 @@ static class Events
             foreach (var (idEvento, cantidadVendida) in eventosAfectados)
             {
                 var evento = await client.From<Evento>()
-                    .Filter("id_evento", Operator.Equals, idEvento)
+                    .Where(e => e.Id == idEvento)
                     .Single();
 
                 if (evento != null)
@@ -296,24 +299,23 @@ static class Events
 
             var codigoUpper = dto.Code.ToUpper();
 
-            if (codigosValidos.ContainsKey(codigoUpper))
+            if (!codigosValidos.ContainsKey(codigoUpper))
+                return await Task.FromResult(Results.NotFound(new { error = "El código de descuento no es válido." }));
+            
+            var (porcentaje, descripcion) = codigosValidos[codigoUpper];
+            return await Task.FromResult(Results.Ok(new
             {
-                var (porcentaje, descripcion) = codigosValidos[codigoUpper];
-                return await Task.FromResult(Results.Ok(new
+                status = "success",
+                message = "Código de descuento válido",
+                descuento = new
                 {
-                    status = "success",
-                    message = "Código de descuento válido",
-                    descuento = new
-                    {
-                        codigo = codigoUpper,
-                        porcentaje = porcentaje,
-                        descripcion = descripcion,
-                        valido = true
-                    }
-                }));
-            }
+                    codigo = codigoUpper,
+                    porcentaje,
+                    descripcion,
+                    valido = true
+                }
+            }));
 
-            return await Task.FromResult(Results.NotFound(new { error = "El código de descuento no es válido." }));
         }
         catch (Exception ex)
         {

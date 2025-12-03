@@ -1,4 +1,5 @@
 ﻿using Backend.Models;
+using Supabase.Gotrue;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
@@ -9,16 +10,16 @@ static class Profile
     {
         try
         {
-            var userAuth = client.Auth.CurrentUser!;
+            var parsed = Guid.Parse(client.Auth.CurrentUser!.Id!);
 
             var usuario = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
+                .Where(u => u.Id == parsed)
                 .Single();
 
             var cliente = await client
                 .From<Cliente>()
-                .Filter("id_cliente", Operator.Equals, usuario.Id.ToString())
+                .Where(c => c.Id == parsed)
                 .Single();
 
             var perfilCompleto = new
@@ -50,16 +51,16 @@ static class Profile
     {
         try
         {
-            var userAuth = client.Auth.CurrentUser;
+            var parsed = Guid.Parse(client.Auth.CurrentUser!.Id!);
 
             var usuario = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
+                .Where(u => u.Id == parsed)
                 .Single();
 
             var cliente = await client
                 .From<Cliente>()
-                .Filter("id_cliente", Operator.Equals, usuario.Id.ToString())
+                .Where(c => c.Id == parsed)
                 .Single();
 
             var usuarioUpdate = new Usuario
