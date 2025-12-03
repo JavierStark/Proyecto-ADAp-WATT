@@ -42,7 +42,7 @@ export class EventosComponent implements OnInit {
 
   cargarEventosDesdeBackend(): void {
     this.isLoading = true; // Iniciamos carga
-    const url = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/eventos'; 
+    const url = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/events'; 
 
     console.log('🔄 Intentando conectar con:', url);
 
