@@ -17,7 +17,12 @@
       </p>
     </div>
 
-    <div class="flex flex-col gap-[2vw] max-w-[90vw] mx-auto">
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-[10vh]">
+      <div class="animate-spin rounded-full h-[4vw] w-[4vw] border-b-4 border-green-900 mb-[2vh]"></div>
+      <p class="text-green-900 text-[1.2vw] font-bold">Cargando eventos...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="flex flex-col gap-[2vw] max-w-[90vw] mx-auto">
       
       <div *ngFor="let evento of eventos" 
            class="bg-white rounded-[1vw] shadow-lg border border-green-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row h-auto md:min-h-[16vw]">
@@ -29,9 +34,15 @@
             class="w-full h-full object-cover"
           />
           
-          <div class="absolute top-[1vw] left-[1vw] bg-green-700 text-white px-[1.2vw] py-[0.4vw] rounded-full text-[0.9vw] font-bold shadow-md z-10">
-            {{ evento.fecha | date:'dd/MM/yyyy' }}
+          <div class="absolute top-[1vw] right-[1vw] flex flex-col rounded-xl overflow-hidden shadow-sm z-10 font-bold text-center min-w-[4vw]">
+            <div class="bg-green-100 text-green-800 text-[1.6vw] pt-[0.5vw] pb-[0.2vw] leading-none">
+              {{ evento.fecha | date:'d' }}
+            </div>
+            <div class="bg-green-600 text-white text-[0.9vw] uppercase py-[0.3vw] leading-none">
+              {{ evento.fecha | date:'MMM' }}
+            </div>
           </div>
+
         </div>
 
         <div class="p-[1.5vw] flex-1 flex flex-col justify-between">
@@ -81,7 +92,7 @@
 
     </div>
 
-    <div *ngIf="eventos.length === 0" class="text-center py-[4vh]">
+    <div *ngIf="eventos.length === 0 && !isLoading" class="text-center py-[4vh]">
       <div class="bg-white/80 backdrop-blur-sm inline-block px-[2vw] py-[1vw] rounded-xl shadow-sm">
         <p class="text-green-900 text-[1.5vw] font-medium">No hay eventos disponibles en este momento.</p>
       </div>

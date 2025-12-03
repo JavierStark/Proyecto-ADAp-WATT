@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
 
-// Interfaz para definir la estructura de un Evento
+registerLocaleData(localeEs);
+
 export interface Evento {
   id: number;
   titulo: string;
@@ -22,17 +27,68 @@ export interface Evento {
   styleUrls: ['./eventos.component.css']
 })
 export class EventosComponent implements OnInit {
-  // Array de eventos - Aquí irán los datos del backend
   eventos: Evento[] = [];
+  // 1. VARIABLE DE ESTADO DE CARGA
+  isLoading: boolean = true; 
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient 
+  ) {}
 
   ngOnInit(): void {
-    // Datos de ejemplo (mock data) - Después se reemplazará con llamada al backend
-    this.cargarEventosMock();
+    this.cargarEventosDesdeBackend();
   }
 
-  // Método temporal con datos de ejemplo
+  cargarEventosDesdeBackend(): void {
+    this.isLoading = true; // Iniciamos carga
+    const url = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/eventos'; 
+
+    console.log('🔄 Intentando conectar con:', url);
+
+    this.http.get(url, { responseType: 'text' })
+      .pipe(
+        map(respuestaTexto => {
+          try {
+            const datosJson = JSON.parse(respuestaTexto);
+            console.log('✅ Datos crudos recibidos:', datosJson);
+            
+            return datosJson.map((item: any) => ({
+              id: item.id || Math.floor(Math.random() * 10000),
+              titulo: item.title || item.titulo || item.name || 'Evento sin título',
+              descripcion: item.description || item.descripcion || 'Sin descripción',
+              fecha: new Date(item.date || item.fecha || Date.now()),
+              imagen: item.imageUrl || item.imagen || 'assets/images/fondoCudeca.png',
+              ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
+              capacidad: item.capacity || item.capacidad || 50,
+              inscritos: item.enrolled || item.inscritos || 0
+            }));
+
+          } catch (e) {
+            console.warn('⚠️ Error al leer los datos:', e);
+            return [];
+          }
+        })
+      )
+      .subscribe({
+        next: (eventosTraducidos) => {
+          this.isLoading = false; // 2. TERMINA LA CARGA
+          if (eventosTraducidos.length > 0) {
+            this.eventos = eventosTraducidos;
+            console.log('🎉 Eventos cargados exitosamente');
+          } else {
+            console.log('⚠️ Lista vacía, cargando mocks...');
+            this.cargarEventosMock();
+          }
+        },
+        error: (error) => {
+          this.isLoading = false; // 2. TERMINA LA CARGA (incluso con error)
+          console.error('❌ Error Backend:', error);
+          this.cargarEventosMock();
+        }
+      });
+  }
+
   cargarEventosMock(): void {
     this.eventos = [
       {
@@ -40,7 +96,7 @@ export class EventosComponent implements OnInit {
         titulo: 'Carrera Solidaria Cudeca',
         descripcion: 'Únete a nuestra carrera anual para recaudar fondos. Disfruta de un día de deporte y solidaridad.',
         fecha: new Date('2025-12-15'),
-        imagen: 'assets/images/evento1.jpg',
+        imagen: 'assets/images/fondoCudeca.png',
         ubicacion: 'Parque Central',
         capacidad: 200,
         inscritos: 145
@@ -50,7 +106,7 @@ export class EventosComponent implements OnInit {
         titulo: 'Concierto Benéfico',
         descripcion: 'Una noche de música en vivo con artistas locales. Todas las ganancias van a Cudeca.',
         fecha: new Date('2025-12-20'),
-        imagen: 'assets/images/evento2.jpg',
+        imagen: 'assets/images/fondoCudeca.png',
         ubicacion: 'Teatro Municipal',
         capacidad: 150,
         inscritos: 98
@@ -60,7 +116,7 @@ export class EventosComponent implements OnInit {
         titulo: 'Taller de Artesanía',
         descripcion: 'Aprende técnicas de artesanía mientras apoyas una gran causa. Incluye materiales.',
         fecha: new Date('2026-01-10'),
-        imagen: 'assets/images/evento3.jpg',
+        imagen: 'assets/images/fondoCudeca.png',
         ubicacion: 'Centro Cudeca',
         capacidad: 30,
         inscritos: 22
@@ -70,32 +126,22 @@ export class EventosComponent implements OnInit {
         titulo: 'Mercadillo Solidario',
         descripcion: 'Venta de productos artesanales y segunda mano. Todos los beneficios para Cudeca.',
         fecha: new Date('2026-01-25'),
-        imagen: 'assets/images/evento4.jpg',
+        imagen: 'assets/images/fondoCudeca.png',
         ubicacion: 'Plaza Mayor',
         capacidad: 500,
         inscritos: 0
       }
     ];
+    // Aseguramos que isLoading se apague si entramos directo al mock
+    this.isLoading = false; 
   }
-
-  // Método para cuando se conecte al backend
-  // cargarEventosDesdeBackend(): void {
-  //   this.http.get<Evento[]>('http://localhost:5000/api/eventos')
-  //     .subscribe({
-  //       next: (data) => this.eventos = data,
-  //       error: (error) => console.error('Error al cargar eventos:', error)
-  //     });
-  // }
 
   inscribirseEvento(eventoId: number): void {
     console.log('Inscribiéndose al evento:', eventoId);
-    // Aquí irá la lógica para inscribirse (llamada al backend)
   }
 
   verDetalles(eventoId: number): void {
     console.log('Ver detalles del evento:', eventoId);
-    // Navegar a página de detalles del evento
-    // this.router.navigate(['/eventos', eventoId]);
   }
 
   goToHome(): void {
