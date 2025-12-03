@@ -19,12 +19,12 @@ static class Donations
             var response = await client
                 .From<Donacion>()
                 .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("pago.id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("pago.id_cliente", Operator.Equals, usuarioDb.Id.ToString())
                 .Get();
 
             var historial = response.Models
                 .Select(d => new DonationHistoryDto(
-                    d.IdDonacion,
+                    d.Id,
                     d.Pago != null ? d.Pago.Monto : 0, // Protección por si pago viniera nulo
                     d.Pago != null ? d.Pago.Fecha : DateTime.MinValue,
                     d.Pago != null ? d.Pago.Estado : "Desconocido",
@@ -55,7 +55,7 @@ static class Donations
             var response = await client
                 .From<Donacion>()
                 .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("Pago.id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("Pago.id_cliente", Operator.Equals, usuarioDb.Id.ToString())
                 .Get();
 
             decimal total = response.Models.Sum(d => d.Pago?.Monto ?? 0);
@@ -86,7 +86,7 @@ static class Donations
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado", // Asumimos que el pago es inmediato para simplificar
                 MetodoDePago = dto.PaymentMethod ?? "Tarjeta",
-                IdCliente = usuarioDb.IdUsuario // Vinculamos el pago al usuario
+                IdCliente = usuarioDb.Id // Vinculamos el pago al usuario
             };
 
             var pagoResponse = await client
@@ -99,7 +99,7 @@ static class Donations
             // Vinculamos esta donación al pago que acabamos de crear
             var nuevaDonacion = new Donacion
             {
-                IdPago = pagoCreado.IdPago
+                IdPago = pagoCreado.Id
             };
 
             await client
@@ -110,7 +110,7 @@ static class Donations
             {
                 status = "success",
                 message = $"¡Gracias! Donación de {dto.Amount}€ realizada correctamente.",
-                id_donacion = pagoCreado.IdPago
+                id_donacion = pagoCreado.Id
             });
         }
         catch (Exception ex)
@@ -143,7 +143,7 @@ static class Donations
             var response = await client
                 .From<Donacion>()
                 .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("Pago.id_cliente", Operator.Equals, usuarioDb.IdUsuario.ToString())
+                .Filter("Pago.id_cliente", Operator.Equals, usuarioDb.Id.ToString())
                 // Filtros de fecha (Mayor o igual a Enero 1, Menor o igual a Dic 31)
                 .Filter("Pago.fecha", Operator.GreaterThanOrEqual, fechaInicio)
                 .Filter("Pago.fecha", Operator.LessThanOrEqual, fechaFin)
@@ -220,7 +220,7 @@ static class Donations
     }
 
     record DonationHistoryDto(
-        long IdDonacion,
+        Guid IdDonacion,
         decimal Monto,
         DateTime Fecha,
         string Estado,

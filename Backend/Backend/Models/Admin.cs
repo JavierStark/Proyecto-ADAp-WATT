@@ -6,10 +6,10 @@ namespace Backend.Models;
 [Table("admin")]
 public class Admin : BaseModel
 {
-    [PrimaryKey("id_admin", shouldInsert: false)]
-    public long IdAdmin { get; set; }
+    [PrimaryKey("id", shouldInsert: false)]
+    public Guid Id { get; set; }
 
-    [Column("id_usuario")]
-    public long IdUsuario { get; set; }
+    [Column("fk_usuario")]
+    public Guid IdUsuario { get; set; }
 }
 

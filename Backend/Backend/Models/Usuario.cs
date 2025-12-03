@@ -7,11 +7,8 @@ namespace Backend.Models;
 [Table("usuario")]
 public class Usuario : BaseModel
 {
-    [PrimaryKey("id_usuario", shouldInsert: false)]
-    public long IdUsuario { get; set; }
-
-    [Column("id_auth_supabase")]
-    public string IdAuthSupabase { get; set; }
+    [PrimaryKey("id", shouldInsert: false)]
+    public Guid Id { get; set; }
 
     [Column("email")]
     public string? Email { get; set; }
@@ -27,4 +24,6 @@ public class Usuario : BaseModel
 
     [Column("telefono")]
     public string? Telefono { get; set; }
+    
+    
 }

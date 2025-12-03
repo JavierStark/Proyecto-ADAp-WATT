@@ -18,13 +18,13 @@ static class Profile
 
             var cliente = await client
                 .From<Cliente>()
-                .Filter("id_cliente", Operator.Equals, usuario.IdUsuario.ToString())
+                .Filter("id_cliente", Operator.Equals, usuario.Id.ToString())
                 .Single();
 
             var perfilCompleto = new
             {
                 // Datos de identificación
-                id_interno = usuario.IdUsuario,
+                id_interno = usuario.Id,
                 email = usuario.Email,
 
                 // Datos personales (Tabla Usuario)
@@ -59,13 +59,12 @@ static class Profile
 
             var cliente = await client
                 .From<Cliente>()
-                .Filter("id_cliente", Operator.Equals, usuario.IdUsuario.ToString())
+                .Filter("id_cliente", Operator.Equals, usuario.Id.ToString())
                 .Single();
 
             var usuarioUpdate = new Usuario
             {
-                IdUsuario = usuario.IdUsuario, // PK obligatoria para update
-                IdAuthSupabase = usuario.IdAuthSupabase,
+                Id = usuario.Id, // PK obligatoria para update
                 Email = usuario.Email, // El email no se toca aquí
                 
                 Nombre = !string.IsNullOrEmpty(dto.Nombre) ? dto.Nombre : usuario.Nombre,
@@ -80,9 +79,7 @@ static class Profile
             // Actualizar Tabla CLIENTE ---
             var clienteUpdate = new Cliente
             {
-                IdCliente = cliente.IdCliente, // PK obligatoria
-                Tipo = cliente.Tipo, // No dejamos cambiar el tipo
-                
+                Id = cliente.Id, // PK obligatoria
                 Direccion = !string.IsNullOrEmpty(dto.Direccion) ? dto.Direccion : cliente.Direccion,
                 
                 SuscritoNewsletter = dto.SuscritoNewsletter ?? cliente.SuscritoNewsletter

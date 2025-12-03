@@ -19,10 +19,10 @@ static class Tickets
             if (usuarioDb == null) return Results.Unauthorized();
             
             var query = client
-                .From<Ticket>()
+                .From<Entrada>()
                 .Select("*, evento(*)")
                 .Filter("id_usuario", Operator.Equals,
-                    usuarioDb.IdUsuario); // ¡Seguridad clave!
+                    usuarioDb.Id); // ¡Seguridad clave!
 
             if (ticketId != null)
                 query.Filter("id_ticket", Operator.Equals, ticketId);

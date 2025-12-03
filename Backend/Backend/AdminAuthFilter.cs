@@ -53,7 +53,7 @@ public class AdminAuthFilter : IEndpointFilter
             // Check if the user is an admin
             var adminResponse = await _supabase
                 .From<Models.Admin>()
-                .Filter("id_usuario", Operator.Equals, usuario.IdUsuario.ToString())
+                .Filter("id_usuario", Operator.Equals, usuario.Id.ToString())
                 .Get();
 
             var admin = adminResponse.Models.FirstOrDefault();

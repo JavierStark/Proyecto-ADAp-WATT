@@ -23,13 +23,13 @@ static class Admin
 
             var eventosDto = listaEventos.Select(e => {
                 
-                var misEntradas = listaEntradas.Where(t => t.IdEvento == e.IdEvento).ToList();
+                var misEntradas = listaEntradas.Where(t => t.IdEvento == e.Id).ToList();
             
                 var general = misEntradas.FirstOrDefault(t => t.Tipo == "General");
                 var vip = misEntradas.FirstOrDefault(t => t.Tipo == "VIP");
 
                 return new EventoAdminDto(
-                    e.IdEvento,
+                    e.Id,
                     e.Nombre,
                     e.Descripcion,
                     e.FechaEvento,
@@ -40,9 +40,9 @@ static class Admin
                     e.ObjetoRecaudacion ?? "Sin especificar",
                     
                     general?.Precio ?? 0,
-                    general?.Numero ?? 0,
+                    general?.Cantidad ?? 0,
                     vip?.Precio, 
-                    vip?.Numero
+                    vip?.Cantidad
                 );
             });
 
@@ -103,10 +103,10 @@ static class Admin
             // Entrada General
             entradasAInsertar.Add(new EntradaEvento
             {
-                IdEvento = eventoCreado.IdEvento,
+                IdEvento = eventoCreado.Id,
                 Tipo = "General",
                 Precio = dto.PrecioGeneral,
-                Numero = dto.CantidadGeneral
+                Cantidad = dto.CantidadGeneral
             });
 
             // Entrada VIP
@@ -114,21 +114,21 @@ static class Admin
             {
                 entradasAInsertar.Add(new EntradaEvento
                 {
-                    IdEvento = eventoCreado.IdEvento,
+                    IdEvento = eventoCreado.Id,
                     Tipo = "VIP",
                     Precio = dto.PrecioVip!.Value,
-                    Numero = dto.CantidadVip!.Value
+                    Cantidad = dto.CantidadVip!.Value
                 });
             }
             
             await client.From<EntradaEvento>().Insert(entradasAInsertar);
             
-            return Results.Created($"/events/{eventoCreado.IdEvento}", new
+            return Results.Created($"/events/{eventoCreado.Id}", new
             {
                 status = "success",
                 message = "Evento y tickets creados correctamente.",
                 evento = new EventoAdminDto(
-                    eventoCreado.IdEvento,
+                    eventoCreado.Id,
                     eventoCreado.Nombre,
                     eventoCreado.Descripcion,
                     eventoCreado.FechaEvento,
@@ -142,7 +142,7 @@ static class Admin
                     dto.PrecioVip,
                     dto.CantidadVip
                 ),
-                tickets_creados = entradasAInsertar.Select(t => new { t.Tipo, t.Precio, Stock = t.Numero })
+                tickets_creados = entradasAInsertar.Select(t => new { t.Tipo, t.Precio, Stock = t.Cantidad })
             });
         }
         catch (Exception ex)
@@ -193,7 +193,7 @@ static class Admin
         {
             bool cambioG = false;
             if (dto.PrecioGeneral.HasValue) { general.Precio = dto.PrecioGeneral.Value; cambioG = true; }
-            if (dto.CantidadGeneral.HasValue) { general.Numero = dto.CantidadGeneral.Value; cambioG = true; }
+            if (dto.CantidadGeneral.HasValue) { general.Cantidad = dto.CantidadGeneral.Value; cambioG = true; }
             
             if (cambioG) await client.From<EntradaEvento>().Update(general);
         }
@@ -202,7 +202,7 @@ static class Admin
         {
             bool cambioV = false;
             if (dto.PrecioVip.HasValue) { vip.Precio = dto.PrecioVip.Value; cambioV = true; }
-            if (dto.CantidadVip.HasValue) { vip.Numero = dto.CantidadVip.Value; cambioV = true; }
+            if (dto.CantidadVip.HasValue) { vip.Cantidad = dto.CantidadVip.Value; cambioV = true; }
             
             if (cambioV) await client.From<EntradaEvento>().Update(vip);
         }
@@ -212,10 +212,10 @@ static class Admin
             {
                 var nuevaVip = new EntradaEvento
                 {
-                    IdEvento = eventoDb.IdEvento,
+                    IdEvento = eventoDb.Id,
                     Tipo = "VIP",
                     Precio = dto.PrecioVip.Value,
-                    Numero = dto.CantidadVip.Value
+                    Cantidad = dto.CantidadVip.Value
                 };
                 
                 await client.From<EntradaEvento>().Insert(nuevaVip);
@@ -225,8 +225,8 @@ static class Admin
         
         if (dto.CantidadGeneral.HasValue || dto.CantidadVip.HasValue)
         {
-            int nuevoGen = dto.CantidadGeneral ?? (general?.Numero ?? 0);
-            int nuevoVip = dto.CantidadVip ?? (vip?.Numero ?? 0);
+            int nuevoGen = dto.CantidadGeneral ?? (general?.Cantidad ?? 0);
+            int nuevoVip = dto.CantidadVip ?? (vip?.Cantidad ?? 0);
             
             eventoDb.Aforo = nuevoGen + nuevoVip + eventoDb.EntradasVendidas;
             huboCambiosEvento = true;
@@ -242,7 +242,7 @@ static class Admin
             status = "success",
             message = "Evento actualizado correctamente.",
             evento = new EventoAdminDto(
-                eventoDb.IdEvento,
+                eventoDb.Id,
                 eventoDb.Nombre,
                 eventoDb.Descripcion,
                 eventoDb.FechaEvento,
@@ -254,9 +254,9 @@ static class Admin
                 
                 // Datos planos
                 general?.Precio ?? 0,
-                general?.Numero ?? 0,
+                general?.Cantidad ?? 0,
                 vip?.Precio,
-                vip?.Numero
+                vip?.Cantidad
             )
         });
     }
@@ -300,7 +300,7 @@ static class Admin
     }
     
     record EventoAdminDto(
-        long Id,
+        Guid Id,
         string Nombre,
         string? Descripcion,
         DateTime Fecha,
@@ -332,6 +332,7 @@ static class Admin
         int? CantidadVip
     );
     public record EventoModifyDto(
+        Guid Id,
         string? Nombre,
         string? Descripcion,
         DateTime? Fecha,
