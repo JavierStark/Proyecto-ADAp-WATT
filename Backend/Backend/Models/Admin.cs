@@ -10,6 +10,9 @@ public class Admin : BaseModel
     public Guid Id { get; set; }
 
     [Column("fk_usuario")]
-    public Guid IdUsuario { get; set; }
+    private Guid fkUsuario { get; set; }
+    
+    [Reference(typeof(Usuario))]
+    public Usuario? Usuario { get; set; }
 }
 

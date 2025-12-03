@@ -86,7 +86,7 @@ static class Donations
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado", // Asumimos que el pago es inmediato para simplificar
                 MetodoDePago = dto.PaymentMethod ?? "Tarjeta",
-                IdCliente = usuarioDb.Id // Vinculamos el pago al usuario
+                FkCliente = usuarioDb.Id // Vinculamos el pago al usuario
             };
 
             var pagoResponse = await client
@@ -95,11 +95,9 @@ static class Donations
 
             var pagoCreado = pagoResponse.Models.First();
 
-            // Crear el registro en la tabla DONACION
-            // Vinculamos esta donación al pago que acabamos de crear
             var nuevaDonacion = new Donacion
             {
-                IdPago = pagoCreado.Id
+                FkPago = pagoCreado.Id
             };
 
             await client

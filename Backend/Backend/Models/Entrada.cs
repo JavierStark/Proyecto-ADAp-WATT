@@ -10,16 +10,16 @@ class Entrada : BaseModel
     public Guid Id { get; set; }
     
     [Column("fk_usuario")]
-    public Guid IdUsuario { get; set; }
+    public Guid FkUsuario { private get; set; }
 
     [Column("fk_evento")]
-    public Guid IdEvento { get; set; }
+    public Guid FkEvento { private get; set; }
 
     [Column("fk_pago")]
-    public Guid IdPago { get; set; }
+    public Guid FkPago { private get; set; }
     
     [Column("fk_entrada_evento")]
-    public Guid IdEntradaEvento { get; set; }
+    public Guid FkEntradaEvento { private get; set; }
 
     [Column("codigo_qr")]
     public string? CodigoQr { get; set; }

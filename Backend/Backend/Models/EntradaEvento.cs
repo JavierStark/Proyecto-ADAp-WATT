@@ -10,7 +10,7 @@ public class EntradaEvento : BaseModel
     public Guid IdEntradaEvento { get; set; }
     
     [Column("fk_evento")]
-    public Guid IdEvento { get; set; }
+    public Guid IdEvento { private get; set; }
     
     [Column("tipo")]
     public string Tipo { get; set; }
@@ -22,5 +22,5 @@ public class EntradaEvento : BaseModel
     public decimal Precio { get; set; }
     
     [Reference(typeof(Evento))]
-    public Evento? Evento { get; set; }
+    public Evento Evento { get; set; }
 }

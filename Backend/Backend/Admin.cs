@@ -1,5 +1,5 @@
 ﻿using Backend.Models;
-using static Supabase.Postgrest.Constants;
+using Supabase.Postgrest;
 
 namespace Backend;
 
@@ -9,24 +9,15 @@ static class Admin
     {
         try
         {
-            var eventosResponse = await client
+            var eventos = (await client
                 .From<Evento>()
-                .Order("fecha_y_hora", Ordering.Descending)
-                .Get();
-            
-            var entradasResponse = await client
-                .From<EntradaEvento>()
-                .Get();
-        
-            var listaEventos = eventosResponse.Models;
-            var listaEntradas = entradasResponse.Models;
+                .Order("fecha_y_hora", Constants.Ordering.Descending)
+                .Get()).Models;
 
-            var eventosDto = listaEventos.Select(e => {
+            var eventosDto = eventos.Select(e => {
                 
-                var misEntradas = listaEntradas.Where(t => t.IdEvento == e.Id).ToList();
-            
-                var general = misEntradas.FirstOrDefault(t => t.Tipo == "General");
-                var vip = misEntradas.FirstOrDefault(t => t.Tipo == "VIP");
+                var general = e.Entradas.FirstOrDefault(t => t.Tipo == "General");
+                var vip = e.Entradas.FirstOrDefault(t => t.Tipo == "VIP");
 
                 return new EventoAdminDto(
                     e.Id,
@@ -157,7 +148,7 @@ static class Admin
     {
         var eventResponse = await client
             .From<Evento>()
-            .Filter("id_evento", Operator.Equals, eventId)
+            .Filter("id_evento", Constants.Operator.Equals, eventId)
             .Single();
 
         var eventoDb = eventResponse;
@@ -167,7 +158,7 @@ static class Admin
         
         var ticketsResponse = await client
             .From<EntradaEvento>()
-            .Filter("id_evento", Operator.Equals, eventId)
+            .Filter("id_evento", Constants.Operator.Equals, eventId)
             .Get();
 
         var ticketsDb = ticketsResponse.Models;
@@ -273,7 +264,7 @@ static class Admin
             // Verificar que el evento existe
             var response = await client
                 .From<Evento>()
-                .Filter("id_evento", Operator.Equals, eventId)
+                .Filter("id_evento", Constants.Operator.Equals, eventId)
                 .Get();
 
             var eventoDb = response.Models.FirstOrDefault();
@@ -284,7 +275,7 @@ static class Admin
             // Eliminar el evento
             await client
                 .From<Evento>()
-                .Filter("id_evento", Operator.Equals, eventId)
+                .Filter("id_evento", Constants.Operator.Equals, eventId)
                 .Delete();
 
             return Results.Ok(new

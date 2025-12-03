@@ -84,7 +84,7 @@ static class Events
         {
             var tipoResponse = await client
                 .From<EntradaEvento>()
-                .Where(te => te.IdEntradaEvento == dto.TicketEventId && te.IdEvento == dto.EventId)
+                .Where(te => te.IdEntradaEvento == dto.TicketEventId && te.Evento.Id == dto.EventId)
                 .Single();
 
             var tipoEntrada = tipoResponse;
@@ -170,7 +170,7 @@ static class Events
 
                 if (tipoDb.Cantidad < item.Quantity)
                     return Results.BadRequest(new
-                        { error = $"No hay stock para {tipoDb.Tipo} (Evento ID: {tipoDb.IdEvento})." });
+                        { error = $"No hay stock para {tipoDb.Tipo} (Evento ID: {tipoDb.Evento.Id})." });
 
                 // Cálculos económicos
                 totalPagar += tipoDb.Precio * item.Quantity;
@@ -179,10 +179,10 @@ static class Events
                 tiposEnBd.Add(item.TicketEventId, tipoDb);
 
                 // Sumamos al contador de este evento específico
-                if (!eventosAfectados.ContainsKey(tipoDb.IdEvento))
-                    eventosAfectados[tipoDb.IdEvento] = 0;
+                if (!eventosAfectados.ContainsKey(tipoDb.Evento.Id))
+                    eventosAfectados[tipoDb.Evento.Id] = 0;
 
-                eventosAfectados[tipoDb.IdEvento] += item.Quantity;
+                eventosAfectados[tipoDb.Evento.Id] += item.Quantity;
             }
 
             if (cantidadTotalTickets == 0) return Results.BadRequest(new { error = "El carrito está vacío." });
@@ -193,7 +193,7 @@ static class Events
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado",
                 MetodoDePago = dto.PaymentMethod,
-                IdCliente = usuarioDb.Id
+                FkCliente = usuarioDb.Id
             };
 
             var pagoResponse = await client.From<Pago>().Insert(nuevoPago);
@@ -215,13 +215,13 @@ static class Events
                 {
                     ticketsNuevos.Add(new Entrada
                     {
-                        IdUsuario = usuarioDb.Id,
-                        IdEvento = tipoDb.IdEvento,
-                        IdPago = pagoCreado.Id,
+                        FkUsuario = usuarioDb.Id,
+                        FkEvento = tipoDb.Evento.Id,
+                        FkPago = pagoCreado.Id,
                         FechaCompra = DateTime.UtcNow,
                         Precio = tipoDb.Precio,
 
-                        IdEntradaEvento = tipoDb.IdEntradaEvento,
+                        FkEntradaEvento = tipoDb.IdEntradaEvento,
                     });
                 }
             }
