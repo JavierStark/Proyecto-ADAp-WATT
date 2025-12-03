@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, LOCALE_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -25,7 +25,8 @@ export interface Evento {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './eventos.component.html',
-  styleUrls: ['./eventos.component.css']
+  styleUrls: ['./eventos.component.css'],
+  providers: [{ provide: LOCALE_ID, useValue: 'es-ES' }]
 })
 export class EventosComponent implements OnInit {
   eventos: Evento[] = [];

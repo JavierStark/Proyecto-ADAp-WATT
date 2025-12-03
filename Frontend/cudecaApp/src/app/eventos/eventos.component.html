@@ -39,7 +39,10 @@
               {{ evento.fecha | date:'d' }}
             </div>
             <div class="bg-green-600 text-white text-[0.9vw] uppercase py-[0.3vw] leading-none">
-              {{ evento.fecha | date:'MMM' }}
+              {{ evento.fecha | date:'MMM':'':'es-ES' }}
+            </div>
+            <div class="bg-green-800 text-white text-[0.7vw] py-[0.2vw] leading-none">
+              {{ evento.fecha | date:'yyyy' }}
             </div>
           </div>
 
