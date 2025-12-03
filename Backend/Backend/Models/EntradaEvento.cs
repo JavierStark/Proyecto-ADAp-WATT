@@ -7,10 +7,10 @@ namespace Backend.Models;
 public class EntradaEvento : BaseModel
 {
     [PrimaryKey("id")]
-    public Guid IdEntradaEvento { get; set; }
+    public Guid FkEntradaEvento { get; set; }
     
     [Column("fk_evento")]
-    public Guid IdEvento { private get; set; }
+    public Guid FkEvento { get; set; }
     
     [Column("tipo")]
     public string Tipo { get; set; }
@@ -20,7 +20,4 @@ public class EntradaEvento : BaseModel
     
     [Column("precio")]
     public decimal Precio { get; set; }
-    
-    [Reference(typeof(Evento))]
-    public Evento Evento { get; set; }
 }

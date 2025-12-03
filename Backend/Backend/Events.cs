@@ -11,13 +11,13 @@ static class Events
         {
             var dbQuery =
                 client.From<Evento>()
-                    .Select("*")
-                    .Order("fecha_y_hora", Ordering.Ascending);
-
+                    .Order(e => e.FechaEvento!, Ordering.Ascending);
+            
             if (!string.IsNullOrEmpty(query))
                 dbQuery = dbQuery.Filter("nombre", Operator.ILike, $"%{query}%");
 
             var response = await dbQuery.Get();
+            
 
             var eventos = response.Models.Select(e => new EventoListDto(
                 e.Id,
@@ -84,7 +84,7 @@ static class Events
         {
             var tipoResponse = await client
                 .From<EntradaEvento>()
-                .Where(te => te.IdEntradaEvento == dto.TicketEventId && te.Evento.Id == dto.EventId)
+                .Where(te => te.FkEntradaEvento == dto.TicketEventId && te.FkEvento == dto.EventId)
                 .Single();
 
             var tipoEntrada = tipoResponse;
@@ -120,7 +120,7 @@ static class Events
                     id_evento = evento.Id,
                     nombre_evento = evento.Nombre,
 
-                    id_tipo_entrada = tipoEntrada.IdEntradaEvento,
+                    id_tipo_entrada = tipoEntrada.FkEntradaEvento,
                     tipo_nombre = tipoEntrada.Tipo,
 
                     cantidad = dto.Quantity,
@@ -170,7 +170,7 @@ static class Events
 
                 if (tipoDb.Cantidad < item.Quantity)
                     return Results.BadRequest(new
-                        { error = $"No hay stock para {tipoDb.Tipo} (Evento ID: {tipoDb.Evento.Id})." });
+                        { error = $"No hay stock para {tipoDb.Tipo} (Evento ID: {tipoDb.FkEvento})." });
 
                 // Cálculos económicos
                 totalPagar += tipoDb.Precio * item.Quantity;
@@ -179,10 +179,10 @@ static class Events
                 tiposEnBd.Add(item.TicketEventId, tipoDb);
 
                 // Sumamos al contador de este evento específico
-                if (!eventosAfectados.ContainsKey(tipoDb.Evento.Id))
-                    eventosAfectados[tipoDb.Evento.Id] = 0;
+                if (!eventosAfectados.ContainsKey(tipoDb.FkEvento))
+                    eventosAfectados[tipoDb.FkEvento] = 0;
 
-                eventosAfectados[tipoDb.Evento.Id] += item.Quantity;
+                eventosAfectados[tipoDb.FkEvento] += item.Quantity;
             }
 
             if (cantidadTotalTickets == 0) return Results.BadRequest(new { error = "El carrito está vacío." });
@@ -216,12 +216,12 @@ static class Events
                     ticketsNuevos.Add(new Entrada
                     {
                         FkUsuario = usuarioDb.Id,
-                        FkEvento = tipoDb.Evento.Id,
+                        FkEvento = tipoDb.FkEvento,
                         FkPago = pagoCreado.Id,
                         FechaCompra = DateTime.UtcNow,
                         Precio = tipoDb.Precio,
 
-                        FkEntradaEvento = tipoDb.IdEntradaEvento,
+                        FkEntradaEvento = tipoDb.FkEntradaEvento,
                     });
                 }
             }
@@ -323,13 +323,13 @@ static class Events
 
     record EventoListDto(
         Guid Id,
-        string Nombre,
+        string? Nombre,
         string? Descripcion,
-        DateTime Fecha,
+        DateTimeOffset? Fecha,
         string? Ubicacion,
         int Aforo,
         int EntradasVendidas,
-        bool EntradaValida,
+        bool? EntradaValida,
         string ObjetoRecaudacion
     );
 

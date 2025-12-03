@@ -10,9 +10,8 @@ class Donacion : BaseModel
     public Guid Id { get; set; }
 
     [Column("fk_pago")]
-    public Guid FkPago {private  get; set; }
-        
-    // Una Donacion tiene un Pago asociado.
+    public Guid FkPago { get; set; }
+    
     [Reference(typeof(Pago))]
     public Pago? Pago { get; set; }
 }

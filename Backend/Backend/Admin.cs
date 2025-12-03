@@ -13,11 +13,16 @@ static class Admin
                 .From<Evento>()
                 .Order("fecha_y_hora", Constants.Ordering.Descending)
                 .Get()).Models;
+            
+            var entradas = (await client
+                .From<EntradaEvento>()
+                .Get()).Models; 
 
             var eventosDto = eventos.Select(e => {
                 
-                var general = e.Entradas.FirstOrDefault(t => t.Tipo == "General");
-                var vip = e.Entradas.FirstOrDefault(t => t.Tipo == "VIP");
+                var entradasEvento = entradas.Where(en => en.FkEvento == e.Id).ToList();
+                var general = entradasEvento.FirstOrDefault(en => en.Tipo == "General");
+                var vip = entradasEvento.FirstOrDefault(en => en.Tipo == "VIP");
 
                 return new EventoAdminDto(
                     e.Id,
@@ -94,7 +99,7 @@ static class Admin
             // Entrada General
             entradasAInsertar.Add(new EntradaEvento
             {
-                IdEvento = eventoCreado.Id,
+                FkEvento = eventoCreado.Id,
                 Tipo = "General",
                 Precio = dto.PrecioGeneral,
                 Cantidad = dto.CantidadGeneral
@@ -105,7 +110,7 @@ static class Admin
             {
                 entradasAInsertar.Add(new EntradaEvento
                 {
-                    IdEvento = eventoCreado.Id,
+                    FkEvento = eventoCreado.Id,
                     Tipo = "VIP",
                     Precio = dto.PrecioVip!.Value,
                     Cantidad = dto.CantidadVip!.Value
@@ -203,7 +208,7 @@ static class Admin
             {
                 var nuevaVip = new EntradaEvento
                 {
-                    IdEvento = eventoDb.Id,
+                    FkEvento = eventoDb.Id,
                     Tipo = "VIP",
                     Precio = dto.PrecioVip.Value,
                     Cantidad = dto.CantidadVip.Value
@@ -292,13 +297,13 @@ static class Admin
     
     record EventoAdminDto(
         Guid Id,
-        string Nombre,
+        string? Nombre,
         string? Descripcion,
-        DateTime Fecha,
+        DateTimeOffset? Fecha,
         string? Ubicacion,
         int Aforo,
         int EntradasVendidas,
-        bool EntradaValida,
+        bool? EntradaValida,
         string ObjetoRecaudacion,
         
         decimal PrecioGeneral,

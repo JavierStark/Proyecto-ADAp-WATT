@@ -9,24 +9,19 @@ static class Donations
     {
         try
         {
-            var userAuth = client.Auth.CurrentUser;
+            var user = client.Auth.CurrentUser!;
 
-            var usuarioDb = await client
-                .From<Usuario>()
-                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
-                .Single();
-
-            var response = await client
+            var donaciones = await client
                 .From<Donacion>()
-                .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("pago.id_cliente", Operator.Equals, usuarioDb.Id.ToString())
+                .Select("*, Pago:fk_pago!inner(*, Cliente:fk_cliente!inner(*))")
+                .Filter("Pago.Cliente.id", Operator.Equals, user.Id)
                 .Get();
-
-            var historial = response.Models
+            
+            var historial = donaciones.Models
                 .Select(d => new DonationHistoryDto(
                     d.Id,
-                    d.Pago != null ? d.Pago.Monto : 0, // Protección por si pago viniera nulo
-                    d.Pago != null ? d.Pago.Fecha : DateTime.MinValue,
+                    d.Pago?.Monto ?? 0,
+                    d.Pago?.Fecha ?? DateTime.MinValue,
                     d.Pago != null ? d.Pago.Estado : "Desconocido",
                     d.Pago?.MetodoDePago
                 ))
@@ -49,7 +44,7 @@ static class Donations
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
+                .Filter("id", Operator.Equals, userAuth.Id)
                 .Single();
 
             var response = await client
@@ -77,7 +72,7 @@ static class Donations
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
+                .Filter("id", Operator.Equals, userAuth.Id)
                 .Single();
 
             var nuevoPago = new Pago
@@ -127,7 +122,7 @@ static class Donations
 
             var usuarioDb = await client
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Operator.Equals, userAuth.Id)
+                .Filter("id", Operator.Equals, userAuth.Id)
                 .Single();
 
             // Si no nos pasan año, asumimos el año anterior (para la renta)

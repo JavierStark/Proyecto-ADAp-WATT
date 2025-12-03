@@ -10,16 +10,16 @@ class Entrada : BaseModel
     public Guid Id { get; set; }
     
     [Column("fk_usuario")]
-    public Guid FkUsuario { private get; set; }
+    public Guid FkUsuario { get; set; }
 
     [Column("fk_evento")]
-    public Guid FkEvento { private get; set; }
+    public Guid FkEvento { get; set; }
 
     [Column("fk_pago")]
-    public Guid FkPago { private get; set; }
+    public Guid FkPago { get; set; }
     
     [Column("fk_entrada_evento")]
-    public Guid FkEntradaEvento { private get; set; }
+    public Guid FkEntradaEvento { get; set; }
 
     [Column("codigo_qr")]
     public string? CodigoQr { get; set; }
@@ -32,13 +32,4 @@ class Entrada : BaseModel
     
     [Column("estado")]
     public string Estado { get; set; } 
-    
-    [Reference(typeof(Evento))]
-    public Evento? Evento { get; set; }
-    [Reference(typeof(Pago))]
-    public Pago? Pago { get; set; }
-    [Reference(typeof(EntradaEvento))]
-    public EntradaEvento? EntradaEvento { get; set; }
-    [Reference(typeof(Usuario))]
-    public Usuario? Usuario { get; set; }
 }

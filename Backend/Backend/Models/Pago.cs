@@ -22,7 +22,7 @@ class Pago : BaseModel
     public string? MetodoDePago { get; set; }
     
     [Column("fk_cliente")]
-    public Guid FkCliente { private get; set; }
+    public Guid FkCliente { get; set; }
     
     [Reference(typeof(Cliente))]
     public Cliente? Cliente { get; set; }

@@ -11,8 +11,5 @@ public class Admin : BaseModel
 
     [Column("fk_usuario")]
     private Guid fkUsuario { get; set; }
-    
-    [Reference(typeof(Usuario))]
-    public Usuario? Usuario { get; set; }
 }
 
