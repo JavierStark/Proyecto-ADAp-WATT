@@ -17,6 +17,7 @@ export interface Evento {
   ubicacion?: string;
   capacidad?: number;
   inscritos?: number;
+  objetoRecaudacion?: string;
 }
 
 @Component({
@@ -55,13 +56,14 @@ export class EventosComponent implements OnInit {
             
             return datosJson.map((item: any) => ({
               id: item.id || Math.floor(Math.random() * 10000),
-              titulo: item.title || item.titulo || item.name || 'Evento sin título',
+              titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
               descripcion: item.description || item.descripcion || 'Sin descripción',
               fecha: new Date(item.date || item.fecha || Date.now()),
               imagen: item.imageUrl || item.imagen || 'assets/images/fondoCudeca.png',
               ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
-              capacidad: item.capacity || item.capacidad || 50,
-              inscritos: item.enrolled || item.inscritos || 0
+              capacidad: item.capacity || item.capacidad || item.aforo || 50,
+              inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
+              objetoRecaudacion: item.goalDescription || item.objetoRecaudacion || item.objetivo || null
             }));
 
           } catch (e) {
@@ -99,7 +101,8 @@ export class EventosComponent implements OnInit {
         imagen: 'assets/images/fondoCudeca.png',
         ubicacion: 'Parque Central',
         capacidad: 200,
-        inscritos: 145
+        inscritos: 145,
+        objetoRecaudacion: 'Recaudar fondos para equipamiento médico'
       },
       {
         id: 2,
@@ -119,7 +122,8 @@ export class EventosComponent implements OnInit {
         imagen: 'assets/images/fondoCudeca.png',
         ubicacion: 'Centro Cudeca',
         capacidad: 30,
-        inscritos: 22
+        inscritos: 22,
+        objetoRecaudacion: 'Apoyo a programas de atención domiciliaria'
       },
       {
         id: 4,
