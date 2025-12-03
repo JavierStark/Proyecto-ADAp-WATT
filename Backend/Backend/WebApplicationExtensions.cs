@@ -37,7 +37,7 @@ public static class WebApplicationExtensions
 
     public static WebApplication MapTicketEndpoints(this WebApplication app)
     {
-        var tickets = app.MapGroup("/tickets");
+        var tickets = app.MapGroup("/tickets").AddEndpointFilter<SupabaseAuthFilter>();
         tickets.MapPost("/purchase/start", Events.StartPurchase);
         tickets.MapPost("/purchase/confirm", Events.ConfirmPurchase);
         
