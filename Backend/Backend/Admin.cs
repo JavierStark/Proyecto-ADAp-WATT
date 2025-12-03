@@ -35,6 +35,7 @@ static class Admin
                     e.FechaEvento,
                     e.Ubicacion,
                     e.Aforo ?? 0,
+                    e.EntradasVendidas,
                     e.EntradaValida,
                     e.ObjetoRecaudacion ?? "Sin especificar",
                     
@@ -133,6 +134,7 @@ static class Admin
                     eventoCreado.FechaEvento,
                     eventoCreado.Ubicacion,
                     eventoCreado.Aforo ?? 0,
+                    0,
                     eventoCreado.EntradaValida,
                     eventoCreado.ObjetoRecaudacion ?? "Sin especificar",
                     dto.PrecioGeneral,
@@ -226,7 +228,7 @@ static class Admin
             int nuevoGen = dto.CantidadGeneral ?? (general?.Numero ?? 0);
             int nuevoVip = dto.CantidadVip ?? (vip?.Numero ?? 0);
             
-            eventoDb.Aforo = nuevoGen + nuevoVip;
+            eventoDb.Aforo = nuevoGen + nuevoVip + eventoDb.EntradasVendidas;
             huboCambiosEvento = true;
         }
         
@@ -246,6 +248,7 @@ static class Admin
                 eventoDb.FechaEvento,
                 eventoDb.Ubicacion,
                 eventoDb.Aforo ?? 0,
+                eventoDb.EntradasVendidas,
                 eventoDb.EntradaValida,
                 eventoDb.ObjetoRecaudacion ?? "Sin especificar",
                 
@@ -303,6 +306,7 @@ static class Admin
         DateTime Fecha,
         string? Ubicacion,
         int Aforo,
+        int EntradasVendidas,
         bool EntradaValida,
         string ObjetoRecaudacion,
         

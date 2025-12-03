@@ -23,6 +23,9 @@ public class Evento : BaseModel
 
     [Column("aforo")]
     public int? Aforo { get; set; }
+    
+    [Column("entradas_vendidas")] 
+    public int EntradasVendidas { get; set; }
 
     [Column("entradavalida")]
     public bool EntradaValida { get; set; }
