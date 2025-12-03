@@ -3,7 +3,6 @@ using Supabase.Postgrest.Models;
 
 namespace Backend.Models;
 
-
 [Table("usuario")]
 public class Usuario : BaseModel
 {

@@ -1,18 +1,10 @@
 ﻿using Backend.Models;
 using Supabase;
-using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
-public class AdminAuthFilter : IEndpointFilter
+public class AdminAuthFilter(Client supabase) : IEndpointFilter
 {
-    private readonly Client _supabase;
-
-    public AdminAuthFilter(Client supabase)
-    {
-        _supabase = supabase;
-    }
-
     public async ValueTask<object?> InvokeAsync(
         EndpointFilterInvocationContext ctx,
         EndpointFilterDelegate next)
@@ -33,27 +25,27 @@ public class AdminAuthFilter : IEndpointFilter
 
         try
         {
-            // Set session for this request
-            await _supabase.Auth.SetSession(token, "dummy");
+            await supabase.Auth.SetSession(token, "dummy");
 
-            var user = _supabase.Auth.CurrentUser;
+            var user = supabase.Auth.CurrentUser;
             if (user == null)
                 return Results.Unauthorized();
+            
+            var userId = Guid.Parse(user.Id);
 
             // Get the usuario from the database
-            var usuarioResponse = await _supabase
+            var usuarioResponse = await supabase
                 .From<Usuario>()
-                .Filter("id_auth_supabase", Operator.Equals, user.Id)
+                .Where(u => u.Id == userId)
                 .Get();
 
             var usuario = usuarioResponse.Models.FirstOrDefault();
             if (usuario == null)
                 return Results.Unauthorized();
 
-            // Check if the user is an admin
-            var adminResponse = await _supabase
-                .From<Models.Admin>()
-                .Filter("id_usuario", Operator.Equals, usuario.Id.ToString())
+            var adminResponse = await supabase
+                .From<Admin>()
+                .Where(a => a. fkUsuario == usuario.Id)
                 .Get();
 
             var admin = adminResponse.Models.FirstOrDefault();

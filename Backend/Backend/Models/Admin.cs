@@ -10,6 +10,6 @@ public class Admin : BaseModel
     public Guid Id { get; set; }
 
     [Column("fk_usuario")]
-    private Guid fkUsuario { get; set; }
+    public Guid fkUsuario { get; set; }
 }
 
