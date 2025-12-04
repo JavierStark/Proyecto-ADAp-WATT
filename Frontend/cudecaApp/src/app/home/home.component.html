@@ -12,13 +12,13 @@
   <div class="absolute inset-0 bg-green-400/40"></div>
 
   <!-- Fade blanco (PC) -->
-  <div class="absolute inset-0 left-0 w-[58%] bg-white/80 blur-[2vw] hidden md:block"></div>
+  <div class="absolute inset-0 top-[-5%] bottom-[-5%] left-[-5%] w-[58%] bg-white/85 blur-[2vw] hidden md:block"></div>
     <!-- Fade blanco superior SOLO en móvil -->
   <div class="absolute top-0 left-0 w-full h-[50%] bg-white/80 blur-[2vw] md:hidden"></div>
 
   <!-- Contenido -->
   <div class="relative z-10 flex flex-col justify-center
-            w-[45vw] pl-[4vw] pt-[6vw] gap-[1vw]
+            w-[45vw] pl-[4vw] pt-[8vw] gap-[1vw]
             md:items-start
             max-md:w-full max-md:px-6 max-md:pt-0 max-md:gap-6 max-md:text-center max-md:items-center
             max-md:mt-[20vw]">
@@ -44,7 +44,7 @@
             <button
         (click)="goToEventos()"
         class="bg-green-600 text-white font-bold transition-all
-              text-[3.2vw] py-[1.6vw] px-[4vw] rounded-[2vw]
+              text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
               hover:bg-green-700
               max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
         Eventos
@@ -55,7 +55,7 @@
       <button
         (click)="goToDonation()"
         class="bg-green-600 text-white font-bold transition-all
-               text-[3vw] py-[1.6vw] px-[3vw] rounded-[2vw]
+               text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
                hover:bg-green-700
                max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
         Donar
