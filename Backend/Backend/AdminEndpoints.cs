@@ -319,7 +319,7 @@ static class AdminEndpoints
             // Eliminar el evento
             await client
                 .From<Evento>()
-                .Filter("id_evento", Constants.Operator.Equals, eventId)
+                .Where(e => e.Id == parse)
                 .Delete();
 
             return Results.Ok(new
