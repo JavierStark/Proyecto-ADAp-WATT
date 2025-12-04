@@ -1,33 +1,61 @@
-<section class="relative w-full h-screen overflow-hidden"> <!-- fixed height -->
+<section class="relative w-full h-screen overflow-hidden">
+
   <!-- Imagen de fondo -->
   <img
-    src="assets/images/fondoCudeca.png" 
-    alt="Fondo"
+    src="assets/images/fondoCudeca.png"
     class="absolute inset-0 w-full h-full object-cover"
   />
 
-  <!-- Filtro de oscuridad (capa semitransparente) -->
-  <div class="absolute inset-0 bg-green-400 opacity-30 z-0"></div>
+  <!-- Filtro verde -->
+  <div class="absolute inset-0 bg-green-400/40"></div>
 
-  <!-- Degradado blanco desde la izquierda -->
-  <div class="left-fade"></div>
+  <!-- Fade blanco (PC) -->
+  <div class="absolute inset-0 left-0 w-[58%] bg-white/80 blur-[2vw] hidden md:block"></div>
 
-  <!-- Contenido con texto dinámico (tamaños fijos para no variar) -->
-  <div class="home-content relative z-10 flex flex-col items-start justify-center">
-    <!-- Texto estático encima del título -->
-    <h1 class="text-green-800 text-[4vw] font-bold text-left max-w-[30vw]">Donaciones y Eventos</h1>
-    <h2 class="text-green-600 text-[2vw] font-medium text-left max-w-[50vw] min-h-[14vw] leading-snug frase-h2">{{ texto }}</h2> <!-- dynamic text fixed in vw units -->
-    <div class="home-buttons">
+  <!-- Contenido -->
+  <div class="relative z-10 flex flex-col justify-center
+              w-[45vw] pl-[4vw] pt-[6vw] gap-[1vw]
+              md:items-start
+              max-md:w-full max-md:px-6 max-md:pt-0 max-md:gap-6 max-md:text-center max-md:items-center">
+
+    <!-- Título -->
+    <h1 class="text-green-800 font-bold text-left max-w-[30vw]
+               text-[4vw] 
+               max-md:text-[10vw] max-md:max-w-full">
+      Donaciones y Eventos
+    </h1>
+
+    <!-- Texto (oculto en móvil) -->
+    <p class="text-green-600 text-[2vw] font-medium max-w-[50vw] min-h-[14vw] leading-snug
+              hidden md:block">
+      {{ texto }}
+    </p>
+
+    <!-- Botones -->
+    <div class="flex gap-[3vw] mt-[2vw]
+                max-md:flex-col max-md:gap-[5vw] max-md:w-full max-md:items-center">
+
+      <!-- Botón 1 -->
       <button
-        (click)="goToEventos()" 
-        class="btn-home bg-green-600 text-white font-bold transition-all">
+        (click)="goToEventos()"
+        class="bg-green-600 text-white font-bold transition-all
+               text-[1.6vw] py-[0.8vw] px-[2vw] rounded-[1vw]
+               hover:bg-green-700
+               max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
         Eventos
       </button>
-      <button 
-        (click)="goToDonation()" 
-        class="btn-home bg-green-600 text-white font-bold transition-all">
+
+      <!-- Botón 2 -->
+      <button
+        (click)="goToDonation()"
+        class="bg-green-600 text-white font-bold transition-all
+               text-[1.6vw] py-[0.8vw] px-[2vw] rounded-[1vw]
+               hover:bg-green-700
+               max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
         Donar
       </button>
+
     </div>
+
   </div>
 </section>
