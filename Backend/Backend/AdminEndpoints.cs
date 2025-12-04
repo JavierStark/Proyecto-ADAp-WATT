@@ -3,7 +3,7 @@ using Supabase.Postgrest;
 
 namespace Backend;
 
-static class AdminEndpoints
+static class AdminEndpoints    
 {
     public static async Task<IResult> AdminListEvents(Supabase.Client client)
     {
@@ -300,14 +300,15 @@ static class AdminEndpoints
         }
     }
 
-    public static async Task<IResult> AdminDeleteEvent(int eventId, Supabase.Client client)
+    public static async Task<IResult> AdminDeleteEvent(string eventId, Supabase.Client client)
     {
         try
         {
+            var parse = Guid.Parse(eventId);
             // Verificar que el evento existe
             var response = await client
                 .From<Evento>()
-                .Filter("id_evento", Constants.Operator.Equals, eventId)
+                .Where(e => e.Id == parse)
                 .Get();
 
             var eventoDb = response.Models.FirstOrDefault();
