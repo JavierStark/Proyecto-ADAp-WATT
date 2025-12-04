@@ -9,7 +9,7 @@ import localeEs from '@angular/common/locales/es';
 registerLocaleData(localeEs);
 
 export interface Evento {
-  id: number;
+  id: string;
   titulo: string;
   descripcion: string;
   fecha: Date;
@@ -56,7 +56,7 @@ export class EventosComponent implements OnInit {
             console.log('✅ Datos crudos recibidos:', datosJson);
             
             return datosJson.map((item: any) => ({
-              id: item.id || Math.floor(Math.random() * 10000),
+              id: item.id || item.Id || '',
               titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
               descripcion: item.description || item.descripcion || 'Sin descripción',
               fecha: new Date(item.date || item.fecha || Date.now()),
@@ -95,7 +95,7 @@ export class EventosComponent implements OnInit {
   cargarEventosMock(): void {
     this.eventos = [
       {
-        id: 1,
+        id: '1',
         titulo: 'Carrera Solidaria Cudeca',
         descripcion: 'Únete a nuestra carrera anual para recaudar fondos. Disfruta de un día de deporte y solidaridad.',
         fecha: new Date('2025-12-15'),
@@ -106,7 +106,7 @@ export class EventosComponent implements OnInit {
         objetoRecaudacion: 'Recaudar fondos para equipamiento médico'
       },
       {
-        id: 2,
+        id: '2',
         titulo: 'Concierto Benéfico',
         descripcion: 'Una noche de música en vivo con artistas locales. Todas las ganancias van a Cudeca.',
         fecha: new Date('2025-12-20'),
@@ -116,7 +116,7 @@ export class EventosComponent implements OnInit {
         inscritos: 98
       },
       {
-        id: 3,
+        id: '3',
         titulo: 'Taller de Artesanía',
         descripcion: 'Aprende técnicas de artesanía mientras apoyas una gran causa. Incluye materiales.',
         fecha: new Date('2026-01-10'),
@@ -127,7 +127,7 @@ export class EventosComponent implements OnInit {
         objetoRecaudacion: 'Apoyo a programas de atención domiciliaria'
       },
       {
-        id: 4,
+        id: '4',
         titulo: 'Mercadillo Solidario',
         descripcion: 'Venta de productos artesanales y segunda mano. Todos los beneficios para Cudeca.',
         fecha: new Date('2026-01-25'),
@@ -141,12 +141,13 @@ export class EventosComponent implements OnInit {
     this.isLoading = false; 
   }
 
-  inscribirseEvento(eventoId: number): void {
+  inscribirseEvento(eventoId: string): void {
     console.log('Inscribiéndose al evento:', eventoId);
   }
 
-  verDetalles(eventoId: number): void {
+  verDetalles(eventoId: string): void {
     console.log('Ver detalles del evento:', eventoId);
+    this.router.navigate(['/eventos', eventoId]);
   }
 
   goToHome(): void {
