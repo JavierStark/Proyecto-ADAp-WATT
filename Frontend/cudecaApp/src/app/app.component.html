@@ -1,3 +1,4 @@
+
 <header 
   *ngIf="!isAuthRoute"
   class="text-white py-[1.2vw] px-0 fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out"
@@ -31,6 +32,44 @@
             ?</button>
         </div>
 </header>
+<!-- ========================================================= -->
+<!-- ======================= HEADER — MÓVIL =================== -->
+<!-- ========================================================= -->
+
+<header 
+  *ngIf="!isAuthRoute"
+  class="md:hidden fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-md z-50 px-4 py-3 flex items-center justify-between">
+  
+  <!-- Logo -->
+  <img 
+    src="assets/images/cudeca-logo.png" 
+    class="h-8 w-auto"
+    (click)="goToHome()"
+    style="cursor:pointer;"
+  />
+
+  <!-- Botón hamburguesa -->
+  <button 
+    (click)="menuOpen = !menuOpen"
+    class="text-green-700 text-3xl font-bold">
+    ☰
+  </button>
+</header>
+
+<!-- MENÚ DESPLEGABLE MÓVIL -->
+<div 
+  *ngIf="menuOpen"
+  class="md:hidden fixed top-[56px] left-0 w-full bg-white shadow-lg z-40 flex flex-col text-green-700 text-lg font-semibold">
+
+  <button (click)="goToHome(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Inicio</button>
+  <button (click)="goToEventos(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Eventos</button>
+  <button (click)="goToDonation(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Donar</button>
+  <button (click)="goToCuenta(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Cuenta</button>
+  <button (click)="goToLogin(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Iniciar sesión</button>
+
+</div>
+
+
 
 <!-- Router Outlet: donde se renderizan los componentes -->
 <main class="">
@@ -39,4 +78,36 @@
 
 <footer *ngIf="!isAuthRoute" class="relative  bg-green-800 text-white py-[1vw] text-center w-full text-[1.2vw]">
   <p>&copy; 2025 Cudeca - Todos los derechos reservados</p>
+</footer>
+
+
+<!-- ========================================================= -->
+<!-- ======================= FOOTER — MÓVIL =================== -->
+<!-- ========================================================= -->
+
+<footer 
+  *ngIf="!isAuthRoute"
+  class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-inner
+         flex justify-around items-center py-3">
+
+  <button (click)="goToHome()" class="flex flex-col items-center text-green-700">
+    <span class="text-2xl">🏠</span>
+    <span class="text-xs font-semibold">Inicio</span>
+  </button>
+
+  <button (click)="goToEventos()" class="flex flex-col items-center text-green-700">
+    <span class="text-2xl">🎉</span>
+    <span class="text-xs font-semibold">Eventos</span>
+  </button>
+
+  <button (click)="goToDonation()" class="flex flex-col items-center text-green-700">
+    <span class="text-2xl">💚</span>
+    <span class="text-xs font-semibold">Donar</span>
+  </button>
+
+  <button (click)="goToCuenta()" class="flex flex-col items-center text-green-700">
+    <span class="text-2xl">👤</span>
+    <span class="text-xs font-semibold">Cuenta</span>
+  </button>
+
 </footer>

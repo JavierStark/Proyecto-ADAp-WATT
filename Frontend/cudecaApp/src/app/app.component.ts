@@ -25,6 +25,9 @@ export class AppComponent {
 
   }
 
+  menuOpen = false;
+
+
   showHeader = true;  // Por defecto el header es visible
     private lastScrollTop = 0;  // Última posición de scroll
 
