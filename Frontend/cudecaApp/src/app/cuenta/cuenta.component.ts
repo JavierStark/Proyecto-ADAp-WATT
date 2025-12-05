@@ -16,9 +16,11 @@ export class CuentaComponent implements OnInit{
   // Control de Vistas
   vistaActual: 'menu' | 'perfil' | 'tickets' | 'donaciones' = 'menu';
   isLoading: boolean = false;
+  modoEdicion: boolean = false;
 
   // Datos del Usuario
   usuario: any = {};
+  usuarioOriginal: any = {}; // Para poder cancelar edición
   
   // Listas de datos
   tickets: any[] = [];
@@ -35,8 +37,20 @@ export class CuentaComponent implements OnInit{
   // NAVEGACIÓN INTERNA
   cambiarVista(vista: 'menu' | 'perfil' | 'tickets' | 'donaciones') {
     this.vistaActual = vista;
+    this.modoEdicion = false; // Salir de modo edición
     if (vista === 'tickets') this.cargarTickets();
     if (vista === 'donaciones') this.cargarDonaciones();
+  }
+
+  // MODO EDICIÓN
+  entrarModoEdicion() {
+    this.modoEdicion = true;
+    this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario)); // Backup
+  }
+
+  cancelarEdicion() {
+    this.usuario = JSON.parse(JSON.stringify(this.usuarioOriginal)); // Restaurar
+    this.modoEdicion = false;
   }
 
   // CARGA DE DATOS
@@ -44,7 +58,8 @@ export class CuentaComponent implements OnInit{
     this.loadingPerfil = true;
     this.authService.getProfile().subscribe({
       next: (data) => {
-        this.usuario = data,
+        this.usuario = data;
+        this.usuarioOriginal = JSON.parse(JSON.stringify(data));
         this.loadingPerfil = false;
       },
       error: (e) => {
@@ -85,7 +100,8 @@ export class CuentaComponent implements OnInit{
       next: () => {
         alert('✅ Datos actualizados correctamente');
         this.isLoading = false;
-        this.cambiarVista('menu');
+        this.modoEdicion = false;
+        this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario));
       },
       error: () => {
         alert('❌ Error al actualizar');

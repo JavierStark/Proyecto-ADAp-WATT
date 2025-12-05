@@ -1,144 +1,238 @@
-<section class="min-h-screen bg-gray-200 py-[5vw] px-[4vw] pt-[10vw] font-sans">
+<section class="relative w-full min-h-screen overflow-hidden">
+  <!-- Imagen de fondo -->
+  <img
+    src="assets/images/fondoCudeca.png" 
+    alt="Fondo"
+    class="absolute inset-0 w-full h-full object-cover"
+  />
 
-  
+  <!-- Filtro verde semitransparente -->
+  <div class="absolute inset-0 bg-green-400 opacity-30 z-0"></div>
 
-  <div *ngIf="loadingPerfil" class="flex flex-col items-center justify-center h-[60vh]">
-    <div class="animate-spin rounded-full h-[5vw] w-[5vw] border-b-[0.4vw] border-green-600 mb-[2vw]"></div>
-    <p class="text-green-800 text-[1.5vw] font-bold">Cargando tu perfil...</p>
-  </div>
-
-
-  <div *ngIf="!loadingPerfil" class="animate-fade-in">
+  <!-- Contenido principal -->
+  <div class="relative z-10 pt-[10vh] pb-[4vh] px-[4vw] flex flex-col items-center justify-center min-h-screen">
     
-    <div class="max-w-[80vw] mx-auto mb-[3vw] flex justify-between items-center">
-      <div>
-        <h1 class="text-[3vw] font-bold text-green-900">
+    <!-- Spinner de carga -->
+    <div *ngIf="loadingPerfil" class="flex flex-col items-center justify-center py-[10vh]">
+      <div class="animate-spin rounded-full h-[4vw] w-[4vw] border-b-4 border-green-900 mb-[2vh]"></div>
+      <p class="text-green-900 text-[1.2vw] font-bold">Cargando tu perfil...</p>
+    </div>
+
+    <!-- Contenido cuando carga -->
+    <div *ngIf="!loadingPerfil" class="w-full">
+
+      <!-- MENÚ PRINCIPAL -->
+      <div *ngIf="vistaActual === 'menu'" class="flex flex-col items-center justify-center gap-[2vh] max-w-[35vw] mx-auto">
+        
+        <!-- Saludo -->
+        <h1 class="text-green-900 text-[3vw] font-bold text-center mb-[2vh]">
           Hola, {{ usuario.nombre || (usuario.email ? usuario.email.split('@')[0] : 'Socio') }} 👋
         </h1>
-        <p class="text-gray-600 text-[1.2vw]">Bienvenido a tu área personal</p>
-      </div>
-      
-      <button *ngIf="vistaActual !== 'menu'" (click)="cambiarVista('menu')" 
-              class="text-green-700 font-bold hover:underline text-[1.2vw]">
-        ← Volver al menú
-      </button>
-    </div>
 
-    <!-- Menu -->
-
-    <div *ngIf="vistaActual === 'menu'" class="max-w-[80vw] mx-auto grid grid-cols-1 md:grid-cols-2 gap-[2vw]">
-      
-      <div (click)="cambiarVista('perfil')" class="bg-white p-[2vw] rounded-[1.5vw] shadow-md hover:shadow-xl transition cursor-pointer border-l-[0.5vw] border-blue-500 group">
-        <h3 class="text-[1.5vw] font-bold text-gray-800 group-hover:text-blue-600">👤 Mis Datos Personales</h3>
-        <p class="text-gray-500 mt-[0.5vw] text-[1vw]">Ver y modificar tu nombre, DNI, teléfono...</p>
-      </div>
-
-      <div (click)="cambiarVista('tickets')" class="bg-white p-[2vw] rounded-[1.5vw] shadow-md hover:shadow-xl transition cursor-pointer border-l-[0.5vw] border-purple-500 group">
-        <h3 class="text-[1.5vw] font-bold text-gray-800 group-hover:text-purple-600">🎟️ Mis Entradas</h3>
-        <p class="text-gray-500 mt-[0.5vw] text-[1vw]">Consulta los eventos a los que te has apuntado.</p>
-      </div>
-
-      <div (click)="cambiarVista('donaciones')" class="bg-white p-[2vw] rounded-[1.5vw] shadow-md hover:shadow-xl transition cursor-pointer border-l-[0.5vw] border-green-500 group">
-        <h3 class="text-[1.5vw] font-bold text-gray-800 group-hover:text-green-600">❤️ Mi Historial Solidario</h3>
-        <p class="text-gray-500 mt-[0.5vw] text-[1vw]">Consulta tus donaciones y el total aportado.</p>
-      </div>
-
-      <div (click)="onLogout()" class="bg-red-50 p-[2vw] rounded-[1.5vw] shadow-md hover:bg-red-100 transition cursor-pointer border-l-[0.5vw] border-red-500 group">
-        <h3 class="text-[1.5vw] font-bold text-red-700">❌ Cerrar Sesión</h3>
-        <p class="text-red-500 mt-[0.5vw] text-[1vw]">Salir de tu cuenta de forma segura.</p>
-      </div>
-    </div>
-
-    <!-- SECCIÓN PERFIL -->
-
-    <div *ngIf="vistaActual === 'perfil'" class="max-w-[50vw] mx-auto bg-white p-[3vw] rounded-[2vw] shadow-lg">
-      <h3 class="text-[2vw] font-bold text-gray-800 mb-[2vw]">Mis Datos</h3>
-      <form (ngSubmit)="guardarCambios()" class="space-y-[1.5vw]">
-        
-        <div>
-          <label class="block text-gray-700 font-bold text-[1vw] mb-[0.5vw]">Nombre</label>
-          <input [(ngModel)]="usuario.nombre" name="nombre" type="text" class="w-full p-[0.8vw] text-[0.8vw] border rounded-[0.5vw] bg-gray-50">
-        </div>
-        
-        <div>
-          <label class="block text-gray-700 font-bold text-[1vw] mb-[0.5vw]">Apellidos</label>
-          <input [(ngModel)]="usuario.apellidos" name="apellidos" type="text" class="w-full p-[0.8vw] text-[0.8vw] border rounded-[0.5vw] bg-gray-50">
-        </div>
-
-        <div>
-          <label class="block text-gray-700 font-bold text-[1vw] mb-[0.5vw]">DNI / NIF</label>
-          <input [(ngModel)]="usuario.dni" name="dni" type="text" class="w-full p-[0.8vw] text-[0.8vw] border rounded-[0.5vw] bg-gray-50">
-        </div>
-
-        <div>
-          <label class="block text-gray-700 font-bold text-[1vw] mb-[0.5vw]">Teléfono</label>
-          <input [(ngModel)]="usuario.telefono" name="telefono" type="tel" class="w-full p-[0.8vw] text-[0.8vw] border rounded-[0.5vw] bg-gray-50">
-        </div>
-
-        <button type="submit" [disabled]="isLoading" class="w-full bg-blue-600 text-white text-[1.2vw] font-bold py-[1vw] rounded-[0.5vw] hover:bg-blue-700 transition">
-          {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+        <!-- Botón Mis Datos (borde verde, relleno blanco) -->
+        <button 
+          (click)="cambiarVista('perfil')"
+          class="w-full bg-white text-green-700 text-[1.5vw] font-bold py-[1.2vw] px-[2vw] rounded-[1.5vw] border-2 border-green-600 hover:bg-green-50 transition">
+          Mis datos
         </button>
-      </form>
-    </div>
 
-    <!-- SECCIÓN TICKETS -->
+        <!-- Botón Mis Entradas (relleno verde) -->
+        <button 
+          (click)="cambiarVista('tickets')"
+          class="w-full bg-green-600 text-white text-[1.5vw] font-bold py-[1.2vw] px-[2vw] rounded-[1.5vw] hover:bg-green-700 transition">
+          Mis entradas
+        </button>
 
-    <div *ngIf="vistaActual === 'tickets'" class="max-w-[60vw] mx-auto">
-      <h3 class="text-[2vw] font-bold text-purple-800 mb-[2vw]">Mis Entradas</h3>
-      
-      <div *ngIf="tickets.length === 0" class="text-center text-[1vw] text-gray-500 bg-white p-[3vw] rounded-[1vw]">
-        <p>No has adquirido ninguna entrada aún. ¡Apúntate a un evento!</p>
+        <!-- Botón Mis Donaciones (relleno verde) -->
+        <button 
+          (click)="cambiarVista('donaciones')"
+          class="w-full bg-green-600 text-white text-[1.5vw] font-bold py-[1.2vw] px-[2vw] rounded-[1.5vw] hover:bg-green-700 transition">
+          Mis donaciones
+        </button>
+
+        <!-- Botón Cerrar Sesión (relleno verde) -->
+        <button 
+          (click)="onLogout()"
+          class="w-full bg-green-600 text-white text-[1.5vw] font-bold py-[1.2vw] px-[2vw] rounded-[1.5vw] hover:bg-green-700 transition">
+          Cerrar sesión
+        </button>
       </div>
 
-      <div class="grid gap-[1.5vw]">
-        <div *ngFor="let ticket of tickets" class="bg-white p-[1.5vw] rounded-[1vw] shadow border-l-4 border-purple-500 flex justify-between items-center">
-          <div>
-            <h3 class="font-bold text-[1.2vw]">{{ ticket.eventoTitulo || 'Evento' }}</h3>
-            <p class="text-gray-500">{{ ticket.fechaCompra | date:'shortDate' }}</p>
+      <!-- VISTA PERFIL -->
+      <div *ngIf="vistaActual === 'perfil'" class="flex flex-col items-center justify-center">
+        
+        <!-- Contenedor principal -->
+        <div class="bg-white rounded-[2vw] shadow-lg p-[3vw] max-w-[60vw] w-full">
+          
+          <!-- Grid: Foto + Datos -->
+          <div class="grid grid-cols-2 gap-[3vw] mb-[2vw]">
+            
+            <!-- Foto (izquierda) -->
+            <div class="flex items-center justify-center">
+              <div class="w-[18vw] h-[18vw] rounded-[1.5vw] border-3 border-green-600 bg-green-100 flex items-center justify-center">
+                <span class="text-green-600 text-[3vw] font-light">FOTO</span>
+              </div>
+            </div>
+
+            <!-- Datos (derecha) -->
+            <div class="space-y-[1vh] text-[1vw] text-gray-800 font-medium">
+              <p><strong>Nombre:</strong> {{ usuario.nombre || '___________________' }}</p>
+              <p><strong>Apellidos:</strong> {{ usuario.apellidos || '___________________' }}</p>
+              <p><strong>Correo electrónico:</strong> {{ usuario.email || '___________________' }}</p>
+              <p><strong>Teléfono:</strong> {{ usuario.telefono || '___________________' }}</p>
+              <p><strong>DNI / Identificación:</strong> {{ usuario.dni || '___________________' }}</p>
+              <p><strong>Dirección:</strong> {{ usuario.direccion || '___________________' }}</p>
+              <p><strong>Código Postal:</strong> {{ usuario.codigoPostal || '___________________' }}</p>
+              <p><strong>Ciudad:</strong> {{ usuario.ciudad || '___________________' }}</p>
+              <p><strong>País:</strong> {{ usuario.pais || '___________________' }}</p>
+            </div>
           </div>
-          <span class="bg-purple-100 text-purple-800 px-[1vw] py-[0.5vw] rounded-full text-[0.9vw] font-bold">
-            Confirmada
-          </span>
+
+          <!-- Botón Editar Datos -->
+          <div class="flex justify-center">
+            <button 
+              (click)="entrarModoEdicion()"
+              class="bg-green-600 text-white text-[1.2vw] font-bold py-[0.8vw] px-[3vw] rounded-full hover:bg-green-700 transition">
+              Editar datos
+            </button>
+          </div>
+
+          <!-- Modo Edición (oculto por defecto) -->
+          <div *ngIf="modoEdicion" class="mt-[2vw] pt-[2vw] border-t-2 border-gray-200">
+            <h3 class="text-[1.5vw] font-bold text-gray-800 mb-[1.5vw]">Editar Datos</h3>
+            <form (ngSubmit)="guardarCambios()" class="space-y-[1vw]">
+              
+              <div>
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Nombre</label>
+                <input [(ngModel)]="usuario.nombre" name="nombre" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              </div>
+              
+              <div>
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Apellidos</label>
+                <input [(ngModel)]="usuario.apellidos" name="apellidos" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              </div>
+
+              <div>
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">DNI / NIF</label>
+                <input [(ngModel)]="usuario.dni" name="dni" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              </div>
+
+              <div>
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Teléfono</label>
+                <input [(ngModel)]="usuario.telefono" name="telefono" type="tel" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              </div>
+
+              <div>
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Dirección</label>
+                <input [(ngModel)]="usuario.direccion" name="direccion" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              </div>
+
+              <div>
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Código Postal</label>
+                <input [(ngModel)]="usuario.codigoPostal" name="codigoPostal" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              </div>
+
+              <div>
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Ciudad</label>
+                <input [(ngModel)]="usuario.ciudad" name="ciudad" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              </div>
+
+              <div>
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">País</label>
+                <input [(ngModel)]="usuario.pais" name="pais" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              </div>
+
+              <div class="flex gap-[1vw] pt-[1vw]">
+                <button type="submit" [disabled]="isLoading" class="flex-1 bg-green-600 text-white text-[0.9vw] font-bold py-[0.6vw] rounded-[0.5vw] hover:bg-green-700 transition">
+                  {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+                </button>
+                <button type="button" (click)="cancelarEdicion()" class="flex-1 bg-gray-400 text-white text-[0.9vw] font-bold py-[0.6vw] rounded-[0.5vw] hover:bg-gray-500 transition">
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Botón volver -->
+          <div class="flex justify-center mt-[2vw]">
+            <button 
+              (click)="cambiarVista('menu')"
+              class="text-green-700 font-bold hover:underline text-[1vw]">
+              ← Volver al menú
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- SECCIÓN DONACIONES -->
+      <!-- VISTA ENTRADAS -->
+      <div *ngIf="vistaActual === 'tickets'" class="max-w-[70vw] mx-auto">
+        <h2 class="text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mis Entradas</h2>
+        
+        <div *ngIf="tickets.length === 0" class="text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">
+          <p>No has adquirido ninguna entrada aún. ¡Apúntate a un evento!</p>
+        </div>
 
-    <div *ngIf="vistaActual === 'donaciones'" class="max-w-[60vw] mx-auto">
-      
-      <div class="bg-green-600 text-white p-[2vw] rounded-[1.5vw] shadow-lg mb-[2vw] flex justify-between items-center">
-        <div>
-          <h3 class="text-[1.5vw] font-medium opacity-90">Total Donado</h3>
+        <div class="grid gap-[1.5vw]">
+          <div *ngFor="let ticket of tickets" class="bg-white p-[2vw] rounded-[1.5vw] shadow-lg border-l-4 border-green-600">
+            <h3 class="font-bold text-[1.3vw] text-gray-800">{{ ticket.eventoTitulo || 'Evento' }}</h3>
+            <p class="text-gray-500 text-[1vw] mt-[0.5vw]">Fecha de compra: {{ ticket.fechaCompra | date:'dd/MM/yyyy' }}</p>
+            <span class="inline-block bg-green-100 text-green-800 px-[1.5vw] py-[0.5vw] rounded-full text-[0.9vw] font-bold mt-[1vw]">
+              ✓ Confirmada
+            </span>
+          </div>
+        </div>
+
+        <div class="flex justify-center mt-[2vw]">
+          <button 
+            (click)="cambiarVista('menu')"
+            class="text-green-700 font-bold hover:underline text-[1vw]">
+            ← Volver al menú
+          </button>
+        </div>
+      </div>
+
+      <!-- VISTA DONACIONES -->
+      <div *ngIf="vistaActual === 'donaciones'" class="max-w-[70vw] mx-auto">
+        <h2 class="text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mi Historial Solidario</h2>
+        
+        <!-- Card de total -->
+        <div class="bg-green-600 text-white p-[2vw] rounded-[1.5vw] shadow-lg mb-[2vw] text-center">
+          <p class="text-[1.2vw] font-medium opacity-90">Total Donado</p>
           <p class="text-[3vw] font-bold">{{ totalDonado | currency:'EUR' }}</p>
         </div>
-        <div class="text-[4vw]">❤️</div>
+
+        <div *ngIf="donaciones.length === 0" class="text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">
+          <p>Aún no has realizado donaciones.</p>
+        </div>
+
+        <div class="bg-white rounded-[1.5vw] overflow-hidden shadow-lg">
+          <table class="w-full text-left">
+            <thead class="bg-gray-100 text-gray-700 uppercase text-[0.9vw] font-bold">
+              <tr>
+                <th class="p-[1.5vw]">Fecha</th>
+                <th class="p-[1.5vw]">Concepto</th>
+                <th class="p-[1.5vw] text-right">Cantidad</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr *ngFor="let donacion of donaciones" class="hover:bg-gray-50">
+                <td class="p-[1.5vw] text-[0.95vw] text-gray-600">{{ donacion.fecha | date:'dd/MM/yyyy' }}</td>
+                <td class="p-[1.5vw] text-[0.95vw] font-medium text-gray-800">{{ donacion.concepto || 'Donación puntual' }}</td>
+                <td class="p-[1.5vw] text-[0.95vw] text-right font-bold text-green-600">{{ donacion.amount || donacion.cantidad | currency:'EUR' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-center mt-[2vw]">
+          <button 
+            (click)="cambiarVista('menu')"
+            class="text-green-700 font-bold hover:underline text-[1vw]">
+            ← Volver al menú
+          </button>
+        </div>
       </div>
 
-      <h3 class="text-[1.5vw] font-bold text-gray-800 mb-[1vw]">Historial</h3>
-      
-      <div *ngIf="donaciones.length === 0" class="text-center text-gray-500 bg-white p-[3vw] rounded-[1vw]">
-        <p>Aún no has realizado donaciones.</p>
-      </div>
-
-      <div class="bg-white rounded-[1vw] overflow-hidden shadow">
-        <table class="w-full text-left">
-          <thead class="bg-gray-100 text-gray-600 uppercase text-[0.8vw]">
-            <tr>
-              <th class="p-[1vw]">Fecha</th>
-              <th class="p-[1vw]">Concepto</th>
-              <th class="p-[1vw] text-right">Cantidad</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <tr *ngFor="let donacion of donaciones">
-              <td class="p-[1vw] text-[0.8vw] text-gray-600">{{ donacion.fecha | date:'shortDate' }}</td>
-              <td class="p-[1vw] text-[0.8vw] font-medium">{{ donacion.concepto || 'Donación puntual' }}</td>
-              <td class="p-[1vw] text-[0.8vw] text-right font-bold text-green-600">{{ donacion.amount || donacion.cantidad | currency:'EUR' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
 
   </div>
