@@ -199,10 +199,15 @@ static class Events
                     : "Desconocido";
 
                 // Cálculo del tiempo restante
-                var tiempoRestante = r.FechaExpiracion - DateTime.UtcNow;
+                var expiracionUtc = r.FechaExpiracion.Kind == DateTimeKind.Utc 
+                    ? r.FechaExpiracion 
+                    : r.FechaExpiracion.ToUniversalTime();
 
-                string reloj = tiempoRestante.TotalSeconds <= 0
-                    ? "00:00"
+                // 2. Restamos contra UTC real
+                var tiempoRestante = expiracionUtc - DateTime.UtcNow;
+            
+                string reloj = tiempoRestante.TotalSeconds <= 0 
+                    ? "00:00" 
                     : $"{(int)tiempoRestante.TotalMinutes:D2}:{tiempoRestante.Seconds:D2}";
 
                 return new ReservationDto(
