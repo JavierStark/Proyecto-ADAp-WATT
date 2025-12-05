@@ -84,11 +84,11 @@ static class Events
         {
             var userAuth = client.Auth.CurrentUser;
             if (userAuth == null) return Results.Unauthorized();
-            
+
             var usuarioDb = await client.From<Usuario>()
                 .Filter("id", Operator.Equals, userAuth.Id) // Asumiendo que Usuario.Id es el UUID
                 .Single();
-            
+
             var tipoEntrada = await client.From<EntradaEvento>()
                 .Filter("id", Operator.Equals, dto.TicketEventId.ToString()) // En EntradaEvento la PK es "id"
                 .Single();
@@ -99,7 +99,7 @@ static class Events
 
             // CALCULAR STOCK REAL
             var ahora = DateTime.UtcNow;
-            
+
             var reservasActivas = await client.From<ReservaEntrada>()
                 .Filter("fk_entrada_evento", Operator.Equals, dto.TicketEventId.ToString())
                 .Filter("fecha_expiracion", Operator.GreaterThan, ahora.ToString("o"))
@@ -146,7 +146,86 @@ static class Events
         }
     }
 
-    public static async Task<IResult> ConfirmPurchase(PurchaseConfirmDto dto, Supabase.Client client, IPaymentService paymentService)
+    public static async Task<IResult> GetMyReservations(Supabase.Client client)
+    {
+        try
+        {
+            // Auth
+            var userAuth = client.Auth.CurrentUser;
+            if (userAuth == null) return Results.Unauthorized();
+
+            var usuarioDb = await client.From<Usuario>()
+                .Filter("id", Operator.Equals, userAuth.Id)
+                .Single();
+
+            var reservasResponse = await client.From<ReservaEntrada>()
+                .Filter("fk_usuario", Operator.Equals, usuarioDb.Id.ToString())
+                .Filter("fecha_expiracion", Operator.GreaterThan, DateTime.UtcNow.ToString("o"))
+                .Get();
+
+            var misReservas = reservasResponse.Models;
+
+            if (!misReservas.Any()) return Results.Ok(new List<ReservationDto>());
+
+            var idsTipos = misReservas.Select(r => r.FkEntradaEvento).Distinct().ToList();
+            var infoTipos = new Dictionary<Guid, (string Tipo, decimal Precio, Guid IdEvento)>();
+            var infoEventos = new Dictionary<Guid, string>();
+
+            foreach (var idTipo in idsTipos)
+            {
+                var tipo = await client.From<EntradaEvento>().Filter("id", Operator.Equals, idTipo.ToString()).Single();
+                if (tipo != null)
+                {
+                    infoTipos[idTipo] = (tipo.Tipo, tipo.Precio, tipo.FkEvento);
+
+                    if (!infoEventos.ContainsKey(tipo.FkEvento))
+                    {
+                        var evt = await client.From<Evento>().Filter("id", Operator.Equals, tipo.FkEvento.ToString())
+                            .Single();
+                        if (evt != null) infoEventos[tipo.FkEvento] = evt.Nombre ?? "Evento";
+                    }
+                }
+            }
+
+            // Mapear a DTO
+            var resultado = misReservas.Select(r =>
+            {
+                var info = infoTipos.ContainsKey(r.FkEntradaEvento)
+                    ? infoTipos[r.FkEntradaEvento]
+                    : (Tipo: "Desconocido", Precio: 0m, IdEvento: Guid.Empty);
+
+                var nombreEvento = infoEventos.ContainsKey(info.IdEvento)
+                    ? infoEventos[info.IdEvento]
+                    : "Desconocido";
+
+                // Cálculo del tiempo restante
+                var tiempoRestante = r.FechaExpiracion - DateTime.UtcNow;
+
+                string reloj = tiempoRestante.TotalSeconds <= 0
+                    ? "00:00"
+                    : $"{(int)tiempoRestante.TotalMinutes:D2}:{tiempoRestante.Seconds:D2}";
+
+                return new ReservationDto(
+                    r.IdReserva,
+                    nombreEvento,
+                    info.Tipo,
+                    r.Cantidad,
+                    info.Precio,
+                    info.Precio * r.Cantidad,
+                    reloj
+                );
+            }).ToList();
+
+            return Results.Ok(resultado);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error obteniendo carrito: " + ex.Message);
+        }
+    }
+
+    public static async Task<IResult> ConfirmPurchase(PurchaseConfirmDto dto, Supabase.Client client,
+        IPaymentService paymentService)
     {
         try
         {
@@ -206,8 +285,8 @@ static class Events
             // PASARELA DE PAGO (STRIPE REAL + SIMULACIÓN)
             // Convertimos a céntimos
             long cantidadEnCentimos = (long)(totalPagar * 100);
-            
-            try 
+
+            try
             {
                 await paymentService.ProcessPaymentAsync(totalPagar, dto.PaymentToken);
             }
@@ -382,6 +461,16 @@ static class Events
     public record PurchaseItemDto(
         Guid TicketEventId,
         int Quantity
+    );
+
+    public record ReservationDto(
+        Guid IdReserva,
+        string NombreEvento,
+        string TipoEntrada,
+        int Cantidad,
+        decimal PrecioUnitario,
+        decimal Total,
+        string TiempoRestante
     );
 
     public record PurchaseConfirmDto(

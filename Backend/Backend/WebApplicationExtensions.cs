@@ -4,7 +4,11 @@ public static class WebApplicationExtensions
 {
     public static WebApplication MapAuthEndpoints(this WebApplication app)
     {
-        var auth = app.MapGroup("/auth");
+        var auth = app.MapGroup("/auth").WithOpenApi(op =>
+        {
+            op.Deprecated = true;
+            return op;
+        });
         auth.MapPost("/register", Auth.RegisterUser);
         auth.MapPost("/login", Auth.LoginUser);
         auth.MapPost("/logout", Auth.LogoutUser);
@@ -39,6 +43,7 @@ public static class WebApplicationExtensions
     {
         var tickets = app.MapGroup("/tickets").AddEndpointFilter<SupabaseAuthFilter>();
         tickets.MapPost("/purchase/start", Events.StartPurchase);
+        tickets.MapGet("/my-cart", Events.GetMyReservations);
         tickets.MapPost("/purchase/confirm", Events.ConfirmPurchase);
         
         return app;
