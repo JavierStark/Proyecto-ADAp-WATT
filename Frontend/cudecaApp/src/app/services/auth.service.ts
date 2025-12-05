@@ -8,7 +8,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 })
 export class AuthService {
 
-  private supabaseUrl = 'https://wntetrtsydueijushgoc.supabase.co/'
+  private supabaseUrl = 'https://wntetrtsydueijushgoc.supabase.co/';
   private supabaseKey = 'sb_publishable_JJbBjtwM5rYMl150Vorfww_G3jJrFok';
   private supabase: SupabaseClient;
 
