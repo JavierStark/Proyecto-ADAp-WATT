@@ -2,21 +2,6 @@
 
 public static class WebApplicationExtensions
 {
-    public static WebApplication MapAuthEndpoints(this WebApplication app)
-    {
-        var auth = app.MapGroup("/auth").WithOpenApi(op =>
-        {
-            op.Deprecated = true;
-            return op;
-        });
-        auth.MapPost("/register", Auth.RegisterUser);
-        auth.MapPost("/login", Auth.LoginUser);
-        auth.MapPost("/logout", Auth.LogoutUser);
-        auth.MapPost("/refresh", Auth.RefreshToken);
-
-        return app;
-    }
-
     public static WebApplication MapUserEndpoints(this WebApplication app)
     {
         var users = app.MapGroup("/users/me").AddEndpointFilter<SupabaseAuthFilter>();

@@ -72,8 +72,7 @@ app.UseHttpsRedirection();
 app.MapGet("/", () => "CUDECA API");
 app.MapGet("/test/supabase", TestSupabase);
 
-app.MapAuthEndpoints()
-    .MapUserEndpoints()
+app.MapUserEndpoints()
     .MapEventEndpoints()
     .MapTicketEndpoints()
     .MapDonationEndpoints()
