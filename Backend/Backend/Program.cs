@@ -1,7 +1,6 @@
 using Backend;
 using System.Text.Json;
-
-// Sirve para declarar las tablas de supabase
+using Backend.PaymentService;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +39,16 @@ builder.Services.AddSingleton<Supabase.Client>(_ =>
     client.InitializeAsync().Wait();
     return client;
 });
+
+// Payment logic
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<IPaymentService, SimulatedPaymentService>();
+}
+else
+{
+    builder.Services.AddScoped<IPaymentService, StripePaymentService>();
+}
 
 var app = builder.Build();
 
@@ -137,7 +146,5 @@ void SwaggerAuthSetup(SwaggerGenOptions swaggerGenOptions)
         }
     });
 }
-
-
 
 record SupabaseSettings(string Url, string Key);
