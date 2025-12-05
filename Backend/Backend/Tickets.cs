@@ -1,5 +1,4 @@
 ﻿using Backend.Models;
-using Supabase.Gotrue;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
@@ -10,33 +9,86 @@ static class Tickets
     {
         try
         {
-            var parsed = Guid.Parse(client.Auth.CurrentUser!.Id!);
+            var userAuth = client.Auth.CurrentUser;
+            if (userAuth == null) return Results.Unauthorized();
 
-            var usuarioDb = await client
-                .From<Usuario>()
-                .Where(u => u.Id == parsed)
+            var usuarioDb = await client.From<Usuario>()
+                .Filter("id", Operator.Equals, userAuth.Id)
                 .Single();
-            
-            if (usuarioDb == null) return Results.Unauthorized();
-            
-            var query = client
-                .From<Entrada>()
-                .Select("*, Evento(*)")
-                .Where(e => e.FkUsuario == usuarioDb.Id); 
 
-            if (ticketId != null)
+            if (usuarioDb == null) return Results.Unauthorized();
+
+            var query = client.From<Entrada>()
+                .Filter("fk_usuario", Operator.Equals, usuarioDb.Id.ToString());
+
+            if (!string.IsNullOrEmpty(ticketId))
             {
-                var parsedTicketId = Guid.Parse(ticketId);
-                query.Where(e => e.Id == parsedTicketId);
+                query = query.Filter("id", Operator.Equals, ticketId);
+            }
+
+            var responseTickets = await query.Order("fecha_compra", Ordering.Descending).Get();
+            var misTickets = responseTickets.Models;
+
+            if (!misTickets.Any())
+            {
+                return !string.IsNullOrEmpty(ticketId)
+                    ? Results.NotFound(new { error = "Ticket no encontrado." })
+                    : Results.Ok(new List<TicketDto>());
             }
             
-            var result = await query.Get();
+            var eventosIds = misTickets.Select(t => t.FkEvento.ToString()).Distinct().ToList();
+            var tiposIds = misTickets.Select(t => t.FkEntradaEvento.ToString()).Distinct().ToList();
+
+            // Traer Eventos
+            var eventosResponse = await client.From<Evento>()
+                .Filter("id", Operator.In, eventosIds) // Trae solo los eventos necesarios
+                .Get();
+
+            // Convertimos a Diccionario para búsqueda rápida por ID
+            var dictEventos = eventosResponse.Models.ToDictionary(e => e.Id);
+
+            // Traer Tipos de Entrada
+            var tiposResponse = await client.From<EntradaEvento>()
+                .Filter("id", Operator.In, tiposIds) // Trae solo los tipos necesarios
+                .Get();
+            
+            var dictTipos = tiposResponse.Models.ToDictionary(t => t.FkEntradaEvento);
+
+            // Mapeo a DTO
+            var listaFinal = misTickets.Select(t =>
+            {
+                var evento = dictEventos.ContainsKey(t.FkEvento) ? dictEventos[t.FkEvento] : null;
                 
-            return Results.Ok(result);
+                var tipo = dictTipos.ContainsKey(t.FkEntradaEvento) ? dictTipos[t.FkEntradaEvento] : null;
+
+                return new TicketDto(
+                    t.Id,
+                    evento?.Nombre ?? "Evento no disponible",
+                    tipo?.Tipo ?? "Estándar",
+                    t.Precio,
+                    evento?.FechaEvento?.DateTime ?? DateTime.MinValue,
+                    evento?.Ubicacion ?? "Ubicación desconocida",
+                    t.CodigoQr,
+                    t.Estado ?? "Activo"
+                );
+            }).ToList();
+
+            return Results.Ok(listaFinal);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return Results.NotFound(new { error = "Ticket no encontrado." });
+            return Results.Problem("Error recuperando tickets: " + ex.Message);
         }
     }
+    
+    public record TicketDto(
+        Guid TicketId,
+        string EventoNombre,
+        string TipoEntrada,
+        decimal PrecioPagado,
+        DateTime FechaEvento,
+        string Ubicacion,
+        string? CodigoQrUrl,
+        string Estado
+    );
 }
