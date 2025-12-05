@@ -2,20 +2,20 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
-// 1. Importamos el servicio (ahora sí existe la ruta)
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service'; 
 
 @Component({
   selector: 'app-sign-up',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
 })
 export class SignUpComponent {
   
-  username: string = '';
   email: string = '';
   password: string = '';
+  isLoading: boolean = false;
 
   // 2. Inyectamos el AuthService
   constructor(
@@ -25,12 +25,12 @@ export class SignUpComponent {
   ) {}
 
   onSubmit() {
+    if (this.isLoading) return; // Evita doble clic accidental
+
     console.log('Enviando registro...');
 
-    // NOTA IMPORTANTE:
-    // backend (Auth.cs) espera un objeto "RegisterDto" que SOLO tiene Email y Password.
-    // Por eso, aunque el usuario escriba su nombre (username), no lo enviamos aquí
-    // para evitar errores 400 Bad Request.
+    this.isLoading = true;
+
     const credentials = {
       email: this.email,
       password: this.password
@@ -40,6 +40,7 @@ export class SignUpComponent {
     this.authService.register(credentials).subscribe({
       next: (response) => {
         console.log('Registro exitoso:', response);
+        this.isLoading = false;
         alert('Cuenta creada con éxito. HEMOS ENVIADO UN CORREO DE CONFIRMACIÓN. Por favor, revísalo y haz clic en el enlace para activar tu cuenta antes de iniciar sesión.');
         
         // Redirigir al Login para que entre
@@ -50,6 +51,7 @@ export class SignUpComponent {
         // Intentamos mostrar el mensaje de error del backend si existe
         const mensaje = error.error?.message || error.error?.error || 'Hubo un error al crear la cuenta.';
         alert(mensaje);
+        this.isLoading = false
       }
     });
   }

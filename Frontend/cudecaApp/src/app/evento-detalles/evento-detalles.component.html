@@ -1,0 +1,112 @@
+<section class="relative w-full min-h-screen pt-[5vw] overflow-hidden font-sans">
+  
+  <img
+    src="assets/images/fondoCudeca.png" 
+    alt="Fondo"
+    class="absolute inset-0 w-full h-full object-cover"
+  />
+  <div class="absolute inset-0 bg-green-400 opacity-30 z-0"></div>
+
+  <div class="relative z-10 pt-[5vw] pb-[5vw] px-[4vw]">
+
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center h-[50vh]">
+      <div class="animate-spin rounded-full h-[5vw] w-[5vw] border-b-[0.4vw] border-white mb-[2vw]"></div>
+      <p class="text-white text-[1.5vw] font-bold">Cargando detalles...</p>
+    </div>
+
+    <div *ngIf="!isLoading && evento" class="max-w-[85vw] mx-auto bg-white rounded-[2vw] shadow-2xl overflow-hidden">
+      
+      <div class="relative h-[30vw] w-full">
+        <img [src]="evento.imagen" alt="Imagen del evento" class="w-full h-full object-cover">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        
+        <button 
+          (click)="goBack()" 
+          class="absolute top-[2vw] left-[2vw] bg-white/90 text-green-800 px-[1.5vw] py-[0.5vw] rounded-[2vw] font-bold shadow-md hover:bg-white transition text-[1.1vw] flex items-center gap-[0.5vw]">
+          <span>←</span> Volver
+        </button>
+
+        <div class="absolute bottom-[2vw] left-[3vw] text-white pr-[3vw]">
+          <h1 class="text-[3.5vw] font-bold leading-tight mb-[1vw]">{{ evento.titulo }}</h1>
+          
+          <div class="flex flex-wrap items-center gap-[1.5vw] text-[1.3vw]">
+            <span class="bg-green-600 px-[1vw] py-[0.3vw] rounded-[0.5vw] shadow-sm">
+              📅 {{ evento.fecha | date:'fullDate':'':'es-ES' }}
+            </span>
+            <span class="flex items-center text-gray-100 drop-shadow-md">
+              📍 {{ evento.ubicacion }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-[4vw] grid grid-cols-1 md:grid-cols-3 gap-[4vw]">
+        
+        <div class="md:col-span-2">
+          <h3 class="text-[2vw] font-bold text-green-900 mb-[1.5vw] border-b border-gray-200 pb-[1vw]">
+            Sobre este evento
+          </h3>
+          
+          <p class="text-gray-700 text-[1.2vw] leading-relaxed whitespace-pre-line mb-[3vw]">
+            {{ evento.descripcion }}
+          </p>
+
+          <div *ngIf="evento.objetoRecaudacion" class="bg-green-50 p-[2vw] rounded-[1.5vw] border border-green-200 flex items-start gap-[1.5vw]">
+            <div class="bg-green-200 p-[0.8vw] rounded-full text-[1.5vw]">🎯</div>
+            <div>
+              <h3 class="font-bold text-green-800 text-[1.3vw] mb-[0.5vw]">Causa Solidaria</h3>
+              <p class="text-green-700 text-[1.1vw]">
+                Este evento recauda fondos para: <strong>{{ evento.objetoRecaudacion }}</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="md:col-span-1">
+          <div class="bg-gray-50 border border-gray-200 p-[2vw] rounded-[1.5vw] shadow-lg sticky top-[2vw]">
+            <h3 class="text-[1.5vw] font-bold text-gray-800 mb-[2vw] text-center">Inscripción</h3>
+            
+            <div class="space-y-[1.5vw] mb-[2vw]">
+              <div class="flex justify-between items-center text-[1.1vw]">
+                <span class="text-gray-600">Aforo total:</span>
+                <span class="font-bold text-gray-900">{{ evento.capacidad }} pers.</span>
+              </div>
+
+              <div class="flex justify-between items-center text-[1.1vw]">
+                <span class="text-gray-600">Inscritos:</span>
+                <span class="font-bold text-green-700">{{ evento.inscritos }} pers.</span>
+              </div>
+            </div>
+
+            <div class="w-full bg-gray-200 rounded-full h-[1vw] mb-[0.5vw] overflow-hidden">
+              <div class="bg-green-600 h-full rounded-full transition-all duration-500" 
+                   [style.width.%]="(evento.inscritos / evento.capacidad) * 100"></div>
+            </div>
+            <p class="text-center text-[0.9vw] text-gray-500 mb-[2.5vw]">
+              {{ evento.capacidad - evento.inscritos }} plazas disponibles
+            </p>
+
+            <button 
+              (click)="inscribirse()"
+              [disabled]="evento.inscritos >= evento.capacidad"
+              [class.opacity-50]="evento.inscritos >= evento.capacidad"
+              [class.cursor-not-allowed]="evento.inscritos >= evento.capacidad"
+              class="w-full bg-green-600 text-white font-bold text-[1.2vw] py-[1vw] rounded-[1vw] hover:bg-green-700 transition shadow-md flex justify-center items-center gap-[0.5vw]">
+              
+              <span *ngIf="evento.inscritos < evento.capacidad">Inscribirme Ahora</span>
+              <span *ngIf="evento.inscritos >= evento.capacidad">⛔ Aforo Completo</span>
+            
+            </button>
+            
+            <p class="text-center text-[0.9vw] text-gray-400 mt-[1.5vw]">
+              Gracias por colaborar con la Fundación Cudeca.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>

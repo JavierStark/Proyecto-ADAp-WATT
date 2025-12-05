@@ -7,6 +7,7 @@ import { EmptyLayoutComponent } from './layouts/empty-layout/empty-layout.compon
 import { CuentaComponent } from './cuenta/cuenta.component';
 import { DonationComponent } from './donation/donation.component';  // Importa tu DonationComponent
 import { EventosComponent } from './eventos/eventos.component';  // Importa el EventosComponent
+import { EventoDetalleComponent } from './evento-detalles/evento-detalles.component';
 import { publicGuard } from './guards/public.guard';
 import { authGuard } from './guards/auth.guard';
 
@@ -17,6 +18,7 @@ export const routes: Routes = [
   { path: 'cuenta', component: CuentaComponent,canActivate: [authGuard] },
   { path: 'donation', component: DonationComponent }, // Ruta para donaciones
   { path: 'eventos', component: EventosComponent }, // Ruta para eventos
+  { path: 'eventos/:id', component: EventoDetalleComponent },
 ];
 
 @NgModule({
