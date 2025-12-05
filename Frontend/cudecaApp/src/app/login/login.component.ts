@@ -35,21 +35,14 @@ export class LoginComponent {
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
-        console.log('Login correcto:', response);
+        console.log('Login Supabase OK:', response);
         this.isLoading = false;
         this.router.navigate(['/']); 
       },
       error: (err) => {
-        console.error('Error login:', err);
-
-        const backendMessage = err.error?.error;
-
-        if (backendMessage) {
-          alert(backendMessage);
-        } else {
-          alert('Usuario o contraseña incorrectos.');
-        }
         this.isLoading = false;
+        console.error(err);
+        alert(err.message || 'Error al iniciar sesión');
       }
     });
   }

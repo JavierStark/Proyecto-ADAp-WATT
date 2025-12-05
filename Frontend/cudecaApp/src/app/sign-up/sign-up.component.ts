@@ -47,11 +47,10 @@ export class SignUpComponent {
         this.router.navigate(['/log-in']); 
       },
       error: (error) => {
-        console.error('Error al registrar:', error);
-        // Intentamos mostrar el mensaje de error del backend si existe
-        const mensaje = error.error?.message || error.error?.error || 'Hubo un error al crear la cuenta.';
-        alert(mensaje);
         this.isLoading = false
+        console.error(error);
+        // Intentamos mostrar el mensaje de error del backend si existe
+        alert(error.message || 'Error al crear la cuenta');
       }
     });
   }
