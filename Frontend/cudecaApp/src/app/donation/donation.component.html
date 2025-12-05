@@ -1,47 +1,49 @@
-<!-- Contenedor principal de la página de donaciones (fondo, altura mínima y flujo vertical) -->
-<div class="min-h-screen flex flex-col relative overflow-x-hidden fondo-floral">
-  <!-- Wrapper central que centra la tarjeta y deja espacio superior para el header fijo -->
-  <div class="flex-grow flex items-center justify-center relative z-10" style="padding:1.2vw; padding-top:5vw;">
+<section class="relative w-full min-h-screen overflow-hidden font-sans flex flex-col">
+
+  <img
+    src="assets/images/fondoCudeca.png"
+    alt="Fondo decorativo"
+    class="absolute inset-0 w-full h-full object-cover z-0"
+  />
+
+  <div class="absolute inset-0 bg-green-400/40 z-0"></div>
+
+
+  <div class="relative z-10 flex-grow flex items-center justify-center pt-[6vw] pb-[4vw] px-[4vw]">
     
-        <!-- Tarjeta principal blanca: contiene imagen (izquierda) y zona de donación (derecha) -->
-        <div class="bg-white rounded-[1.5vw] shadow-xl w-[55vw] max-w-[48vw] flex p-[1.5vw] gap-[1.5vw]">
+    <div class="bg-white rounded-[1.5vw] shadow-2xl w-[55vw] max-w-[48vw] flex p-[1.5vw] gap-[1.5vw] animate-fade-in-up">
       
-      <!-- Columna izquierda: imagen ilustrativa (persona beneficiaria) -->
       <div class="w-[22vw] flex-shrink-0">
         <img 
           src="assets/images/abuela.png" 
           alt="Señora mayor sonriendo"
-          class="w-full h-auto object-cover shadow-sm"
+          class="w-full h-auto object-cover shadow-md"
           style="border-radius:1.2vw; aspect-ratio:1;"
         >
       </div>
 
-      <!-- Columna derecha: título, botones de importes predefinidos, campo personalizado y botón de pago -->
       <div class="w-[22vw] flex flex-col items-center justify-center">
         <h1 class="font-bold text-green-700 mb-[1.2vw] text-[1.6vw]">¡Dona ahora!</h1>
 
-        <!-- Presets de importes rápidos (botones redondos) -->
         <div class="grid grid-cols-4 gap-[0.8vw] mb-[1.2vw] w-full">
           <button *ngFor="let amount of presetAmounts"
                   (click)="selectPreset(amount)"
                   [ngClass]="{'bg-green-100 border-green-600 font-bold': selectedAmount === amount, 'border-green-300 text-green-600 hover:border-green-500 hover:bg-green-50': selectedAmount !== amount}"
-                  class="border-2 rounded-full transition-all duration-200"
+                  class="border-2 rounded-full transition-all duration-200 hover:shadow-sm"
                   style="padding:0.6vw 0; font-size:0.9vw;">
             {{ amount }}€
           </button>
         </div>
 
-        <!-- Controles: botón 'Otro' para activar input personalizado y el input con símbolo € -->
         <div class="flex gap-[0.8vw] mb-[1.6vw] w-full">
           <button 
             (click)="enableCustomAmount()"
             [ngClass]="{'bg-green-100 border-green-600 font-bold': isCustomAmountMode, 'border-green-300 text-green-600 hover:border-green-500 hover:bg-green-50': !isCustomAmountMode}"
-            class="border-2 rounded-full transition-all duration-200 w-[30%] whitespace-nowrap"
+            class="border-2 rounded-full transition-all duration-200 w-[30%] whitespace-nowrap hover:shadow-sm"
             style="padding:0.6vw 0; font-size:0.9vw;">
             Otro
           </button>
           
-          <!-- Wrapper relativo para posicionar el símbolo € sobre el input -->
           <div class="relative w-[70%]">
             <input 
               type="number" 
@@ -54,10 +56,9 @@
           </div>
         </div>
 
-        <!-- Botón de acción para procesar el pago -->
         <button 
           (click)="processPayment()"
-          class="w-full bg-[#8FBD9F] hover:bg-[#7da88c] text-white rounded-full shadow-md transition-colors duration-300 font-medium"
+          class="w-full bg-[#8FBD9F] hover:bg-[#7da88c] text-white rounded-full shadow-lg transition-transform duration-300 transform hover:scale-[1.02] font-medium"
           style="font-size:1.1vw; padding:0.6vw 1.2vw;">
           Pagar
         </button>
@@ -65,4 +66,4 @@
       </div>
     </div>
   </div>
-</div>
+</section>
