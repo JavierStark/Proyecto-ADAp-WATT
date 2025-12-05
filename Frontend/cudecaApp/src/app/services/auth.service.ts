@@ -1,56 +1,62 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, from, map, tap } from 'rxjs';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  // Tu URL de Azure (sin barra al final)
+  private supabaseUrl = 'https://wntetrtsydueijushgoc.supabase.co/'
+  private supabaseKey = 'sb_publishable_JJbBjtwM5rYMl150Vorfww_G3jJrFok';
+  private supabase: SupabaseClient;
+
+
+  // URL de azure
   private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/'; 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { 
+    this.supabase = createClient(this.supabaseUrl, this.supabaseKey);
+  }
 
-  // 1. REGISTRO
-  // Según PDF: POST /auth/register [cite: 2, 3]
   register(credentials: { email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/register`, credentials);
+    return from(this.supabase.auth.signUp({
+      email: credentials.email,
+      password: credentials.password,
+    })).pipe(
+      map(response => {
+        if (response.error) throw response.error;
+        return response.data;
+      })
+    );
   }
 
-  // 2. LOGIN
-  // Según PDF: POST /auth/login [cite: 4, 5]
+  
   login(credentials: { email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/login`, credentials)
-      .pipe(
-        // El operador 'tap' nos permite hacer algo con la respuesta sin modificarla
-        tap((response: any) => this.setSession(response))
-      );
+    return from(this.supabase.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    })).pipe(
+      map(response => {
+        if (response.error) throw response.error;
+        return response.data; // Devuelve objeto con { user, session }
+      }),
+      tap((data) => {
+        // IMPORTANTE: Guardamos el token manualmente para poder usarlo 
+        // en las peticiones al backend (getProfile, etc.)
+        if (data.session) {
+          localStorage.setItem('token', data.session.access_token);
+        }
+      })
+    );
   }
 
-  // 3. LOGOUT (Cerrar Sesión)
-  // Según PDF: POST /auth/logout [cite: 6, 7]
-  // El PDF dice que hay que avisar al servidor de que nos vamos
   logout(): void {
-    this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({
-      next: () => console.log('Sesión cerrada en servidor'),
-      error: (e) => console.error('Error cerrando sesión', e)
-    });
-    
-    // Limpiamos el navegador pase lo que pase
+    this.supabase.auth.signOut();
     localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
   }
 
-  // --- MÉTODOS AUXILIARES ---
-
-  // Guardar token
-  private setSession(authResult: any) {
-    localStorage.setItem('token', authResult.token);
-    if (authResult.refreshToken) {
-      localStorage.setItem('refreshToken', authResult.refreshToken);
-    }
-  }
 
   // Verificar si estoy logueado
   isLoggedIn(): boolean {
@@ -91,5 +97,5 @@ export class AuthService {
   getMyDonations(): Observable<any> {
     return this.http.get(`${this.apiUrl}/users/me/donations`, { headers: this.getHeaders() });
   }
-  
+
 }
