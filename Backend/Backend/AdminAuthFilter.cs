@@ -3,47 +3,56 @@ using Supabase;
 
 namespace Backend;
 
-public class AdminAuthFilter(Client supabase) : IEndpointFilter
+/// <summary>
+/// AdminAuthFilter assumes SupabaseAuthFilter has already run and validated the JWT token.
+/// This filter only checks if the authenticated user has admin permissions.
+/// Apply filters in order: .AddEndpointFilter&lt;SupabaseAuthFilter&gt;().AddEndpointFilter&lt;AdminAuthFilter&gt;()
+/// </summary>
+public class AdminAuthFilter : IEndpointFilter
 {
+    private readonly Client _supabase;
+
+    public AdminAuthFilter(Client supabase)
+    {
+        _supabase = supabase;
+    }
+
     public async ValueTask<object?> InvokeAsync(
         EndpointFilterInvocationContext ctx,
         EndpointFilterDelegate next)
     {
         var http = ctx.HttpContext;
 
-        // Extract Authorization header
-        if (!http.Request.Headers.TryGetValue("Authorization", out var authHeader))
-            return Results.Unauthorized();
-
-        string token = authHeader.ToString()
-            .Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
-            .Replace("\"", "")
-            .Trim();
-
-        if (string.IsNullOrEmpty(token))
-            return Results.Unauthorized();
+        // Check if SupabaseAuthFilter has already authenticated the user
+        if (!http.Items.TryGetValue("user_id", out var userIdObj) || userIdObj is not string userIdStr)
+        {
+            return Results.Json(
+                new { error = "Usuario no autenticado. Debe aplicar SupabaseAuthFilter primero." },
+                statusCode: 401
+            );
+        }
 
         try
         {
-            await supabase.Auth.SetSession(token, "dummy");
-
-            var user = supabase.Auth.CurrentUser;
-            if (user == null)
-                return Results.Unauthorized();
-
-            var userId = Guid.Parse(user.Id);
+            var userId = Guid.Parse(userIdStr);
 
             // Get the usuario from the database
-            var usuarioResponse = await supabase
+            var usuarioResponse = await _supabase
                 .From<Usuario>()
                 .Where(u => u.Id == userId)
                 .Get();
 
             var usuario = usuarioResponse.Models.FirstOrDefault();
             if (usuario == null)
-                return Results.Unauthorized();
+            {
+                return Results.Json(
+                    new { error = "Usuario no encontrado." },
+                    statusCode: 404
+                );
+            }
 
-            var adminResponse = await supabase
+            // Check if the user is an admin
+            var adminResponse = await _supabase
                 .From<Admin>()
                 .Where(a => a.fkUsuario == usuario.Id)
                 .Get();
@@ -57,15 +66,23 @@ public class AdminAuthFilter(Client supabase) : IEndpointFilter
                 );
             }
 
-            http.Items["supabase_user"] = user;
+            // Store additional context for endpoints
             http.Items["usuario"] = usuario;
             http.Items["admin"] = admin;
         }
+        catch (FormatException)
+        {
+            return Results.Json(
+                new { error = "ID de usuario inválido." },
+                statusCode: 400
+            );
+        }
         catch (Exception ex)
         {
-            return Results.Problem("Error de autenticación: " + ex.Message);
+            return Results.Problem("Error al verificar permisos de administrador: " + ex.Message);
         }
 
         return await next(ctx);
     }
 }
+

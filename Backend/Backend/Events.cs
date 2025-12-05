@@ -76,19 +76,18 @@ static class Events
         }
     }
 
-    public static async Task<IResult> StartPurchase(PurchaseStartDto dto, Supabase.Client client)
+    public static async Task<IResult> StartPurchase(PurchaseStartDto dto, Supabase.Client client, HttpContext httpContext)
     {
         if (dto.Quantity <= 0) return Results.BadRequest(new { error = "Cantidad mínima: 1." });
 
         try
         {
-            var userAuth = client.Auth.CurrentUser;
-            if (userAuth == null) return Results.Unauthorized();
-
+            var userId = (string)httpContext.Items["user_id"]!;
+            
             var usuarioDb = await client.From<Usuario>()
-                .Filter("id", Operator.Equals, userAuth.Id) // Asumiendo que Usuario.Id es el UUID
+                .Filter("id", Operator.Equals, userId)
                 .Single();
-
+            
             var tipoEntrada = await client.From<EntradaEvento>()
                 .Filter("id", Operator.Equals, dto.TicketEventId.ToString()) // En EntradaEvento la PK es "id"
                 .Single();
@@ -99,7 +98,7 @@ static class Events
 
             // CALCULAR STOCK REAL
             var ahora = DateTime.UtcNow;
-
+            
             var reservasActivas = await client.From<ReservaEntrada>()
                 .Filter("fk_entrada_evento", Operator.Equals, dto.TicketEventId.ToString())
                 .Filter("fecha_expiracion", Operator.GreaterThan, ahora.ToString("o"))
@@ -146,16 +145,15 @@ static class Events
         }
     }
 
-    public static async Task<IResult> GetMyReservations(Supabase.Client client)
+    public static async Task<IResult> GetMyReservations(Supabase.Client client, HttpContext httpContext)
     {
         try
         {
-            // Auth
-            var userAuth = client.Auth.CurrentUser;
-            if (userAuth == null) return Results.Unauthorized();
+            if (httpContext.Items["user_auth"] is not string userAuth)
+                return Results.Unauthorized();
 
             var usuarioDb = await client.From<Usuario>()
-                .Filter("id", Operator.Equals, userAuth.Id)
+                .Filter("id", Operator.Equals, userAuth)
                 .Single();
 
             var reservasResponse = await client.From<ReservaEntrada>()
@@ -230,15 +228,14 @@ static class Events
     }
 
     public static async Task<IResult> ConfirmPurchase(PurchaseConfirmDto dto, Supabase.Client client,
-        IPaymentService paymentService)
+        IPaymentService paymentService, HttpContext httpContext)
     {
         try
         {
-            var userAuth = client.Auth.CurrentUser;
-            if (userAuth == null) return Results.Unauthorized();
+            var userId = (string)httpContext.Items["user_id"]!;
 
             var usuarioDb = await client.From<Usuario>()
-                .Filter("id", Operator.Equals, userAuth.Id)
+                .Filter("id", Operator.Equals, userId)
                 .Single();
 
 
@@ -290,8 +287,8 @@ static class Events
             // PASARELA DE PAGO (STRIPE REAL + SIMULACIÓN)
             // Convertimos a céntimos
             long cantidadEnCentimos = (long)(totalPagar * 100);
-
-            try
+            
+            try 
             {
                 await paymentService.ProcessPaymentAsync(totalPagar, dto.PaymentToken);
             }

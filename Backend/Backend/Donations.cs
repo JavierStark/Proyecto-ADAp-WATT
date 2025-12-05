@@ -5,16 +5,16 @@ namespace Backend;
 
 static class Donations
 {
-    public static async Task<IResult> GetMyDonations(Supabase.Client client)
+    public static async Task<IResult> GetMyDonations(HttpContext httpContext, Supabase.Client client)
     {
         try
         {
-            var user = client.Auth.CurrentUser!;
+            var userId = (string)httpContext.Items["user_id"]!;
 
             var donaciones = await client
                 .From<Donacion>()
                 .Select("*, Pago:fk_pago!inner(*, Cliente:fk_cliente!inner(*))")
-                .Filter("Pago.Cliente.id", Operator.Equals, user.Id)
+                .Filter("Pago.Cliente.id", Operator.Equals, userId)
                 .Get();
 
             var historial = donaciones.Models
@@ -36,15 +36,15 @@ static class Donations
         }
     }
 
-    public static async Task<IResult> GetMyDonationSummary(Supabase.Client client)
+    public static async Task<IResult> GetMyDonationSummary(HttpContext httpContext, Supabase.Client client)
     {
         try
         {
-            var userAuth = client.Auth.CurrentUser!;
+            var userId = (string)httpContext.Items["user_id"]!;
 
             var usuario = await client
                 .From<Usuario>()
-                .Filter("id", Operator.Equals, userAuth.Id)
+                .Filter("id", Operator.Equals, userId)
                 .Single();
 
             var response = await client
@@ -63,18 +63,19 @@ static class Donations
         }
     }
 
-    public static async Task<IResult> CreateDonation(DonationDto dto, Supabase.Client client)
+    public static async Task<IResult> CreateDonation(DonationDto dto, HttpContext httpContext, Supabase.Client client)
     {
         if (dto.Amount <= 0)
             return Results.BadRequest(new { error = "El monto debe ser mayor a 0." });
 
         try
         {
-            var userId = Guid.Parse(client.Auth.CurrentUser.Id);
+            var userId = (string)httpContext.Items["user_id"]!;
+            var userGuid = Guid.Parse(userId);
 
             var usuario = await client
                 .From<Usuario>()
-                .Where(u => u.Id == userId)
+                .Where(u => u.Id == userGuid)
                 .Single();
 
             var nuevoPago = new Pago
@@ -111,15 +112,16 @@ static class Donations
         }
     }
 
-    public static async Task<IResult> GetDonationCertificate(int? year, Supabase.Client client)
+    public static async Task<IResult> GetDonationCertificate(int? year, HttpContext httpContext, Supabase.Client client)
     {
         try
         {
-            var userId = Guid.Parse(client.Auth.CurrentUser!.Id!);
+            var userId = (string)httpContext.Items["user_id"]!;
+            var userGuid = Guid.Parse(userId);
 
             var usuario = (await client
                 .From<Usuario>()
-                .Where(u => u.Id == userId)
+                .Where(u => u.Id == userGuid)
                 .Single())!;
 
             // Si no nos pasan año, asumimos el año anterior (para la renta)

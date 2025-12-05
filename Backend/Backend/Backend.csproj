@@ -13,6 +13,7 @@
         <PackageReference Include="Stripe.net" Version="50.0.0" />
         <PackageReference Include="Supabase" Version="1.1.1" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
     </ItemGroup>
 
     <ItemGroup>

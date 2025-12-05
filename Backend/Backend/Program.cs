@@ -15,6 +15,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(SwaggerAuthSetup);
 builder.Services.AddCors();
+builder.Services.AddHttpClient(); // For JWKS fetching in SupabaseAuthFilter
 
 var supabaseSettings = builder.Configuration.GetSection("Supabase").Get<SupabaseSettings>();
 

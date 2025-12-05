@@ -1,14 +1,17 @@
 ﻿using Backend.Models;
+using Supabase.Gotrue;
+using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
 static class Profile
 {
-    public static async Task<IResult> GetMyProfile(Supabase.Client client)
+    public static async Task<IResult> GetMyProfile(HttpContext httpContext, Supabase.Client client)
     {
         try
         {
-            var parsed = Guid.Parse(client.Auth.CurrentUser!.Id!);
+            var userId = (string)httpContext.Items["user_id"]!;
+            var parsed = Guid.Parse(userId);
 
             var usuario = await client
                 .From<Usuario>()
@@ -45,11 +48,12 @@ static class Profile
         }
     }
 
-    public static async Task<IResult> UpdateProfile(ProfileUpdateDto dto, Supabase.Client client)
+    public static async Task<IResult> UpdateProfile(ProfileUpdateDto dto, HttpContext httpContext, Supabase.Client client)
     {
         try
         {
-            var parsed = Guid.Parse(client.Auth.CurrentUser!.Id!);
+            var userId = (string)httpContext.Items["user_id"]!;
+            var parsed = Guid.Parse(userId);
 
             var usuario = await client
                 .From<Usuario>()
@@ -65,7 +69,7 @@ static class Profile
             {
                 Id = usuario.Id, // PK obligatoria para update
                 Email = usuario.Email, // El email no se toca aquí
-
+                
                 Nombre = !string.IsNullOrEmpty(dto.Nombre) ? dto.Nombre : usuario.Nombre,
                 Apellidos = !string.IsNullOrEmpty(dto.Apellidos) ? dto.Apellidos : usuario.Apellidos,
                 Dni = !string.IsNullOrEmpty(dto.Dni) ? dto.Dni : usuario.Dni,
@@ -109,7 +113,7 @@ static class Profile
             return Results.Problem("Error actualizando perfil: " + ex.Message);
         }
     }
-
+    
     public record ProfileUpdateDto(
         string? Nombre,
         string? Apellidos,
