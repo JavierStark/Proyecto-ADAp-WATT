@@ -31,7 +31,6 @@ public class SupabaseAuthFilter : IEndpointFilter
             .Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)
             .Replace("\"", "")
             .Trim();
-        Console.WriteLine(token);
 
         if (string.IsNullOrEmpty(token))
             return Results.Unauthorized();
@@ -53,7 +52,6 @@ public class SupabaseAuthFilter : IEndpointFilter
                 _jwksCacheExpiry = DateTime.UtcNow.AddHours(1);
             }
             
-            Console.WriteLine("JWKS Keys Count: " + (_cachedJwks?.Keys.Count ?? 0));
 
             if (_cachedJwks == null)
                 return Results.Unauthorized();
@@ -72,7 +70,6 @@ public class SupabaseAuthFilter : IEndpointFilter
             };
 
             var principal = _tokenHandler.ValidateToken(token, validationParameters, out _);
-            Console.WriteLine(principal.ToString());
             
             // Extract user ID from the user_metadata claim
             var userMetadataClaim = principal.FindFirst("user_metadata")?.Value;

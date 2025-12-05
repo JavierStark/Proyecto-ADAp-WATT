@@ -2,6 +2,18 @@
 
 public static class WebApplicationExtensions
 {
+    public static WebApplication MapAuthEndpoints(this WebApplication app)
+    {
+        var auth = app.MapGroup("/auth");
+        auth.MapPost("/signup", Auth.SignUp).WithTags("Authentication (Testing)");
+        auth.MapPost("/signin", Auth.SignIn).WithTags("Authentication (Testing)");
+        
+        var authProtected = app.MapGroup("/auth").AddEndpointFilter<SupabaseAuthFilter>();
+        authProtected.MapPost("/signout", Auth.SignOut).WithTags("Authentication (Testing)");
+
+        return app;
+    }
+
     public static WebApplication MapUserEndpoints(this WebApplication app)
     {
         var users = app.MapGroup("/users/me").AddEndpointFilter<SupabaseAuthFilter>();
