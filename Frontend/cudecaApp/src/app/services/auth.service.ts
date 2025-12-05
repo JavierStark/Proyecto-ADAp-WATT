@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
 @Injectable({
@@ -56,4 +56,40 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   }
+
+
+
+
+
+
+
+  // METODOS PARA CUENTA
+
+  private getHeaders() {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+  }
+
+  // 1. Obtener Perfil (GET /users/me)
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/users/me`, { headers: this.getHeaders() });
+  }
+
+  // 2. Editar Perfil (PUT /users/me)
+  updateProfile(data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/users/me`, data, { headers: this.getHeaders() });
+  }
+
+  // 3. Historial de Tickets (GET /users/me/tickets)
+  getMyTickets(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/users/me/tickets`, { headers: this.getHeaders() });
+  }
+
+  // 4. Historial de Donaciones (GET /users/me/donations)
+  getMyDonations(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/users/me/donations`, { headers: this.getHeaders() });
+  }
+  
 }
