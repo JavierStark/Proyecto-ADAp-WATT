@@ -4,7 +4,11 @@ public static class WebApplicationExtensions
 {
     public static WebApplication MapAuthEndpoints(this WebApplication app)
     {
-        var auth = app.MapGroup("/auth");
+        var auth = app.MapGroup("/auth").WithOpenApi(op =>
+        {
+            op.Deprecated = true;
+            return op;
+        });
         auth.MapPost("/register", Auth.RegisterUser);
         auth.MapPost("/login", Auth.LoginUser);
         auth.MapPost("/logout", Auth.LogoutUser);
