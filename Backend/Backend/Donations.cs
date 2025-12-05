@@ -16,7 +16,7 @@ static class Donations
                 .Select("*, Pago:fk_pago!inner(*, Cliente:fk_cliente!inner(*))")
                 .Filter("Pago.Cliente.id", Operator.Equals, user.Id)
                 .Get();
-            
+
             var historial = donaciones.Models
                 .Select(d => new DonationHistoryDto(
                     d.Id,
@@ -65,9 +65,9 @@ static class Donations
 
     public static async Task<IResult> CreateDonation(DonationDto dto, Supabase.Client client)
     {
-        if (dto.Amount <= 0) 
+        if (dto.Amount <= 0)
             return Results.BadRequest(new { error = "El monto debe ser mayor a 0." });
-        
+
         try
         {
             var userId = Guid.Parse(client.Auth.CurrentUser.Id);

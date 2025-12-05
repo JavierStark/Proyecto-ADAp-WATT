@@ -9,7 +9,5 @@ public class Admin : BaseModel
     [PrimaryKey("id", shouldInsert: false)]
     public Guid Id { get; set; }
 
-    [Column("fk_usuario")]
-    public Guid fkUsuario { get; set; }
+    [Column("fk_usuario")] public Guid fkUsuario { get; set; }
 }
-

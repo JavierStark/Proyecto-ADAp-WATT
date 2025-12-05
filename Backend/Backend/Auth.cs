@@ -58,8 +58,9 @@ static class Auth
         catch (Exception ex)
         {
             if (ex.Message.Contains("Email not confirmed") || ex.Message.Contains("confirm"))
-                return Results.BadRequest(new { error = "¡Aún no has confirmado tu correo! Revisa tu bandeja de entrada." });
-            
+                return Results.BadRequest(new
+                    { error = "¡Aún no has confirmado tu correo! Revisa tu bandeja de entrada." });
+
             return Results.BadRequest(new { error = "Credenciales inválidas (Usuario o contraseña incorrectos)." });
         }
     }
@@ -107,7 +108,7 @@ static class Auth
             return Results.Unauthorized();
         }
     }
-    
+
     public record RegisterDto(string Email, string Password);
 
     public record LoginDto(string Email, string Password);

@@ -9,9 +9,7 @@ class Donacion : BaseModel
     [PrimaryKey("id", shouldInsert: false)]
     public Guid Id { get; set; }
 
-    [Column("fk_pago")]
-    public Guid FkPago { get; set; }
-    
-    [Reference(typeof(Pago))]
-    public Pago? Pago { get; set; }
+    [Column("fk_pago")] public Guid FkPago { get; set; }
+
+    [Reference(typeof(Pago))] public Pago? Pago { get; set; }
 }

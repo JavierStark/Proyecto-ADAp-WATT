@@ -1,6 +1,4 @@
 ﻿using Backend.Models;
-using Supabase.Gotrue;
-using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
@@ -47,7 +45,7 @@ static class Profile
         }
     }
 
-    public static async Task<IResult> UpdateProfile(ProfileUpdateDto dto,Supabase.Client client)
+    public static async Task<IResult> UpdateProfile(ProfileUpdateDto dto, Supabase.Client client)
     {
         try
         {
@@ -67,7 +65,7 @@ static class Profile
             {
                 Id = usuario.Id, // PK obligatoria para update
                 Email = usuario.Email, // El email no se toca aquí
-                
+
                 Nombre = !string.IsNullOrEmpty(dto.Nombre) ? dto.Nombre : usuario.Nombre,
                 Apellidos = !string.IsNullOrEmpty(dto.Apellidos) ? dto.Apellidos : usuario.Apellidos,
                 Dni = !string.IsNullOrEmpty(dto.Dni) ? dto.Dni : usuario.Dni,
@@ -82,7 +80,7 @@ static class Profile
             {
                 Id = cliente.Id, // PK obligatoria
                 Direccion = !string.IsNullOrEmpty(dto.Direccion) ? dto.Direccion : cliente.Direccion,
-                
+
                 SuscritoNewsletter = dto.SuscritoNewsletter ?? cliente.SuscritoNewsletter
             };
 
@@ -93,7 +91,8 @@ static class Profile
             {
                 status = "success",
                 message = "Perfil actualizado correctamente",
-                data = new {
+                data = new
+                {
                     nombre = usuarioNuevo.Nombre,
                     apellidos = usuarioNuevo.Apellidos,
                     dni = usuarioNuevo.Dni,
@@ -110,13 +109,13 @@ static class Profile
             return Results.Problem("Error actualizando perfil: " + ex.Message);
         }
     }
-    
+
     public record ProfileUpdateDto(
-        string? Nombre, 
-        string? Apellidos, 
-        string? Dni, 
-        string? Telefono, 
-        string? Direccion, 
+        string? Nombre,
+        string? Apellidos,
+        string? Dni,
+        string? Telefono,
+        string? Direccion,
         bool? SuscritoNewsletter
     );
 }

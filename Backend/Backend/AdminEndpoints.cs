@@ -3,7 +3,7 @@ using Supabase.Postgrest;
 
 namespace Backend;
 
-static class AdminEndpoints    
+static class AdminEndpoints
 {
     public static async Task<IResult> AdminListEvents(Supabase.Client client)
     {

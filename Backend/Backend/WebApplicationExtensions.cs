@@ -13,7 +13,7 @@ public static class WebApplicationExtensions
         auth.MapPost("/login", Auth.LoginUser);
         auth.MapPost("/logout", Auth.LogoutUser);
         auth.MapPost("/refresh", Auth.RefreshToken);
-        
+
         return app;
     }
 
@@ -26,7 +26,7 @@ public static class WebApplicationExtensions
         users.MapGet("/tickets/{ticketId:int}", Tickets.GetMyTickets);
         users.MapGet("/donations", Donations.GetMyDonations);
         users.MapGet("/donations/summary", Donations.GetMyDonationSummary);
-        
+
         return app;
     }
 
@@ -35,7 +35,7 @@ public static class WebApplicationExtensions
         var events = app.MapGroup("/events");
         events.MapGet("", Events.ListEvents);
         events.MapGet("/{eventId}", Events.GetEvent);
-        
+
         return app;
     }
 
@@ -45,7 +45,7 @@ public static class WebApplicationExtensions
         tickets.MapPost("/purchase/start", Events.StartPurchase);
         tickets.MapGet("/my-cart", Events.GetMyReservations);
         tickets.MapPost("/purchase/confirm", Events.ConfirmPurchase);
-        
+
         return app;
     }
 
@@ -54,7 +54,7 @@ public static class WebApplicationExtensions
         var donations = app.MapGroup("/donations").AddEndpointFilter<SupabaseAuthFilter>();
         donations.MapPost("", Donations.CreateDonation);
         donations.MapGet("/certificate/annual", Donations.GetDonationCertificate);
-        
+
         return app;
     }
 
@@ -62,7 +62,7 @@ public static class WebApplicationExtensions
     {
         var payments = app.MapGroup("/payments");
         payments.MapGet("/methods", Events.GetPaymentMethods);
-        
+
         return app;
     }
 
@@ -70,7 +70,7 @@ public static class WebApplicationExtensions
     {
         var discounts = app.MapGroup("/discounts");
         discounts.MapPost("/validate", Events.ValidateDiscount);
-        
+
         return app;
     }
 
@@ -81,7 +81,7 @@ public static class WebApplicationExtensions
         admin.MapPost("", AdminEndpoints.AdminCreateEvent);
         admin.MapPut("/{eventId}", AdminEndpoints.AdminUpdateEvent);
         admin.MapDelete("/{eventId}", AdminEndpoints.AdminDeleteEvent);
-        
+
         return app;
     }
 }

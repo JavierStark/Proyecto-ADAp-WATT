@@ -52,15 +52,15 @@ else
 
 var app = builder.Build();
 
-app.UseCors(policy => 
+app.UseCors(policy =>
     policy.WithOrigins(
-        "http://localhost:4200",             
-        "https://cudeca-watt.es",            
-        "https://www.cudeca-watt.es"         
-    )
-    .AllowAnyMethod()
-    .AllowAnyHeader()
-    .AllowCredentials() 
+            "http://localhost:4200",
+            "https://cudeca-watt.es",
+            "https://www.cudeca-watt.es"
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials()
 );
 
 app.UseSwagger();
@@ -115,7 +115,8 @@ IResult TestSupabase(Supabase.Client supabase)
 
 void SwaggerAuthSetup(SwaggerGenOptions swaggerGenOptions)
 {
-    swaggerGenOptions.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Cudeca API", Version = "v1" });
+    swaggerGenOptions.SwaggerDoc("v1",
+        new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Cudeca API", Version = "v1" });
 
     // Definimos el esquema de seguridad "Bearer"
     swaggerGenOptions.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme

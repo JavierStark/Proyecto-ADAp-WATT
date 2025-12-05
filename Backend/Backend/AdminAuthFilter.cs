@@ -30,7 +30,7 @@ public class AdminAuthFilter(Client supabase) : IEndpointFilter
             var user = supabase.Auth.CurrentUser;
             if (user == null)
                 return Results.Unauthorized();
-            
+
             var userId = Guid.Parse(user.Id);
 
             // Get the usuario from the database
@@ -45,7 +45,7 @@ public class AdminAuthFilter(Client supabase) : IEndpointFilter
 
             var adminResponse = await supabase
                 .From<Admin>()
-                .Where(a => a. fkUsuario == usuario.Id)
+                .Where(a => a.fkUsuario == usuario.Id)
                 .Get();
 
             var admin = adminResponse.Models.FirstOrDefault();
@@ -69,4 +69,3 @@ public class AdminAuthFilter(Client supabase) : IEndpointFilter
         return await next(ctx);
     }
 }
-

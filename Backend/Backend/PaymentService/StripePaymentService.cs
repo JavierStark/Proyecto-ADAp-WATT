@@ -13,7 +13,7 @@ public class StripePaymentService : IPaymentService
 
     public async Task ProcessPaymentAsync(decimal amount, string token, string currency = "eur")
     {
-        if (string.IsNullOrEmpty(_secretKey)) 
+        if (string.IsNullOrEmpty(_secretKey))
             throw new Exception("Falta la clave de Stripe en la configuración.");
 
         StripeConfiguration.ApiKey = _secretKey;

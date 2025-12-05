@@ -35,30 +35,29 @@ static class Tickets
                     ? Results.NotFound(new { error = "Ticket no encontrado." })
                     : Results.Ok(new List<TicketDto>());
             }
-            
+
             var eventosIds = misTickets.Select(t => t.FkEvento.ToString()).Distinct().ToList();
             var tiposIds = misTickets.Select(t => t.FkEntradaEvento.ToString()).Distinct().ToList();
 
             // Traer Eventos
             var eventosResponse = await client.From<Evento>()
-                .Filter("id", Operator.In, eventosIds) // Trae solo los eventos necesarios
+                .Filter("id", Operator.In, eventosIds)
                 .Get();
-
-            // Convertimos a Diccionario para búsqueda rápida por ID
+            
             var dictEventos = eventosResponse.Models.ToDictionary(e => e.Id);
 
             // Traer Tipos de Entrada
             var tiposResponse = await client.From<EntradaEvento>()
-                .Filter("id", Operator.In, tiposIds) // Trae solo los tipos necesarios
+                .Filter("id", Operator.In, tiposIds)
                 .Get();
-            
+
             var dictTipos = tiposResponse.Models.ToDictionary(t => t.FkEntradaEvento);
 
             // Mapeo a DTO
             var listaFinal = misTickets.Select(t =>
             {
                 var evento = dictEventos.ContainsKey(t.FkEvento) ? dictEventos[t.FkEvento] : null;
-                
+
                 var tipo = dictTipos.ContainsKey(t.FkEntradaEvento) ? dictTipos[t.FkEntradaEvento] : null;
 
                 return new TicketDto(
@@ -80,7 +79,7 @@ static class Tickets
             return Results.Problem("Error recuperando tickets: " + ex.Message);
         }
     }
-    
+
     public record TicketDto(
         Guid TicketId,
         string EventoNombre,
