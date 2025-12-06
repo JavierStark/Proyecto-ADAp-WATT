@@ -81,9 +81,12 @@
               <p><strong>Correo electrónico:</strong> {{ usuario.email || '___________________' }}</p>
               <p><strong>Teléfono:</strong> {{ usuario.telefono || '___________________' }}</p>
               <p><strong>DNI / Identificación:</strong> {{ usuario.dni || '___________________' }}</p>
-              <p><strong>Dirección:</strong> {{ usuario.direccion || '___________________' }}</p>
+              <p><strong>Calle:</strong> {{ usuario.calle || '___________________' }}</p>
+              <p><strong>Número:</strong> {{ usuario.numero || '___________________' }}</p>
+              <p><strong>Piso/Puerta:</strong> {{ usuario.pisoPuerta || '___________________' }}</p>
               <p><strong>Código Postal:</strong> {{ usuario.codigoPostal || '___________________' }}</p>
               <p><strong>Ciudad:</strong> {{ usuario.ciudad || '___________________' }}</p>
+              <p><strong>Provincia:</strong> {{ usuario.provincia || '___________________' }}</p>
               <p><strong>País:</strong> {{ usuario.pais || '___________________' }}</p>
             </div>
           </div>
@@ -123,23 +126,41 @@
               </div>
 
               <div>
-                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Dirección</label>
-                <input [(ngModel)]="usuario.direccion" name="direccion" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Calle</label>
+                <input [(ngModel)]="usuario.calle" name="calle" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
               </div>
 
-              <div>
-                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Código Postal</label>
-                <input [(ngModel)]="usuario.codigoPostal" name="codigoPostal" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              <div class="grid grid-cols-2 gap-[1vw]">
+                <div>
+                  <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Número</label>
+                  <input [(ngModel)]="usuario.numero" name="numero" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+                </div>
+                <div>
+                  <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Piso/Puerta</label>
+                  <input [(ngModel)]="usuario.pisoPuerta" name="pisoPuerta" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+                </div>
               </div>
 
-              <div>
-                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Ciudad</label>
-                <input [(ngModel)]="usuario.ciudad" name="ciudad" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              <div class="grid grid-cols-2 gap-[1vw]">
+                <div>
+                  <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Código Postal</label>
+                  <input [(ngModel)]="usuario.codigoPostal" name="codigoPostal" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+                </div>
+                <div>
+                  <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Ciudad</label>
+                  <input [(ngModel)]="usuario.ciudad" name="ciudad" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+                </div>
               </div>
 
-              <div>
-                <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">País</label>
-                <input [(ngModel)]="usuario.pais" name="pais" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+              <div class="grid grid-cols-2 gap-[1vw]">
+                <div>
+                  <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">Provincia</label>
+                  <input [(ngModel)]="usuario.provincia" name="provincia" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+                </div>
+                <div>
+                  <label class="block text-gray-700 font-bold text-[0.9vw] mb-[0.3vw]">País</label>
+                  <input [(ngModel)]="usuario.pais" name="pais" type="text" class="w-full p-[0.6vw] text-[0.85vw] border border-gray-300 rounded-[0.5vw] bg-gray-50 focus:outline-none focus:border-green-600">
+                </div>
               </div>
 
               <div class="flex gap-[1vw] pt-[1vw]">
