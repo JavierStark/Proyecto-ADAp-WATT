@@ -6,10 +6,21 @@ namespace Backend.Models;
 [Table("cliente")]
 class Cliente : BaseModel
 {
-    [PrimaryKey("id", shouldInsert: false)]
-    public Guid Id { get; set; }
+    [PrimaryKey("id", shouldInsert: false)] public Guid Id { get; set; }
 
-    [Column("direccion")] public string? Direccion { get; set; }
+    [Column("calle")] public string? Calle { get; set; }
 
-    [Column("suscrito_newsletter")] public bool SuscritoNewsletter { get; set; } // bool normal (true/false)
+    [Column("numero")] public string? Numero { get; set; }
+
+    [Column("piso_puerta")] public string? PisoPuerta { get; set; }
+
+    [Column("codigo_postal")] public string? CodigoPostal { get; set; }
+
+    [Column("ciudad")] public string? Ciudad { get; set; }
+
+    [Column("provincia")] public string? Provincia { get; set; }
+
+    [Column("pais")] public string? Pais { get; set; }
+
+    [Column("suscrito_newsletter")] public bool SuscritoNewsletter { get; set; }
 }
