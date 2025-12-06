@@ -1,4 +1,6 @@
-﻿using Supabase.Gotrue;
+﻿using Backend.Models;
+using Supabase.Gotrue;
+using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
@@ -146,6 +148,29 @@ public static class Auth
                 detail: ex.Message,
                 statusCode: 500
             );
+        }
+    }
+    
+    public static async Task<IResult> IsUserAdmin(Supabase.Client client, HttpContext context)
+    {
+        try
+        {
+            // Auth
+            var userId = (string)context.Items["user_id"]!;
+            
+            var response = await client
+                .From<Admin>()
+                .Filter("fk_usuario", Operator.Equals, userId)
+                .Get();
+            
+            // Si la lista tiene elementos (> 0) es administrador.
+            bool esAdmin = response.Models.Count > 0;
+
+            return Results.Ok(new { isAdmin = esAdmin });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error comprobando rol: " + ex.Message);
         }
     }
 }
