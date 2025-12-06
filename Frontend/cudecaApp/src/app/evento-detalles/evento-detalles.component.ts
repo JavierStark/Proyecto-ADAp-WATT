@@ -92,4 +92,8 @@ export class EventoDetalleComponent implements OnInit {
     console.log('Inscribirse logic here');
     alert('¡Gracias por tu interés! Próximamente podrás inscribirte.');
   }
+ goToDonation() {
+    this.router.navigate(['/donation']);
+  }
+
 }
