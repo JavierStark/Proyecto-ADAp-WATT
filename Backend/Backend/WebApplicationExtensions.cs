@@ -1,4 +1,6 @@
-﻿namespace Backend;
+﻿using Backend.Filters;
+
+namespace Backend;
 
 public static class WebApplicationExtensions
 {
