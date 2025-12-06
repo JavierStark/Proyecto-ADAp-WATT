@@ -1,5 +1,6 @@
 using Backend;
 using System.Text.Json;
+using Backend.Filters;
 using Backend.PaymentService;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -13,7 +14,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(SwaggerAuthSetup);
+builder.Services.AddSwaggerGen(c =>
+{
+    SwaggerAuthSetup(c);
+    c.SchemaFilter<SwaggerEmptyStringDefaultFilter>();
+});
 builder.Services.AddCors();
 builder.Services.AddHttpClient(); // For JWKS fetching in SupabaseAuthFilter
 

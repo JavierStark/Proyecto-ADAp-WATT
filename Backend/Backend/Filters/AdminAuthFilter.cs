@@ -1,7 +1,7 @@
 ﻿using Backend.Models;
 using Supabase;
 
-namespace Backend;
+namespace Backend.Filters;
 
 /// <summary>
 /// AdminAuthFilter assumes SupabaseAuthFilter has already run and validated the JWT token.
