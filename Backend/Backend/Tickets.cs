@@ -1,5 +1,4 @@
 ﻿using Backend.Models;
-using Supabase.Gotrue;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
@@ -11,7 +10,6 @@ static class Tickets
         try
         {
             var userId = (string)httpContext.Items["user_id"]!;
-            var parsed = Guid.Parse(userId);
 
             var usuarioDb = await client.From<Usuario>()
                 .Filter("id", Operator.Equals, userId)

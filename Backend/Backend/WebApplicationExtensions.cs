@@ -19,6 +19,9 @@ public static class WebApplicationExtensions
         var users = app.MapGroup("/users/me").AddEndpointFilter<SupabaseAuthFilter>();
         users.MapGet("", Profile.GetMyProfile);
         users.MapPut("", Profile.UpdateProfile);
+        
+        users.MapGet("/is-admin", Auth.IsUserAdmin);
+        
         users.MapGet("/tickets", Tickets.GetMyTickets);
         users.MapGet("/tickets/{ticketId:int}", Tickets.GetMyTickets);
         users.MapGet("/donations", Donations.GetMyDonations);
