@@ -58,8 +58,14 @@ export class CuentaComponent implements OnInit{
     this.loadingPerfil = true;
     this.authService.getProfile().subscribe({
       next: (data) => {
-        this.usuario = data;
-        this.usuarioOriginal = JSON.parse(JSON.stringify(data));
+        // Mapear los campos del backend al frontend
+        // Backend envía: piso (no pisoPuerta) y cp (no codigoPostal)
+        this.usuario = {
+          ...data,
+          pisoPuerta: data.piso,
+          codigoPostal: data.cp
+        };
+        this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario));
         this.loadingPerfil = false;
       },
       error: (e) => {
@@ -96,7 +102,13 @@ export class CuentaComponent implements OnInit{
   // --- ACCIONES ---
   guardarCambios() {
     this.isLoading = true;
-    this.authService.updateProfile(this.usuario).subscribe({
+    // Mapear los campos al formato esperado por el backend
+    const datosAEnviar = {
+      ...this.usuario,
+      piso: this.usuario.pisoPuerta,
+      cp: this.usuario.codigoPostal
+    };
+    this.authService.updateProfile(datosAEnviar).subscribe({
       next: () => {
         alert('✅ Datos actualizados correctamente');
         this.isLoading = false;
