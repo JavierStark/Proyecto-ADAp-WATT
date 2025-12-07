@@ -1,5 +1,5 @@
 ﻿using Backend.Models;
-using Backend.PaymentService;
+using Backend.Services;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
@@ -88,7 +88,7 @@ static class Events
                 .Single();
             
             var tipoEntrada = await client.From<EntradaEvento>()
-                .Filter("id", Operator.Equals, dto.TicketEventId.ToString()) // En EntradaEvento la PK es "id"
+                .Filter("id", Operator.Equals, dto.TicketEventId.ToString()) 
                 .Single();
 
             if (tipoEntrada == null) return Results.NotFound(new { error = "Entrada no encontrada." });
@@ -171,17 +171,17 @@ static class Events
             foreach (var idTipo in idsTipos)
             {
                 var tipo = await client.From<EntradaEvento>().Filter("id", Operator.Equals, idTipo.ToString()).Single();
-                if (tipo != null)
-                {
-                    infoTipos[idTipo] = (tipo.Tipo, tipo.Precio, tipo.FkEvento);
+                
+                if (tipo == null) continue;
+                if (infoEventos.ContainsKey(tipo.FkEvento)) continue;
+                
+                
+                infoTipos[idTipo] = (tipo.Tipo, tipo.Precio, tipo.FkEvento);
 
-                    if (!infoEventos.ContainsKey(tipo.FkEvento))
-                    {
-                        var evt = await client.From<Evento>().Filter("id", Operator.Equals, tipo.FkEvento.ToString())
-                            .Single();
-                        if (evt != null) infoEventos[tipo.FkEvento] = evt.Nombre ?? "Evento";
-                    }
-                }
+
+                var evt = await client.From<Evento>().Filter("id", Operator.Equals, tipo.FkEvento.ToString())
+                    .Single();
+                if (evt != null) infoEventos[tipo.FkEvento] = evt.Nombre ?? "Evento";
             }
 
             // Mapear a DTO
@@ -238,7 +238,7 @@ static class Events
                 .Single();
 
 
-            if (dto.ReservationIds == null || !dto.ReservationIds.Any())
+            if (!dto.ReservationIds.Any())
                 return Results.BadRequest(new { error = "No has seleccionado ninguna reserva." });
 
             // Obtenemos las reseervas a partir de sus Ids
@@ -271,14 +271,14 @@ static class Events
 
             foreach (var reserva in reservasAConfirmar)
             {
-                if (preciosDict.TryGetValue(reserva.FkEntradaEvento, out var info))
-                {
-                    totalPagar += info.Precio * reserva.Cantidad;
+                if (!preciosDict.TryGetValue(reserva.FkEntradaEvento, out var info)) continue;
+                
+                
+                totalPagar += info.Precio * reserva.Cantidad;
 
-                    // Contabilizar para aforo global
-                    if (!eventosAfectados.ContainsKey(info.IdEvento)) eventosAfectados[info.IdEvento] = 0;
-                    eventosAfectados[info.IdEvento] += reserva.Cantidad;
-                }
+                // Contabilizar para aforo global
+                eventosAfectados.TryAdd(info.IdEvento, 0);
+                eventosAfectados[info.IdEvento] += reserva.Cantidad;
             }
 
             if (totalPagar == 0) return Results.BadRequest(new { error = "Carrito vacío." });

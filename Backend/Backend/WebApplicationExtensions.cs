@@ -47,6 +47,7 @@ public static class WebApplicationExtensions
         tickets.MapPost("/purchase/start", Events.StartPurchase);
         tickets.MapGet("/my-cart", Events.GetMyReservations);
         tickets.MapPost("/purchase/confirm", Events.ConfirmPurchase);
+        tickets.MapPost("/send-test-email", Tickets.SendTicketByEmail);
 
         return app;
     }

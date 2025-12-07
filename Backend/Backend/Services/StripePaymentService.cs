@@ -1,6 +1,6 @@
-﻿namespace Backend.PaymentService;
+﻿using Stripe;
 
-using Stripe;
+namespace Backend.Services;
 
 public class StripePaymentService : IPaymentService
 {
