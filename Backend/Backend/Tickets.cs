@@ -532,6 +532,43 @@ static class Tickets
         }
     }
     
+    public static async Task<IResult> ValidateTicketQr(string qrCode, Client client)
+    {
+        try
+        {
+            var ticket = await client.From<Entrada>()
+                .Filter("codigo_qr", Operator.Equals, qrCode)
+                .Single();
+
+            if (ticket == null)
+            {
+                return Results.NotFound(new { error = "Código QR no válido." });
+            }
+
+            var evento = await client.From<Evento>()
+                .Filter("id", Operator.Equals, ticket.FkEvento.ToString())
+                .Single();
+
+            return Results.Ok(new
+            {
+                status = "success",
+                message = "Código QR válido.",
+                ticket = new
+                {
+                    ticket.Id,
+                    EventoNombre = evento?.Nombre,
+                    ticket.Precio,
+                    ticket.FechaCompra,
+                    ticket.Estado
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error validando código QR: " + ex.Message);
+        }
+    }
+    
     public record TicketDto(
         Guid TicketId,
         string EventoNombre,
