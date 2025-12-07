@@ -31,6 +31,14 @@ public static class WebApplicationExtensions
 
         return app;
     }
+    
+    public static WebApplication MapPartnerEndpoints(this WebApplication app)
+    {
+        var partners = app.MapGroup("/partners").AddEndpointFilter<SupabaseAuthFilter>();
+        partners.MapPost("/subscribe", Partner.BecomePartner);
+
+        return app;
+    }
 
     public static WebApplication MapEventEndpoints(this WebApplication app)
     {
