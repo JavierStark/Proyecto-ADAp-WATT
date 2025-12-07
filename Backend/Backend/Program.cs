@@ -1,7 +1,7 @@
 using Backend;
 using System.Text.Json;
 using Backend.Filters;
-using Backend.PaymentService;
+using Backend.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,6 +55,8 @@ else
 {
     builder.Services.AddScoped<IPaymentService, StripePaymentService>();
 }
+
+builder.Services.AddScoped<IEmailService, MailGunService>();
 
 var app = builder.Build();
 

@@ -1,4 +1,4 @@
-﻿namespace Backend.PaymentService;
+﻿namespace Backend.Services;
 
 public interface IPaymentService
 {

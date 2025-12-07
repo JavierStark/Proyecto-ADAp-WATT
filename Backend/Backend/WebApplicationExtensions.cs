@@ -52,9 +52,10 @@ public static class WebApplicationExtensions
     public static WebApplication MapTicketEndpoints(this WebApplication app)
     {
         var tickets = app.MapGroup("/tickets").AddEndpointFilter<SupabaseAuthFilter>();
-        tickets.MapPost("/purchase/start", Events.StartPurchase);
-        tickets.MapGet("/my-cart", Events.GetMyReservations);
-        tickets.MapPost("/purchase/confirm", Events.ConfirmPurchase);
+        tickets.MapPost("/purchase/start", Tickets.StartPurchase);
+        tickets.MapGet("/my-cart", Tickets.GetMyReservations);
+        tickets.MapPost("/purchase/confirm", Tickets.ConfirmPurchase);
+        tickets.MapPost("/send-test-email", Tickets.SendTestEmail);
 
         return app;
     }
@@ -71,7 +72,7 @@ public static class WebApplicationExtensions
     public static WebApplication MapPaymentEndpoints(this WebApplication app)
     {
         var payments = app.MapGroup("/payments");
-        payments.MapGet("/methods", Events.GetPaymentMethods);
+        payments.MapGet("/methods", Tickets.GetPaymentMethods);
 
         return app;
     }
@@ -79,7 +80,7 @@ public static class WebApplicationExtensions
     public static WebApplication MapDiscountEndpoints(this WebApplication app)
     {
         var discounts = app.MapGroup("/discounts");
-        discounts.MapPost("/validate", Events.ValidateDiscount);
+        discounts.MapPost("/validate", Tickets.ValidateDiscount);
 
         return app;
     }
