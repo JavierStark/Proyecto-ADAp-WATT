@@ -21,7 +21,7 @@ public class Evento : BaseModel
 
     [Column("entradas_vendidas")] public int EntradasVendidas { get; set; }
 
-    [Column("entrada_valida")] public bool? EntradaValida { get; set; }
+    [Column("evento_visible")] public bool? EventoVisible { get; set; }
 
     [Column("objeto_recaudacion")] public string? ObjetoRecaudacion { get; set; }
 }

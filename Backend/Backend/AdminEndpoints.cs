@@ -32,7 +32,7 @@ static class AdminEndpoints
                     e.Ubicacion,
                     e.Aforo ?? 0,
                     e.EntradasVendidas,
-                    e.EntradaValida,
+                    e.EventoVisible,
                     e.ObjetoRecaudacion ?? "Sin especificar",
                     general?.Precio ?? 0,
                     general?.Cantidad ?? 0,
@@ -82,7 +82,7 @@ static class AdminEndpoints
                 FechaEvento = dto.Fecha,
                 Ubicacion = dto.Ubicacion,
                 Aforo = aforoTotal,
-                EntradaValida = dto.EntradaValida,
+                EventoVisible = dto.EventoVisible,
                 ObjetoRecaudacion = dto.ObjetoRecaudacion
             };
 
@@ -127,7 +127,7 @@ static class AdminEndpoints
                     eventoCreado.Ubicacion,
                     eventoCreado.Aforo ?? 0,
                     0,
-                    eventoCreado.EntradaValida,
+                    eventoCreado.EventoVisible,
                     eventoCreado.ObjetoRecaudacion ?? "Sin especificar",
                     dto.PrecioGeneral,
                     dto.CantidadGeneral,
@@ -193,9 +193,9 @@ static class AdminEndpoints
                 huboCambiosEvento = true;
             }
 
-            if (dto.EntradaValida.HasValue)
+            if (dto.EventoVisible.HasValue)
             {
-                evento.EntradaValida = dto.EntradaValida.Value;
+                evento.EventoVisible = dto.EventoVisible.Value;
                 huboCambiosEvento = true;
             }
 
@@ -283,7 +283,7 @@ static class AdminEndpoints
                     evento.Ubicacion,
                     evento.Aforo ?? 0,
                     evento.EntradasVendidas,
-                    evento.EntradaValida,
+                    evento.EventoVisible,
                     evento.ObjetoRecaudacion ?? "Sin especificar",
 
                     // Datos planos
@@ -342,7 +342,7 @@ static class AdminEndpoints
         string? Ubicacion,
         int Aforo,
         int EntradasVendidas,
-        bool? EntradaValida,
+        bool? EventoVisible,
         string ObjetoRecaudacion,
         decimal PrecioGeneral,
         int CantidadGeneral,
@@ -355,7 +355,7 @@ static class AdminEndpoints
         string? Descripcion,
         DateTime Fecha,
         string? Ubicacion,
-        bool EntradaValida,
+        bool EventoVisible,
         string ObjetoRecaudacion,
         decimal PrecioGeneral,
         int CantidadGeneral,
@@ -370,7 +370,7 @@ static class AdminEndpoints
         DateTime? Fecha,
         string? Ubicacion,
         int? Aforo,
-        bool? EntradaValida,
+        bool? EventoVisible,
         string? ObjetoRecaudacion,
         decimal? PrecioGeneral,
         int? CantidadGeneral,

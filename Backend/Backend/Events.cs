@@ -12,6 +12,7 @@ static class Events
         {
             var dbQuery =
                 client.From<Evento>()
+                    .Filter("evento_visible", Operator.Equals, "true")
                     .Order(e => e.FechaEvento!, Ordering.Ascending);
 
             if (!string.IsNullOrEmpty(query))
@@ -28,7 +29,6 @@ static class Events
                 e.Ubicacion,
                 e.Aforo ?? 0,
                 e.EntradasVendidas,
-                e.EntradaValida,
                 e.ObjetoRecaudacion ?? "Sin especificar"
             ));
 
@@ -64,7 +64,6 @@ static class Events
                 eventoDb.Ubicacion,
                 eventoDb.Aforo ?? 0,
                 eventoDb.EntradasVendidas,
-                eventoDb.EntradaValida,
                 eventoDb.ObjetoRecaudacion ?? "Sin especificar"
             );
 
@@ -436,7 +435,6 @@ static class Events
         string? Ubicacion,
         int Aforo,
         int EntradasVendidas,
-        bool? EntradaValida,
         string ObjetoRecaudacion
     );
 
