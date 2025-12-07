@@ -1,0 +1,41 @@
+<div class="min-h-screen flex items-center justify-center bg-[#0b1f2f] text-white px-[4vw] py-[6vh]">
+  <div class="w-full max-w-[720px] bg-white/5 border border-white/10 rounded-[1.4vw] p-[3vw] shadow-2xl shadow-black/30">
+    <h1 class="text-[2.6vw] font-semibold tracking-tight mb-[0.8vw]">Validación de entrada</h1>
+    <p class="text-white/70 text-[1.05vw] mb-[2vw]">Escanea tu QR y aterrizarás aquí. Validamos automáticamente el código.</p>
+
+    <div *ngIf="estado === 'loading'" class="text-[1.1vw] text-white/80">Comprobando...</div>
+    <div *ngIf="estado === 'missing'" class="text-[1.05vw] text-amber-200">No se encontró el parámetro <span class="font-semibold">qr</span> en la URL (?qr=...).</div>
+    <div *ngIf="estado === 'error'" class="text-[1.05vw] text-red-200">{{ mensaje }}</div>
+
+    <div *ngIf="estado === 'success'" class="space-y-[1.2vw]">
+      <div class="text-[1.1vw] text-emerald-200 font-medium">✔ {{ mensaje }}</div>
+
+      <div *ngIf="ticket" class="bg-white/5 border border-white/10 rounded-[1vw] p-[1.6vw] grid grid-cols-2 gap-[1vw] text-[1vw]">
+        <div>
+          <div class="text-white/50 text-[0.85vw]">Ticket ID</div>
+          <div class="font-semibold break-words">{{ ticket.id }}</div>
+        </div>
+        <div>
+          <div class="text-white/50 text-[0.85vw]">Estado</div>
+          <div class="font-semibold">{{ ticket.estado || 'Activo' }}</div>
+        </div>
+        <div>
+          <div class="text-white/50 text-[0.85vw]">Evento</div>
+          <div class="font-semibold">{{ ticket.evento || '—' }}</div>
+        </div>
+        <div>
+          <div class="text-white/50 text-[0.85vw]">Precio</div>
+          <div class="font-semibold">{{ ticket.precio !== null && ticket.precio !== undefined ? (ticket.precio | currency:'EUR':'symbol':'1.2-2':'es') : '—' }}</div>
+        </div>
+        <div>
+          <div class="text-white/50 text-[0.85vw]">Fecha compra</div>
+          <div class="font-semibold">{{ ticket.fechaCompra | date:'short':'':'es-ES' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-[2.4vw] text-[0.95vw] text-white/60">
+      Si quieres probarlo manualmente: abre <code class="bg-black/30 px-[0.6vw] py-[0.2vw] rounded">/validar-qr?qr=&lt;codigoQR&gt;</code> sustituyendo <span class="text-white">&lt;codigoQR&gt;</span> por el valor real del QR.
+    </div>
+  </div>
+</div>

@@ -98,4 +98,10 @@ export class AuthService {
     return this.http.get(`${this.apiUrl}/users/me/donations`, { headers: this.getHeaders() });
   }
 
+  // 5. Validar ticket vía QR (GET /tickets/validate?qrCode=...)
+  validateTicketQr(qrCode: string): Observable<any> {
+    const url = `${this.apiUrl}/tickets/validate?qrCode=${encodeURIComponent(qrCode)}`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
 }

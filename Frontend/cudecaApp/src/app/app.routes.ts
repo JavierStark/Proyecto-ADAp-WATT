@@ -10,6 +10,7 @@ import { EventosComponent } from './eventos/eventos.component';  // Importa el E
 import { EventoDetalleComponent } from './evento-detalles/evento-detalles.component';
 import { publicGuard } from './guards/public.guard';
 import { authGuard } from './guards/auth.guard';
+import { QrValidateComponent } from './qr-validate/qr-validate.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Ruta por defecto que carga el HomeComponent
@@ -19,6 +20,7 @@ export const routes: Routes = [
   { path: 'donation', component: DonationComponent }, // Ruta para donaciones
   { path: 'eventos', component: EventosComponent }, // Ruta para eventos
   { path: 'eventos/:id', component: EventoDetalleComponent },
+  { path: 'validar-qr', component: QrValidateComponent },
 ];
 
 @NgModule({
