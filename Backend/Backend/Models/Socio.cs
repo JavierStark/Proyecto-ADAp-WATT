@@ -4,7 +4,7 @@ using Supabase.Postgrest.Models;
 [Table("socio")]
 public class Socio : BaseModel
 {
-    [PrimaryKey("id", false)] public Guid Id { get; set; }
+    [PrimaryKey("id", false)] public Guid? Id { get; set; }
 
     [Column("fk_cliente")] public Guid FkCliente { get; set; }
 
