@@ -47,14 +47,16 @@ builder.Services.AddSingleton<Supabase.Client>(_ =>
 });
 
 // Payment logic
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddScoped<IPaymentService, SimulatedPaymentService>();
-}
-else
-{
-    builder.Services.AddScoped<IPaymentService, StripePaymentService>();
-}
+// if (builder.Environment.IsDevelopment())
+// {
+//     builder.Services.AddScoped<IPaymentService, SimulatedPaymentService>();
+// }
+// else
+// {
+//     builder.Services.AddScoped<IPaymentService, StripePaymentService>();
+// }
+
+builder.Services.AddScoped<IPaymentService, SimulatedPaymentService>();
 
 builder.Services.AddScoped<IEmailService, MailGunService>();
 
