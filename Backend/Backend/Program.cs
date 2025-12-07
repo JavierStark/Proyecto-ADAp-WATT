@@ -3,6 +3,9 @@ using System.Text.Json;
 using Backend.Filters;
 using Backend.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -65,7 +65,7 @@ public static class WebApplicationExtensions
     {
         var donations = app.MapGroup("/donations").AddEndpointFilter<SupabaseAuthFilter>();
         donations.MapPost("", Donations.CreateDonation);
-        donations.MapGet("/certificate/annual", Donations.GetDonationCertificate);
+        donations.MapPost("/certificate/annual", Donations.GetDonationCertificate);
 
         return app;
     }
