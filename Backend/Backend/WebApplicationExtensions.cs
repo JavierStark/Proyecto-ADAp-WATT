@@ -56,6 +56,7 @@ public static class WebApplicationExtensions
         tickets.MapGet("/my-cart", Tickets.GetMyReservations);
         tickets.MapPost("/purchase/confirm", Tickets.ConfirmPurchase);
         tickets.MapPost("/send-test-email", Tickets.SendTestEmail);
+        tickets.MapGet("/validate", Tickets.ValidateTicketQr);
 
         return app;
     }
