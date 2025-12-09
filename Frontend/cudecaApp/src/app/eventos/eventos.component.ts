@@ -1,10 +1,11 @@
 import { Component, OnInit, LOCALE_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
+import { AuthService } from '../services/auth.service';
 
 registerLocaleData(localeEs);
 
@@ -18,12 +19,13 @@ export interface Evento {
   capacidad?: number;
   inscritos?: number;
   objetoRecaudacion?: string;
+  visible?: boolean;
 }
 
 @Component({
   selector: 'app-eventos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './eventos.component.html',
   styleUrls: ['./eventos.component.css'],
   providers: [{ provide: LOCALE_ID, useValue: 'es-ES' }]
@@ -32,64 +34,221 @@ export class EventosComponent implements OnInit {
   eventos: Evento[] = [];
   // 1. VARIABLE DE ESTADO DE CARGA
   isLoading: boolean = true; 
+  isAdmin: boolean = false;
+  adminMode: boolean = false;
+  // Estado de formularios admin
+  showForm: boolean = false;
+  editingId: string | null = null;
+  saving: boolean = false;
+  formData: any = this.getEmptyForm();
 
   constructor(
     private router: Router,
-    private http: HttpClient 
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.cargarEventosDesdeBackend();
+    // Cargar eventos públicos por defecto; detectar si es admin para habilitar el modo
+    this.cargarEventosPublicos();
+    this.comprobarAdmin();
   }
 
-  cargarEventosDesdeBackend(): void {
+  comprobarAdmin(): void {
+    this.authService.isAdmin().subscribe({
+      next: (esAdmin) => {
+        this.isAdmin = esAdmin;
+      },
+      error: () => {
+        this.isAdmin = false;
+      }
+    });
+  }
+
+  cargarEventosPublicos(): void {
     this.isLoading = true; // Iniciamos carga
     const url = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/events'; 
 
     console.log('🔄 Intentando conectar con:', url);
 
-    this.http.get(url, { responseType: 'text' })
-      .pipe(
-        map(respuestaTexto => {
-          try {
-            const datosJson = JSON.parse(respuestaTexto);
-            console.log('✅ Datos crudos recibidos:', datosJson);
-            
-            return datosJson.map((item: any) => ({
-              id: item.id || item.Id || '',
-              titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
-              descripcion: item.description || item.descripcion || 'Sin descripción',
-              fecha: new Date(item.date || item.fecha || Date.now()),
-              imagen: item.imageUrl || item.imagen || 'assets/images/fondoCudeca.png',
-              ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
-              capacidad: item.capacity || item.capacidad || item.aforo || 50,
-              inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
-              objetoRecaudacion: item.goalDescription || item.objetoRecaudacion || item.objetivo || null
-            }));
-
-          } catch (e) {
-            console.warn('⚠️ Error al leer los datos:', e);
-            return [];
-          }
-        })
-      )
-      .subscribe({
-        next: (eventosTraducidos) => {
-          this.isLoading = false; // 2. TERMINA LA CARGA
-          if (eventosTraducidos.length > 0) {
-            this.eventos = eventosTraducidos;
-            console.log('🎉 Eventos cargados exitosamente');
-          } else {
-            console.log('⚠️ Lista vacía, cargando mocks...');
-            this.cargarEventosMock();
-          }
-        },
-        error: (error) => {
-          this.isLoading = false; // 2. TERMINA LA CARGA (incluso con error)
-          console.error('❌ Error Backend:', error);
+    fetch(url)
+      .then(r => r.text())
+      .then(texto => this.mapearEventos(texto))
+      .then(eventosTraducidos => {
+        this.isLoading = false;
+        if (eventosTraducidos.length > 0) {
+          this.eventos = eventosTraducidos;
+        } else {
           this.cargarEventosMock();
         }
+      })
+      .catch(err => {
+        console.error('❌ Error Backend:', err);
+        this.isLoading = false;
+        this.cargarEventosMock();
       });
+  }
+
+  cargarEventosAdmin(): void {
+    this.isLoading = true;
+    this.authService.getAdminEvents()
+      .pipe(map(datos => this.mapearEventosDesdeAdmin(datos)))
+      .subscribe({
+        next: (eventosTraducidos) => {
+          this.isLoading = false;
+          this.eventos = eventosTraducidos;
+        },
+        error: (error) => {
+          console.error('❌ Error cargando eventos admin, usando públicos:', error);
+          this.isLoading = false;
+          this.cargarEventosPublicos();
+        }
+      });
+  }
+
+  toggleAdminMode(): void {
+    if (!this.isAdmin) return;
+    this.adminMode = !this.adminMode;
+    if (this.adminMode) {
+      this.cargarEventosAdmin();
+    } else {
+      this.cargarEventosPublicos();
+    }
+  }
+
+  // --- FORM ADMIN ---
+  getEmptyForm() {
+    return {
+      nombre: '',
+      descripcion: '',
+      fecha: '',
+      ubicacion: '',
+      eventoVisible: true,
+      objetoRecaudacion: '',
+      precioGeneral: 0,
+      cantidadGeneral: 0,
+      precioVip: null,
+      cantidadVip: null
+    };
+  }
+
+  abrirCrear() {
+    this.editingId = null;
+    this.formData = this.getEmptyForm();
+    this.showForm = true;
+  }
+
+  abrirEditar(evento: any) {
+    this.editingId = evento.id;
+    this.formData = {
+      nombre: evento.titulo,
+      descripcion: evento.descripcion,
+      fecha: evento.fecha ? new Date(evento.fecha).toISOString().slice(0,16) : '',
+      ubicacion: evento.ubicacion,
+      eventoVisible: evento.visible ?? true,
+      objetoRecaudacion: evento.objetoRecaudacion || '',
+      precioGeneral: evento.precioGeneral ?? 0,
+      cantidadGeneral: evento.cantidadGeneral ?? 0,
+      precioVip: evento.precioVip ?? null,
+      cantidadVip: evento.cantidadVip ?? null
+    };
+    this.showForm = true;
+  }
+
+  cerrarForm() {
+    if (this.saving) return;
+    this.showForm = false;
+  }
+
+  guardarEvento() {
+    if (this.saving) return;
+    this.saving = true;
+
+    const payload: any = {
+      nombre: this.formData.nombre,
+      descripcion: this.formData.descripcion,
+      fecha: this.formData.fecha ? new Date(this.formData.fecha).toISOString() : null,
+      ubicacion: this.formData.ubicacion,
+      eventoVisible: !!this.formData.eventoVisible,
+      objetoRecaudacion: this.formData.objetoRecaudacion || null,
+      precioGeneral: Number(this.formData.precioGeneral) || 0,
+      cantidadGeneral: Number(this.formData.cantidadGeneral) || 0,
+      precioVip: this.formData.precioVip !== null && this.formData.precioVip !== '' ? Number(this.formData.precioVip) : null,
+      cantidadVip: this.formData.cantidadVip !== null && this.formData.cantidadVip !== '' ? Number(this.formData.cantidadVip) : null
+    };
+
+    const obs = this.editingId
+      ? this.authService.updateAdminEvent(this.editingId, payload)
+      : this.authService.createAdminEvent(payload);
+
+    obs.subscribe({
+      next: () => {
+        this.saving = false;
+        this.showForm = false;
+        this.cargarEventosAdmin();
+      },
+      error: (err) => {
+        console.error('Error guardando evento', err);
+        this.saving = false;
+      }
+    });
+  }
+
+  eliminarEvento(id: string) {
+    if (!confirm('¿Eliminar este evento?')) return;
+    this.authService.deleteAdminEvent(id).subscribe({
+      next: () => this.cargarEventosAdmin(),
+      error: (err) => console.error('Error eliminando evento', err)
+    });
+  }
+
+  toggleVisible(evento: any) {
+    const nuevoVisible = !(evento.visible ?? true);
+    const payload = { eventoVisible: nuevoVisible };
+    this.authService.updateAdminEvent(evento.id, payload).subscribe({
+      next: () => this.cargarEventosAdmin(),
+      error: (err) => console.error('Error cambiando visibilidad', err)
+    });
+  }
+
+  private mapearEventos(textoRespuesta: string): Evento[] {
+    try {
+      const datosJson = JSON.parse(textoRespuesta);
+      return datosJson.map((item: any) => ({
+        id: item.id || item.Id || '',
+        titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
+        descripcion: item.description || item.descripcion || 'Sin descripción',
+        fecha: new Date(item.date || item.fecha || item.fechaEvento || Date.now()),
+        imagen: item.imageUrl || item.imagen || 'assets/images/fondoCudeca.png',
+        ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
+        capacidad: item.capacity || item.capacidad || item.aforo || 50,
+        inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
+        objetoRecaudacion: item.goalDescription || item.objetoRecaudacion || item.objetivo || null,
+        visible: item.eventoVisible ?? true
+      }));
+    } catch (e) {
+      console.warn('⚠️ Error al leer los datos:', e);
+      return [];
+    }
+  }
+
+  private mapearEventosDesdeAdmin(datos: any): Evento[] {
+    try {
+      return (datos || []).map((item: any) => ({
+        id: item.id || item.Id || '',
+        titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
+        descripcion: item.descripcion || item.description || 'Sin descripción',
+        fecha: new Date(item.fechaEvento || item.fecha || Date.now()),
+        imagen: 'assets/images/fondoCudeca.png',
+        ubicacion: item.ubicacion || 'Ubicación pendiente',
+        capacidad: item.aforo || item.capacity || 50,
+        inscritos: item.entradasVendidas || item.inscritos || 0,
+        objetoRecaudacion: item.objetoRecaudacion || null,
+        visible: item.eventoVisible ?? true
+      }));
+    } catch (e) {
+      console.warn('⚠️ Error al leer eventos admin:', e);
+      return [];
+    }
   }
 
   cargarEventosMock(): void {
@@ -143,6 +302,10 @@ export class EventosComponent implements OnInit {
 
   inscribirseEvento(eventoId: string): void {
     console.log('Inscribiéndose al evento:', eventoId);
+  }
+
+  irAdminEventos(): void {
+    alert('Gestión de eventos (crear/editar/eliminar) pendiente de UI.');
   }
 
   verDetalles(eventoId: string): void {

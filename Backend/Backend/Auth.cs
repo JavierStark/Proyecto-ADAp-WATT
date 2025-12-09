@@ -173,6 +173,34 @@ public static class Auth
             return Results.Problem("Error comprobando rol: " + ex.Message);
         }
     }
+    
+    public static async Task<IResult> IsPartner(HttpContext httpContext, Supabase.Client client)
+    {
+        try
+        {
+            var userId = httpContext.Items["user_id"]?.ToString();
+            if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
+            
+            var response = await client
+                .From<Socio>()
+                .Filter("fk_cliente", Operator.Equals, userId)
+                .Get();
+
+            var socio = response.Models.FirstOrDefault();
+
+            // Es socio si existe Y la fecha de fin es mayor que hoy
+            bool esSocioActivo = socio != null && socio.FechaFin > DateTime.UtcNow;
+
+            return Results.Ok(new 
+            { 
+                isSocio = esSocioActivo,
+            });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error comprobando estado de socio: " + ex.Message);
+        }
+    }
 }
 
 public record SignUpRequest(
