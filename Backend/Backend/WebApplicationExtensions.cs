@@ -40,6 +40,14 @@ public static class WebApplicationExtensions
 
         return app;
     }
+    
+    public static WebApplication MapOrganizationEndpoints(this WebApplication app)
+    {
+        var company = app.MapGroup("/company").AddEndpointFilter<SupabaseAuthFilter>();
+        company.MapPost("", Organization.UpdateCompany);
+
+        return app;
+    }
 
     public static WebApplication MapEventEndpoints(this WebApplication app)
     {

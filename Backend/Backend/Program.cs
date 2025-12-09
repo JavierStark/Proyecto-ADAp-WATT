@@ -87,6 +87,7 @@ app.MapGet("/test/supabase", TestSupabase);
 app.MapAuthEndpoints()
     .MapUserEndpoints()
     .MapPartnerEndpoints()
+    .MapOrganizationEndpoints()
     .MapEventEndpoints()
     .MapTicketEndpoints()
     .MapDonationEndpoints()
