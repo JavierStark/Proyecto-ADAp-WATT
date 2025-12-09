@@ -15,6 +15,8 @@ interface Evento {
   capacidad: number;
   inscritos: number;
   objetoRecaudacion?: string;
+  precioGeneral?: number | null;
+  precioVip?: number | null;
 }
 
 @Component({
@@ -59,7 +61,9 @@ export class EventoDetalleComponent implements OnInit {
         ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
         capacidad: item.capacity || item.capacidad || item.aforo || 50,
         inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
-        objetoRecaudacion: item.goalDescription || item.objetoRecaudacion
+        objetoRecaudacion: item.goalDescription || item.objetoRecaudacion,
+        precioGeneral: item.precioGeneral ?? item.priceGeneral ?? item.precio ?? null,
+        precioVip: item.precioVip ?? item.priceVip ?? null
       }))
     ).subscribe({
       next: (data) => {

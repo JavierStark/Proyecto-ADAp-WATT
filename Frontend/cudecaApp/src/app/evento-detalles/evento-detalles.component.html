@@ -71,6 +71,18 @@
             </div>
           </div>
 
+          <!-- Precios -->
+          <div *ngIf="evento.precioGeneral || evento.precioVip" class="mb-[3vw] flex flex-wrap gap-[0.8vw]">
+            <div *ngIf="evento.precioGeneral !== null && evento.precioGeneral !== undefined"
+                 class="px-[1vw] py-[0.7vw] bg-green-100 text-green-800 rounded-[0.9vw] text-[1.1vw] font-semibold">
+              General: {{ evento.precioGeneral | currency:'EUR':'symbol':'1.0-0' }}
+            </div>
+            <div *ngIf="evento.precioVip !== null && evento.precioVip !== undefined"
+                 class="px-[1vw] py-[0.7vw] bg-amber-100 text-amber-800 rounded-[0.9vw] text-[1.1vw] font-semibold">
+              VIP: {{ evento.precioVip | currency:'EUR':'symbol':'1.0-0' }}
+            </div>
+          </div>
+
           <!-- Botones de acción -->
           <div class="flex flex-col sm:flex-row gap-[1vw]">
             <button (click)="inscribirse()"
