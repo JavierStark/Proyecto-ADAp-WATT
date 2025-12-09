@@ -1,4 +1,4 @@
-<section class="relative w-full min-h-screen overflow-hidden">
+<section class="relative w-full min-h-screen overflow-hidden" [class.modal-active]="adminMode && showForm">
   
   <img
     src="assets/images/fondoCudeca.png" 
@@ -18,11 +18,21 @@
             Participa en nuestros eventos solidarios y ayuda a marcar la diferencia
           </p>
         </div>
-        <button *ngIf="isAdmin"
-          (click)="irAdminEventos()"
-          class="self-start mt-[3vw] bg-emerald-700 text-white text-[1vw] font-semibold px-[1.6vw] py-[0.9vw] rounded-lg shadow hover:bg-emerald-800 transition-colors">
-          Gestionar eventos
-        </button>
+        <div *ngIf="isAdmin" class="flex flex-col items-end gap-[0.8vw] mt-[5vw]">
+          <button
+            (click)="toggleAdminMode()"
+            class="bg-emerald-700 text-white text-[1vw] font-semibold px-[1.6vw] py-[0.9vw] rounded-lg shadow hover:bg-emerald-800 transition-colors">
+            {{ adminMode ? 'Salir de modo admin' : 'Modo admin' }}
+          </button>
+          <button *ngIf="adminMode"
+            (click)="abrirCrear()"
+            class="bg-white text-emerald-800 text-[1vw] font-semibold px-[1.4vw] py-[0.8vw] rounded-lg shadow border border-emerald-200 hover:bg-emerald-50 transition-colors">
+            + Nuevo evento
+          </button>
+          <span *ngIf="adminMode" class="text-[0.95vw] text-white bg-emerald-900/70 px-[1vw] py-[0.4vw] rounded-lg border border-white/10">
+            Viendo todos los eventos (incluidos ocultos).
+          </span>
+        </div>
       </div>
     </div>
 
@@ -33,8 +43,8 @@
 
     <div *ngIf="!isLoading" class="flex flex-col gap-[2vw] max-w-[90vw] mx-auto">
       
-      <div *ngFor="let evento of eventos" 
-           class="bg-white rounded-[1vw] shadow-lg border border-green-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row h-auto md:min-h-[16vw]">
+       <div *ngFor="let evento of eventos" 
+         class="evento-card bg-white rounded-[1vw] shadow-lg border border-green-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row h-auto md:min-h-[16vw]">
         
         <div class="relative w-full md:w-[28%] h-[40vw] md:h-auto bg-gray-200 shrink-0">
           <img 
@@ -65,7 +75,7 @@
                 {{ evento.titulo }}
               </h3>
               <div class="flex items-center gap-[0.5vw]">
-                <span *ngIf="isAdmin && evento.visible === false" class="inline-flex items-center bg-red-50 text-red-700 text-[0.8vw] font-semibold px-[0.8vw] py-[0.3vw] rounded-lg border border-red-200">
+                <span *ngIf="adminMode && evento.visible === false" class="inline-flex items-center bg-red-50 text-red-700 text-[0.8vw] font-semibold px-[0.8vw] py-[0.3vw] rounded-lg border border-red-200">
                   Oculto
                 </span>
               
@@ -111,6 +121,24 @@
               class="flex-1 md:flex-none bg-green-800 text-white text-[1vw] font-semibold py-[0.7vw] px-[2vw] rounded-lg hover:bg-green-900 transition-colors shadow-sm">
               Inscribirse
             </button>
+
+            <ng-container *ngIf="adminMode">
+              <button 
+                (click)="abrirEditar(evento)"
+                class="bg-white text-emerald-800 text-[0.95vw] font-semibold py-[0.6vw] px-[1.2vw] rounded-lg border border-emerald-200 hover:bg-emerald-50 transition-colors">
+                Editar
+              </button>
+              <button 
+                (click)="toggleVisible(evento)"
+                class="bg-amber-500 text-white text-[0.95vw] font-semibold py-[0.6vw] px-[1.2vw] rounded-lg hover:bg-amber-600 transition-colors">
+                {{ evento.visible === false ? 'Mostrar' : 'Ocultar' }}
+              </button>
+              <button 
+                (click)="eliminarEvento(evento.id)"
+                class="bg-red-600 text-white text-[0.95vw] font-semibold py-[0.6vw] px-[1.2vw] rounded-lg hover:bg-red-700 transition-colors">
+                Eliminar
+              </button>
+            </ng-container>
           </div>
 
         </div>
@@ -124,5 +152,84 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Modal Admin Crear/Editar -->
+  <div *ngIf="adminMode && showForm" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-8">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[45rem] p-[1.5rem] space-y-[1rem]">
+      <div class="flex justify-between items-center mb-[1rem]">
+        <h3 class="text-[1.4rem] font-bold text-emerald-800">{{ editingId ? 'Editar evento' : 'Nuevo evento' }}</h3>
+        <button (click)="cerrarForm()" class="text-gray-500 hover:text-gray-700 text-[1.1rem]">✕</button>
+      </div>
+
+      <div *ngIf="formError" class="bg-red-50 border border-red-200 text-red-700 text-[0.9rem] rounded-lg px-[1rem] py-[0.8rem]">
+        {{ formError }}
+      </div>
+
+      <div class="grid grid-cols-2 gap-[0.75rem] text-[0.9rem]">
+        <label class="flex flex-col gap-[0.3vw]">
+          <span class="text-gray-700 font-semibold">Nombre</span>
+          <input [(ngModel)]="formData.nombre" class="border rounded-lg px-[0.6rem] py-[0.5rem]" />
+        </label>
+
+        <label class="flex flex-col gap-[0.3vw]">
+          <span class="text-gray-700 font-semibold">Fecha</span>
+          <input type="datetime-local" [(ngModel)]="formData.fecha" class="border rounded-lg px-[0.6rem] py-[0.5rem]" />
+        </label>
+
+        <label class="flex flex-col gap-[0.3vw] col-span-2">
+          <span class="text-gray-700 font-semibold">Descripción</span>
+          <textarea rows="3" [(ngModel)]="formData.descripcion" class="border rounded-lg px-[0.6rem] py-[0.5rem]"></textarea>
+        </label>
+
+        <label class="flex flex-col gap-[0.3vw]">
+          <span class="text-gray-700 font-semibold">Ubicación</span>
+          <input [(ngModel)]="formData.ubicacion" class="border rounded-lg px-[0.6rem] py-[0.5rem]" />
+        </label>
+
+        <label class="flex flex-col gap-[0.3vw]">
+          <span class="text-gray-700 font-semibold">Objetivo / Recaudación</span>
+          <input [(ngModel)]="formData.objetoRecaudacion" class="border rounded-lg px-[0.6rem] py-[0.5rem]" />
+        </label>
+
+        <label class="flex items-center gap-[0.5rem] col-span-2 text-gray-700 font-semibold">
+          <input type="checkbox" [(ngModel)]="formData.eventoVisible" /> Evento visible
+        </label>
+
+        <div class="col-span-2 grid grid-cols-2 gap-[0.75rem] bg-emerald-50 border border-emerald-100 rounded-xl p-[0.75rem]">
+          <div class="font-semibold text-emerald-800">Entradas General</div>
+          <div class="font-semibold text-emerald-800">Entradas VIP (opcional)</div>
+
+          <div class="grid grid-cols-2 gap-[0.6rem]">
+            <label class="flex flex-col text-[0.85rem] text-gray-700 gap-[0.15rem]">
+              Precio (€)
+              <input type="number" min="0" step="0.01" [(ngModel)]="formData.precioGeneral" class="border rounded-lg px-[0.5rem] py-[0.4rem]" />
+            </label>
+            <label class="flex flex-col text-[0.85rem] text-gray-700 gap-[0.15rem]">
+              Cantidad
+              <input type="number" min="0" step="1" [(ngModel)]="formData.cantidadGeneral" class="border rounded-lg px-[0.5rem] py-[0.4rem]" />
+            </label>
+          </div>
+
+          <div class="grid grid-cols-2 gap-[0.6rem]">
+            <label class="flex flex-col text-[0.85rem] text-gray-700 gap-[0.15rem]">
+              Precio VIP (€)
+              <input type="number" min="0" step="0.01" [(ngModel)]="formData.precioVip" class="border rounded-lg px-[0.5rem] py-[0.4rem]" />
+            </label>
+            <label class="flex flex-col text-[0.85rem] text-gray-700 gap-[0.15rem]">
+              Cantidad VIP
+              <input type="number" min="0" step="1" [(ngModel)]="formData.cantidadVip" class="border rounded-lg px-[0.5rem] py-[0.4rem]" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-[0.75rem] pt-[0.5rem]">
+        <button (click)="cerrarForm()" [disabled]="saving" class="px-[1rem] py-[0.6rem] rounded-lg border border-gray-300 text-gray-700 text-[0.9rem] disabled:opacity-50">Cancelar</button>
+        <button (click)="guardarEvento()" [disabled]="saving" class="px-[1.2rem] py-[0.7rem] rounded-lg bg-emerald-700 text-white text-[0.9rem] font-semibold hover:bg-emerald-800 disabled:opacity-60">
+          {{ saving ? 'Guardando...' : (editingId ? 'Guardar cambios' : 'Crear evento') }}
+        </button>
+      </div>
+    </div>
   </div>
 </section>

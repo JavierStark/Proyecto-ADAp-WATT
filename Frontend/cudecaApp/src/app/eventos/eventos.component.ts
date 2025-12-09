@@ -1,5 +1,6 @@
 import { Component, OnInit, LOCALE_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { registerLocaleData } from '@angular/common';
@@ -19,12 +20,16 @@ export interface Evento {
   inscritos?: number;
   objetoRecaudacion?: string;
   visible?: boolean;
+  precioGeneral?: number;
+  cantidadGeneral?: number;
+  precioVip?: number | null;
+  cantidadVip?: number | null;
 }
 
 @Component({
   selector: 'app-eventos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './eventos.component.html',
   styleUrls: ['./eventos.component.css'],
   providers: [{ provide: LOCALE_ID, useValue: 'es-ES' }]
@@ -35,6 +40,12 @@ export class EventosComponent implements OnInit {
   isLoading: boolean = true; 
   isAdmin: boolean = false;
   adminMode: boolean = false;
+  // Estado de formularios admin
+  showForm: boolean = false;
+  editingId: string | null = null;
+  saving: boolean = false;
+  formError: string = '';
+  formData: any = this.getEmptyForm();
 
   constructor(
     private router: Router,
@@ -109,6 +120,128 @@ export class EventosComponent implements OnInit {
     }
   }
 
+  // --- FORM ADMIN ---
+  getEmptyForm() {
+    return {
+      nombre: '',
+      descripcion: '',
+      fecha: '',
+      ubicacion: '',
+      eventoVisible: true,
+      objetoRecaudacion: '',
+      precioGeneral: 0,
+      cantidadGeneral: 0,
+      precioVip: null,
+      cantidadVip: null
+    };
+  }
+
+  abrirCrear() {
+    this.editingId = null;
+    this.formData = this.getEmptyForm();
+    this.showForm = true;
+  }
+
+  abrirEditar(evento: any) {
+    this.editingId = evento.id;
+    this.formData = {
+      nombre: evento.titulo,
+      descripcion: evento.descripcion,
+      fecha: evento.fecha ? new Date(evento.fecha).toISOString().slice(0,16) : '',
+      ubicacion: evento.ubicacion,
+      eventoVisible: evento.visible ?? true,
+      objetoRecaudacion: evento.objetoRecaudacion || '',
+      precioGeneral: evento.precioGeneral ?? 0,
+      cantidadGeneral: evento.cantidadGeneral ?? 0,
+      precioVip: evento.precioVip ?? null,
+      cantidadVip: evento.cantidadVip ?? null
+    };
+    this.showForm = true;
+  }
+
+  cerrarForm() {
+    if (this.saving) return;
+    this.showForm = false;
+    this.formError = '';
+  }
+
+  guardarEvento() {
+    if (this.saving) return;
+    
+    // Validación frontend
+    if (!this.formData.nombre?.trim()) {
+      this.formError = 'El nombre del evento es obligatorio.';
+      return;
+    }
+    if (!this.formData.fecha) {
+      this.formError = 'La fecha es obligatoria.';
+      return;
+    }
+    if (new Date(this.formData.fecha) < new Date()) {
+      this.formError = 'La fecha no puede ser en el pasado.';
+      return;
+    }
+    if (Number(this.formData.cantidadGeneral) <= 0) {
+      this.formError = 'Debe haber al menos 1 entrada General.';
+      return;
+    }
+    if (Number(this.formData.precioGeneral) < 0) {
+      this.formError = 'El precio General no puede ser negativo.';
+      return;
+    }
+
+    this.formError = '';
+    this.saving = true;
+
+    const payload: any = {
+      nombre: this.formData.nombre,
+      descripcion: this.formData.descripcion,
+      fecha: this.formData.fecha ? new Date(this.formData.fecha).toISOString() : null,
+      ubicacion: this.formData.ubicacion,
+      eventoVisible: !!this.formData.eventoVisible,
+      objetoRecaudacion: this.formData.objetoRecaudacion || null,
+      precioGeneral: Number(this.formData.precioGeneral) || 0,
+      cantidadGeneral: Number(this.formData.cantidadGeneral) || 0,
+      precioVip: this.formData.precioVip !== null && this.formData.precioVip !== '' ? Number(this.formData.precioVip) : null,
+      cantidadVip: this.formData.cantidadVip !== null && this.formData.cantidadVip !== '' ? Number(this.formData.cantidadVip) : null
+    };
+
+    const obs = this.editingId
+      ? this.authService.updateAdminEvent(this.editingId, payload)
+      : this.authService.createAdminEvent(payload);
+
+    obs.subscribe({
+      next: () => {
+        this.saving = false;
+        this.showForm = false;
+        this.formError = '';
+        this.cargarEventosAdmin();
+      },
+      error: (err) => {
+        console.error('Error guardando evento', err);
+        this.formError = err?.error?.error || err?.error?.message || 'Error al guardar. Intenta de nuevo.';
+        this.saving = false;
+      }
+    });
+  }
+
+  eliminarEvento(id: string) {
+    if (!confirm('¿Eliminar este evento?')) return;
+    this.authService.deleteAdminEvent(id).subscribe({
+      next: () => this.cargarEventosAdmin(),
+      error: (err) => console.error('Error eliminando evento', err)
+    });
+  }
+
+  toggleVisible(evento: any) {
+    const nuevoVisible = !(evento.visible ?? true);
+    const payload = { eventoVisible: nuevoVisible };
+    this.authService.updateAdminEvent(evento.id, payload).subscribe({
+      next: () => this.cargarEventosAdmin(),
+      error: (err) => console.error('Error cambiando visibilidad', err)
+    });
+  }
+
   private mapearEventos(textoRespuesta: string): Evento[] {
     try {
       const datosJson = JSON.parse(textoRespuesta);
@@ -142,7 +275,11 @@ export class EventosComponent implements OnInit {
         capacidad: item.aforo || item.capacity || 50,
         inscritos: item.entradasVendidas || item.inscritos || 0,
         objetoRecaudacion: item.objetoRecaudacion || null,
-        visible: item.eventoVisible ?? true
+        visible: item.eventoVisible ?? true,
+        precioGeneral: item.precioGeneral ?? item.PrecioGeneral ?? null,
+        cantidadGeneral: item.cantidadGeneral ?? item.CantidadGeneral ?? null,
+        precioVip: item.precioVip ?? item.PrecioVip ?? null,
+        cantidadVip: item.cantidadVip ?? item.CantidadVip ?? null
       }));
     } catch (e) {
       console.warn('⚠️ Error al leer eventos admin:', e);
