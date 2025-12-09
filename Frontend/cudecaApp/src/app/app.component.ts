@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router
 import {HostListener } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { CommonModule } from '@angular/common'; 
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -12,16 +13,21 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent {
 
-   isAuthRoute: boolean = false;
-  constructor(private router: Router) {
+  isAuthRoute: boolean = false;
+  isLoggedIn: boolean = false;
+
+  constructor(private router: Router, private authService: AuthService) {
 
      // Detectar cambios en la ruta
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.isAuthRoute = event.urlAfterRedirects.includes('/log-in') || event.urlAfterRedirects.includes('/sign-up');
         console.log('isAuthRoute:', this.isAuthRoute);
+        this.updateAuthStatus();
       }
     });
+
+    this.updateAuthStatus();
 
   }
 
@@ -43,6 +49,11 @@ export class AppComponent {
       }
 
       this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // Evitar desplazamiento negativo
+    }
+
+    @HostListener('window:storage', ['$event'])
+    onStorageChange() {
+      this.updateAuthStatus();
     }
 
  
@@ -72,5 +83,9 @@ export class AppComponent {
 
   goToEventos() {
     this.router.navigate(['/eventos']); // Navega a la página de eventos
+  }
+
+  private updateAuthStatus() {
+    this.isLoggedIn = this.authService.isLoggedIn();
   }
 }
