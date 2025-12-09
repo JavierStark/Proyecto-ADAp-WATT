@@ -40,6 +40,7 @@ export class EventosComponent implements OnInit {
   showForm: boolean = false;
   editingId: string | null = null;
   saving: boolean = false;
+  formError: string = '';
   formData: any = this.getEmptyForm();
 
   constructor(
@@ -157,10 +158,35 @@ export class EventosComponent implements OnInit {
   cerrarForm() {
     if (this.saving) return;
     this.showForm = false;
+    this.formError = '';
   }
 
   guardarEvento() {
     if (this.saving) return;
+    
+    // Validación frontend
+    if (!this.formData.nombre?.trim()) {
+      this.formError = 'El nombre del evento es obligatorio.';
+      return;
+    }
+    if (!this.formData.fecha) {
+      this.formError = 'La fecha es obligatoria.';
+      return;
+    }
+    if (new Date(this.formData.fecha) < new Date()) {
+      this.formError = 'La fecha no puede ser en el pasado.';
+      return;
+    }
+    if (Number(this.formData.cantidadGeneral) <= 0) {
+      this.formError = 'Debe haber al menos 1 entrada General.';
+      return;
+    }
+    if (Number(this.formData.precioGeneral) < 0) {
+      this.formError = 'El precio General no puede ser negativo.';
+      return;
+    }
+
+    this.formError = '';
     this.saving = true;
 
     const payload: any = {
@@ -184,10 +210,12 @@ export class EventosComponent implements OnInit {
       next: () => {
         this.saving = false;
         this.showForm = false;
+        this.formError = '';
         this.cargarEventosAdmin();
       },
       error: (err) => {
         console.error('Error guardando evento', err);
+        this.formError = err?.error?.error || err?.error?.message || 'Error al guardar. Intenta de nuevo.';
         this.saving = false;
       }
     });
