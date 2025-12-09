@@ -7,10 +7,16 @@
   overflow: hidden;
 }
 
-/* Hover suave para la tarjeta horizontal */
-.bg-white:hover {
+/* Hover suave para la tarjeta horizontal (solo cards de eventos) */
+.evento-card:hover {
   transform: translateX(0.3vw); /* Mueve ligeramente a la derecha en lugar de arriba */
   border-color: #059669; /* Un verde más intenso en el borde */
+}
+
+/* Desactivar hover desplazamiento cuando el modal está abierto (evita saltos al hacer zoom) */
+.modal-active .evento-card:hover {
+  transform: none;
+  border-color: inherit;
 }
 
 /* Ajustes Responsive */
