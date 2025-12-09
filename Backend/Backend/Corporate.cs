@@ -3,9 +3,9 @@ using static Supabase.Postgrest.Constants;
 
 namespace Backend;
 
-public class Organization
+public class Corporate
 {
-    public static async Task<IResult> UpdateCompany(HttpContext httpContext, CorporativoDto dto, 
+    public static async Task<IResult> UpdateCorporate(HttpContext httpContext, CorporativoDto dto, 
         Supabase.Client client)
     {
         try
@@ -20,19 +20,19 @@ public class Organization
                 return Results.BadRequest("El nombre de la empresa es obligatorio.");
             
             var response = await client
-                .From<Organizacion>()
+                .From<Models.Corporate>()
                 .Filter("fk_cliente", Operator.Equals, userIdString)
                 .Get();
 
             var empresaExistente = response.Models.FirstOrDefault();
 
-            Organizacion resultadoFinal;
+            Models.Corporate resultadoFinal;
             string mensaje;
             
             if (empresaExistente != null)
             {
                 // Actualizar
-                await client.From<Organizacion>()
+                await client.From<Models.Corporate>()
                     .Filter("id", Operator.Equals, empresaExistente.Id.ToString())
                     .Set(x => x.NombreEmpresa, dto.NombreEmpresa.Trim())
                     .Update();
@@ -44,7 +44,7 @@ public class Organization
             else
             {
                 // Insertar
-                var nuevaEmpresa = new Organizacion
+                var nuevaEmpresa = new Models.Corporate
                 {
                     FkCliente = userGuid,
                     NombreEmpresa = dto.NombreEmpresa.Trim()
@@ -52,7 +52,7 @@ public class Organization
 
                 // Insertamos y capturamos la respuesta para devolver el objeto creado (con su nuevo ID)
                 var insertResponse = await client
-                    .From<Organizacion>()
+                    .From<Models.Corporate>()
                     .Insert(nuevaEmpresa);
 
                 resultadoFinal = insertResponse.Models.First();

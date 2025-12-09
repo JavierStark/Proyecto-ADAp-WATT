@@ -201,6 +201,31 @@ public static class Auth
             return Results.Problem("Error comprobando estado de socio: " + ex.Message);
         }
     }
+    
+    public static async Task<IResult> IsCorporate(HttpContext httpContext, Supabase.Client client)
+    {
+        try
+        {
+            var userId = httpContext.Items["user_id"]?.ToString();
+            if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
+            
+            var response = await client
+                .From<Models.Corporate>()
+                .Filter("fk_cliente", Operator.Equals, userId)
+                .Get();
+            
+            bool esCorporativo = response.Models.Any();
+
+            return Results.Ok(new 
+            { 
+                isCorporate = esCorporativo,
+            });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error comprobando estado corporativo: " + ex.Message);
+        }
+    }
 }
 
 public record SignUpRequest(

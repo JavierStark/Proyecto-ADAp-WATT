@@ -4,7 +4,7 @@ using Supabase.Postgrest.Models;
 namespace Backend.Models;
 
 [Table("corporativo")]
-public class Organizacion : BaseModel
+public class Corporate : BaseModel
 {
     [PrimaryKey("id", false)]
     public Guid? Id { get; set; }

@@ -24,6 +24,7 @@ public static class WebApplicationExtensions
         
         users.MapGet("/is-admin", Auth.IsUserAdmin);
         users.MapGet("/is-partner", Auth.IsPartner);
+        users.MapGet("/is-corporate", Auth.IsCorporate);
         
         users.MapGet("/tickets", Tickets.GetMyTickets);
         users.MapGet("/tickets/{ticketId:int}", Tickets.GetMyTickets);
@@ -44,7 +45,7 @@ public static class WebApplicationExtensions
     public static WebApplication MapOrganizationEndpoints(this WebApplication app)
     {
         var company = app.MapGroup("/company").AddEndpointFilter<SupabaseAuthFilter>();
-        company.MapPost("", Organization.UpdateCompany);
+        company.MapPost("", Corporate.UpdateCorporate);
 
         return app;
     }
