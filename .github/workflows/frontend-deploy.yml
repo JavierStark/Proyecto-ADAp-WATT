@@ -41,6 +41,10 @@ jobs:
       - name: Add .nojekyll file
         run: echo "" > Frontend/cudecaApp/dist/cudeca-app/browser/.nojekyll
 
+      - name: Add 404 fallback
+        run: cp Frontend/cudecaApp/dist/cudeca-app/browser/index.html Frontend/cudecaApp/dist/cudeca-app/browser/404.html
+
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
