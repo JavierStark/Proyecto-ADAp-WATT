@@ -20,6 +20,10 @@ export interface Evento {
   inscritos?: number;
   objetoRecaudacion?: string;
   visible?: boolean;
+  precioGeneral?: number;
+  cantidadGeneral?: number;
+  precioVip?: number | null;
+  cantidadVip?: number | null;
 }
 
 @Component({
@@ -271,7 +275,11 @@ export class EventosComponent implements OnInit {
         capacidad: item.aforo || item.capacity || 50,
         inscritos: item.entradasVendidas || item.inscritos || 0,
         objetoRecaudacion: item.objetoRecaudacion || null,
-        visible: item.eventoVisible ?? true
+        visible: item.eventoVisible ?? true,
+        precioGeneral: item.precioGeneral ?? item.PrecioGeneral ?? null,
+        cantidadGeneral: item.cantidadGeneral ?? item.CantidadGeneral ?? null,
+        precioVip: item.precioVip ?? item.PrecioVip ?? null,
+        cantidadVip: item.cantidadVip ?? item.CantidadVip ?? null
       }));
     } catch (e) {
       console.warn('⚠️ Error al leer eventos admin:', e);
