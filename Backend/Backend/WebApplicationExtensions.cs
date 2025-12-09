@@ -23,6 +23,7 @@ public static class WebApplicationExtensions
         users.MapPut("", Profile.UpdateProfile);
         
         users.MapGet("/is-admin", Auth.IsUserAdmin);
+        users.MapGet("/is-partner", Auth.IsPartner);
         
         users.MapGet("/tickets", Tickets.GetMyTickets);
         users.MapGet("/tickets/{ticketId:int}", Tickets.GetMyTickets);

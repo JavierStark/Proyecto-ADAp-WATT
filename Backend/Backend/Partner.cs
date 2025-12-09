@@ -11,8 +11,8 @@ public class Partner
     {
         try
         {
+            // Auth
             var userId = httpContext.Items["user_id"]?.ToString();
-            // Validación de seguridad antes de parsear
             if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
             
             var userIdGuid = Guid.Parse(userId);
@@ -29,10 +29,10 @@ public class Partner
             };
             if (meses == 0) return Results.BadRequest("Plan inválido.");
 
-            // 1. PROCESAR PAGO (Pasarela externa)
+            // Procesar pago
             await paymentService.ProcessPaymentAsync(dto.Importe, dto.PaymentToken);
 
-            // 2. GUARDAR EL PAGO EN BD
+            // Guardar el pago
             var nuevoPago = new Pago
             {
                 Monto = dto.Importe,
@@ -43,9 +43,8 @@ public class Partner
             };
 
             var pagoResponse = await client.From<Pago>().Insert(nuevoPago);
-            var pagoCreado = pagoResponse.Models.First(); // Aquí tenemos el ID del pago (pagoCreado.Id)
-
-            // 3. BUSCAR SOCIO
+            var pagoCreado = pagoResponse.Models.First();
+            
             var response = await client
                 .From<Socio>()
                 .Filter("fk_cliente", Operator.Equals, userId)
@@ -63,16 +62,14 @@ public class Partner
                 fechaInicio = socioExistente.FechaInicio;
                 nuevaFechaFin = socioExistente.FechaFin.AddMonths(meses);
             }
-
-            // Variables para guardar datos finales y usarlos en el paso 5
+            
             Guid socioIdFinal;
             string conceptoHistorial;
-
-            // 4. INSERTAR O ACTUALIZAR SOCIO
+            
             if (socioExistente != null)
             {
-                // === CASO ACTUALIZAR ===
-                socioIdFinal = socioExistente.Id!.Value; // Usamos el ID existente
+                // Actualizar
+                socioIdFinal = socioExistente.Id!.Value;
                 conceptoHistorial = $"Renovación {dto.Plan}";
 
                 await client.From<Socio>()
@@ -85,24 +82,23 @@ public class Partner
             }
             else
             {
-                // === CASO INSERTAR ===
+                // Insertar 
                 conceptoHistorial = $"Alta {dto.Plan}";
 
                 var nuevoSocio = new Socio
                 {
-                    Id = null, // Dejar null para que BD genere UUID
+                    Id = null,
                     FkCliente = userIdGuid,
                     TipoSuscripcion = dto.Plan.ToLower(),
                     Cuota = dto.Importe,
                     FechaInicio = fechaInicio,
                     FechaFin = nuevaFechaFin
                 };
-
-                // CAMBIO CLAVE: Capturamos la respuesta para obtener el ID generado
+                
                 var insertResponse = await client.From<Socio>().Insert(nuevoSocio);
                 var socioCreado = insertResponse.Models.First();
                 
-                socioIdFinal = socioCreado.Id!.Value; // Obtenemos el nuevo ID
+                socioIdFinal = socioCreado.Id!.Value;
             }
 
             // Guardar periodo_socio
