@@ -1,48 +1,52 @@
-<section class="relative w-full h-screen overflow-hidden bg-cover bg-center"
+<section class="relative w-full min-h-screen overflow-hidden bg-cover bg-center"
          style="background-image: url('assets/images/fondoCudeca.png');">
-  <!-- Botón volver arriba a la derecha -->
-  <button type="button" (click)="goBack()"
-          aria-label="Volver"
-          class="absolute top-[1.3vw] right-[1.3vw] z-20 p-[1.3vw] bg-white bg-opacity-90 rounded-full shadow-md text-green-600 hover:bg-opacity-100 focus:outline-none">
-    <!-- Icono chevron-left SVG -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-[1.5vw] w-[1.5vw]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fill-rule="evenodd" d="M12.293 15.293a1 1 0 01-1.414 0L6.586 11l4.293-4.293a1 1 0 011.414 1.414L9.414 11l2.879 2.879a1 1 0 010 1.414z" clip-rule="evenodd"/>
-    </svg>
-  </button>
-  <!-- Filtro de oscuridad -->
-  <div class="absolute inset-0 bg-green-900 opacity-60 z-0"></div>
 
-  <!-- Formulario de Registro -->
-  <div class="relative z-10 flex items-center justify-center w-full h-full px-[1.5vw]">
-    <div class="bg-white p-[1.6vw] rounded-[1vw] shadow-lg w-[35vw]">
-      <h1 class="text-[2.6vw] font-bold text-center text-green-600 mb-[1.2vw]">Registrarse</h1>
-      
+  <!-- Botón volver -->
+  <button type="button"
+          (click)="goBack()"
+          aria-label="Volver"
+          class="absolute top-4 right-4 z-20 p-3 bg-white bg-opacity-90 rounded-full shadow-md text-green-600 hover:bg-opacity-100 focus:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M12.293 15.293a1 1 0 01-1.414 0L6.586 11l4.293-4.293a1 1 0 011.414 1.414L9.414 11l2.879 2.879a1 1 0 010 1.414z" clip-rule="evenodd"/>
+      </svg>
+  </button>
+
+  <!-- Filtro oscuro -->
+  <div class="absolute inset-0 bg-green-900 opacity-60"></div>
+
+  <!-- Contenedor -->
+  <div class="relative z-10 flex items-center justify-center w-full min-h-screen px-4 md:px-8">
+
+    <div class="bg-white p-6 md:p-10 rounded-xl shadow-lg w-full max-w-md md:max-w-lg">
+
+      <h1 class="text-3xl md:text-4xl font-bold text-center text-green-600 mb-6">Registrarse</h1>
+
       <form (ngSubmit)="onSubmit()">
 
-        <!-- Correo electrónico -->
-        <div class="mb-[1vw]">
-          <label for="email" class="block text-[1vw] font-medium text-gray-700">Correo electrónico</label>
-          <input type="email" id="email" [(ngModel)]="email" name="email" 
-                 required class="w-full px-[1vw] py-[0.6vw] mt-[0.6vw] border border-gray-300 rounded-[0.6vw] focus:outline-none focus:ring-2 focus:ring-green-500 text-[0.95vw]">
+        <!-- Email -->
+        <div class="mb-4">
+          <label for="email" class="block text-sm md:text-base font-medium text-gray-700">Correo electrónico</label>
+          <input type="email" id="email" [(ngModel)]="email" name="email" required
+                 class="w-full px-3 py-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none text-sm md:text-base">
         </div>
 
-        <!-- Contraseña -->
-        <div class="mb-[1vw]">
-          <label for="password" class="block text-[1vw] font-medium text-gray-700">Contraseña</label>
-          <input type="password" id="password" [(ngModel)]="password" name="password" 
-                 required class="w-full px-[1vw] py-[0.6vw] mt-[0.6vw] border border-gray-300 rounded-[0.6vw] focus:outline-none focus:ring-2 focus:ring-green-500 text-[0.95vw]">
+        <!-- Password -->
+        <div class="mb-4">
+          <label for="password" class="block text-sm md:text-base font-medium text-gray-700">Contraseña</label>
+          <input type="password" id="password" [(ngModel)]="password" name="password" required
+                 class="w-full px-3 py-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none text-sm md:text-base">
         </div>
 
-        <!-- Botón de Registrarse -->
+        <!-- Botón -->
         <button 
-          type="submit" 
+          type="submit"
           [disabled]="isLoading"
           [class.opacity-50]="isLoading"
           [class.cursor-not-allowed]="isLoading"
-          class="w-full py-[0.7vw] px-[1.2vw] bg-green-600 text-white rounded-[0.6vw] hover:bg-green-700 transition-colors text-[1.2vw] flex justify-center items-center gap-2">
-          
+          class="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex justify-center items-center gap-2 text-lg">
+
           <ng-container *ngIf="isLoading">
-            <svg class="animate-spin h-[1.2vw] w-[1.2vw] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -50,21 +54,19 @@
           </ng-container>
 
           <span *ngIf="!isLoading">Registrarse</span>
-
         </button>
       </form>
 
-      <!-- Enlace para iniciar sesión -->
-      <div class="mt-[0.7vw] text-center">
-        <p class="text-[1vw] text-gray-600">
-          ¿Ya tienes cuenta? 
-          <button
-            (click)="goToLogin()" 
-            class="text-green-600 hover:text-green-800">
+      <!-- Enlace login -->
+      <div class="mt-4 text-center">
+        <p class="text-sm md:text-base text-gray-600">
+          ¿Ya tienes cuenta?
+          <button (click)="goToLogin()" class="text-green-600 hover:text-green-800 font-medium">
             Iniciar sesión aquí
           </button>
         </p>
       </div>
+
     </div>
   </div>
 </section>
