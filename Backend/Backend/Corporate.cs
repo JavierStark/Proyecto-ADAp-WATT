@@ -20,19 +20,19 @@ public class Corporate
                 return Results.BadRequest("El nombre de la empresa es obligatorio.");
             
             var response = await client
-                .From<Models.Corporate>()
+                .From<Models.Corporativo>()
                 .Filter("fk_cliente", Operator.Equals, userIdString)
                 .Get();
 
             var empresaExistente = response.Models.FirstOrDefault();
 
-            Models.Corporate resultadoFinal;
+            Models.Corporativo resultadoFinal;
             string mensaje;
             
             if (empresaExistente != null)
             {
                 // Actualizar
-                await client.From<Models.Corporate>()
+                await client.From<Models.Corporativo>()
                     .Filter("id", Operator.Equals, empresaExistente.Id.ToString())
                     .Set(x => x.NombreEmpresa, dto.NombreEmpresa.Trim())
                     .Update();
@@ -44,7 +44,7 @@ public class Corporate
             else
             {
                 // Insertar
-                var nuevaEmpresa = new Models.Corporate
+                var nuevaEmpresa = new Models.Corporativo
                 {
                     FkCliente = userGuid,
                     NombreEmpresa = dto.NombreEmpresa.Trim()
@@ -52,7 +52,7 @@ public class Corporate
 
                 // Insertamos y capturamos la respuesta para devolver el objeto creado (con su nuevo ID)
                 var insertResponse = await client
-                    .From<Models.Corporate>()
+                    .From<Models.Corporativo>()
                     .Insert(nuevaEmpresa);
 
                 resultadoFinal = insertResponse.Models.First();
@@ -73,6 +73,36 @@ public class Corporate
         catch (Exception ex)
         {
             return Results.Problem("Error gestionando empresa: " + ex.Message);
+        }
+    }
+    
+    public static async Task<IResult> GetCorporateData(HttpContext httpContext, Supabase.Client client)
+    {
+        try
+        {
+            var userId = httpContext.Items["user_id"]?.ToString();
+            if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
+            
+            var response = await client
+                .From<Corporativo>()
+                .Filter("fk_cliente", Operator.Equals, userId)
+                .Get();
+
+            var empresa = response.Models.FirstOrDefault();
+
+            if (empresa == null)
+            {
+                return Results.NotFound(new { error = "El usuario no tiene perfil corporativo." });
+            }
+
+            return Results.Ok(new
+            {
+                nombreEmpresa = empresa.NombreEmpresa
+            });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error obteniendo datos corporativos: " + ex.Message);
         }
     }
 

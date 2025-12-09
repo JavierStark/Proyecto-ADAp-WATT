@@ -123,6 +123,43 @@ public class Partner
             return Results.Problem("Error: " + ex.Message);
         }
     }
+    
+    public static async Task<IResult> GetPartnerData(HttpContext httpContext, Supabase.Client client)
+    {
+        try
+        {
+            var userId = httpContext.Items["user_id"]?.ToString();
+            if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
+            
+            var response = await client
+                .From<Socio>()
+                .Filter("fk_cliente",Operator.Equals, userId)
+                .Get();
+
+            var socio = response.Models.FirstOrDefault();
+
+            if (socio == null)
+            {
+                return Results.NotFound(new { error = "El usuario no es socio actualmente." });
+            }
+
+            // Devolvemos datos
+            return Results.Ok(new
+            {
+                plan = socio.TipoSuscripcion,
+                cuota = socio.Cuota,
+                fechaInicio = socio.FechaInicio,
+                fechaFin = socio.FechaFin,
+
+                isActivo = socio.FechaFin > DateTime.UtcNow,
+                diasRestantes = (socio.FechaFin - DateTime.UtcNow).Days
+            });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error obteniendo datos de socio: " + ex.Message);
+        }
+    }
 
     public record SuscripcionDto(
         string Plan,

@@ -38,14 +38,16 @@ public static class WebApplicationExtensions
     {
         var partners = app.MapGroup("/partners").AddEndpointFilter<SupabaseAuthFilter>();
         partners.MapPost("/subscribe", Partner.BecomePartner);
+        partners.MapGet("/data", Partner.GetPartnerData);
 
         return app;
     }
     
-    public static WebApplication MapOrganizationEndpoints(this WebApplication app)
+    public static WebApplication MapCorporateEndpoints(this WebApplication app)
     {
         var company = app.MapGroup("/company").AddEndpointFilter<SupabaseAuthFilter>();
         company.MapPost("", Corporate.UpdateCorporate);
+        company.MapGet("", Corporate.GetCorporateData);
 
         return app;
     }

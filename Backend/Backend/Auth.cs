@@ -210,7 +210,7 @@ public static class Auth
             if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
             
             var response = await client
-                .From<Models.Corporate>()
+                .From<Models.Corporativo>()
                 .Filter("fk_cliente", Operator.Equals, userId)
                 .Get();
             
