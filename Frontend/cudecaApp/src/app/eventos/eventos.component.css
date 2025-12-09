@@ -7,6 +7,12 @@
   overflow: hidden;
 }
 
+/* Modal con scroll interno para contenido largo */
+.modal-backdrop > div {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
 /* Hover suave para la tarjeta horizontal (solo cards de eventos) */
 .evento-card:hover {
   transform: translateX(0.3vw); /* Mueve ligeramente a la derecha en lugar de arriba */

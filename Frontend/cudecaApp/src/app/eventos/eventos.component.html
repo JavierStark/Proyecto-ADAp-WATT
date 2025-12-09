@@ -30,7 +30,7 @@
             + Nuevo evento
           </button>
           <span *ngIf="adminMode" class="text-[0.95vw] text-white bg-emerald-900/70 px-[1vw] py-[0.4vw] rounded-lg border border-white/10">
-            Viendo todos los eventos (incluidos ocultos). Aquí añadiremos crear/editar/eliminar.
+            Viendo todos los eventos (incluidos ocultos).
           </span>
         </div>
       </div>
@@ -155,74 +155,74 @@
   </div>
 
   <!-- Modal Admin Crear/Editar -->
-  <div *ngIf="adminMode && showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-[4vw]">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[720px] p-[2vw] space-y-[1vw]">
-      <div class="flex justify-between items-center mb-[1vw]">
-        <h3 class="text-[1.6vw] font-bold text-emerald-800">{{ editingId ? 'Editar evento' : 'Nuevo evento' }}</h3>
-        <button (click)="cerrarForm()" class="text-gray-500 hover:text-gray-700 text-[1.2vw]">✕</button>
+  <div *ngIf="adminMode && showForm" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-8">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[45rem] p-[1.5rem] space-y-[1rem]">
+      <div class="flex justify-between items-center mb-[1rem]">
+        <h3 class="text-[1.4rem] font-bold text-emerald-800">{{ editingId ? 'Editar evento' : 'Nuevo evento' }}</h3>
+        <button (click)="cerrarForm()" class="text-gray-500 hover:text-gray-700 text-[1.1rem]">✕</button>
       </div>
 
-      <div class="grid grid-cols-2 gap-[1vw] text-[0.95vw]">
+      <div class="grid grid-cols-2 gap-[0.75rem] text-[0.9rem]">
         <label class="flex flex-col gap-[0.3vw]">
           <span class="text-gray-700 font-semibold">Nombre</span>
-          <input [(ngModel)]="formData.nombre" class="border rounded-lg px-[0.8vw] py-[0.6vw]" />
+          <input [(ngModel)]="formData.nombre" class="border rounded-lg px-[0.6rem] py-[0.5rem]" />
         </label>
 
         <label class="flex flex-col gap-[0.3vw]">
           <span class="text-gray-700 font-semibold">Fecha</span>
-          <input type="datetime-local" [(ngModel)]="formData.fecha" class="border rounded-lg px-[0.8vw] py-[0.6vw]" />
+          <input type="datetime-local" [(ngModel)]="formData.fecha" class="border rounded-lg px-[0.6rem] py-[0.5rem]" />
         </label>
 
         <label class="flex flex-col gap-[0.3vw] col-span-2">
           <span class="text-gray-700 font-semibold">Descripción</span>
-          <textarea rows="3" [(ngModel)]="formData.descripcion" class="border rounded-lg px-[0.8vw] py-[0.6vw]"></textarea>
+          <textarea rows="3" [(ngModel)]="formData.descripcion" class="border rounded-lg px-[0.6rem] py-[0.5rem]"></textarea>
         </label>
 
         <label class="flex flex-col gap-[0.3vw]">
           <span class="text-gray-700 font-semibold">Ubicación</span>
-          <input [(ngModel)]="formData.ubicacion" class="border rounded-lg px-[0.8vw] py-[0.6vw]" />
+          <input [(ngModel)]="formData.ubicacion" class="border rounded-lg px-[0.6rem] py-[0.5rem]" />
         </label>
 
         <label class="flex flex-col gap-[0.3vw]">
           <span class="text-gray-700 font-semibold">Objetivo / Recaudación</span>
-          <input [(ngModel)]="formData.objetoRecaudacion" class="border rounded-lg px-[0.8vw] py-[0.6vw]" />
+          <input [(ngModel)]="formData.objetoRecaudacion" class="border rounded-lg px-[0.6rem] py-[0.5rem]" />
         </label>
 
-        <label class="flex items-center gap-[0.6vw] col-span-2 text-gray-700 font-semibold">
+        <label class="flex items-center gap-[0.5rem] col-span-2 text-gray-700 font-semibold">
           <input type="checkbox" [(ngModel)]="formData.eventoVisible" /> Evento visible
         </label>
 
-        <div class="col-span-2 grid grid-cols-2 gap-[1vw] bg-emerald-50 border border-emerald-100 rounded-xl p-[1vw]">
+        <div class="col-span-2 grid grid-cols-2 gap-[0.75rem] bg-emerald-50 border border-emerald-100 rounded-xl p-[0.75rem]">
           <div class="font-semibold text-emerald-800">Entradas General</div>
           <div class="font-semibold text-emerald-800">Entradas VIP (opcional)</div>
 
-          <div class="grid grid-cols-2 gap-[0.8vw]">
-            <label class="flex flex-col text-[0.9vw] text-gray-700 gap-[0.2vw]">
+          <div class="grid grid-cols-2 gap-[0.6rem]">
+            <label class="flex flex-col text-[0.85rem] text-gray-700 gap-[0.15rem]">
               Precio (€)
-              <input type="number" min="0" step="0.01" [(ngModel)]="formData.precioGeneral" class="border rounded-lg px-[0.6vw] py-[0.5vw]" />
+              <input type="number" min="0" step="0.01" [(ngModel)]="formData.precioGeneral" class="border rounded-lg px-[0.5rem] py-[0.4rem]" />
             </label>
-            <label class="flex flex-col text-[0.9vw] text-gray-700 gap-[0.2vw]">
+            <label class="flex flex-col text-[0.85rem] text-gray-700 gap-[0.15rem]">
               Cantidad
-              <input type="number" min="0" step="1" [(ngModel)]="formData.cantidadGeneral" class="border rounded-lg px-[0.6vw] py-[0.5vw]" />
+              <input type="number" min="0" step="1" [(ngModel)]="formData.cantidadGeneral" class="border rounded-lg px-[0.5rem] py-[0.4rem]" />
             </label>
           </div>
 
-          <div class="grid grid-cols-2 gap-[0.8vw]">
-            <label class="flex flex-col text-[0.9vw] text-gray-700 gap-[0.2vw]">
+          <div class="grid grid-cols-2 gap-[0.6rem]">
+            <label class="flex flex-col text-[0.85rem] text-gray-700 gap-[0.15rem]">
               Precio VIP (€)
-              <input type="number" min="0" step="0.01" [(ngModel)]="formData.precioVip" class="border rounded-lg px-[0.6vw] py-[0.5vw]" />
+              <input type="number" min="0" step="0.01" [(ngModel)]="formData.precioVip" class="border rounded-lg px-[0.5rem] py-[0.4rem]" />
             </label>
-            <label class="flex flex-col text-[0.9vw] text-gray-700 gap-[0.2vw]">
+            <label class="flex flex-col text-[0.85rem] text-gray-700 gap-[0.15rem]">
               Cantidad VIP
-              <input type="number" min="0" step="1" [(ngModel)]="formData.cantidadVip" class="border rounded-lg px-[0.6vw] py-[0.5vw]" />
+              <input type="number" min="0" step="1" [(ngModel)]="formData.cantidadVip" class="border rounded-lg px-[0.5rem] py-[0.4rem]" />
             </label>
           </div>
         </div>
       </div>
 
-      <div class="flex justify-end gap-[1vw] pt-[0.5vw]">
-        <button (click)="cerrarForm()" class="px-[1.4vw] py-[0.8vw] rounded-lg border border-gray-300 text-gray-700 text-[0.95vw]">Cancelar</button>
-        <button (click)="guardarEvento()" [disabled]="saving" class="px-[1.6vw] py-[0.9vw] rounded-lg bg-emerald-700 text-white text-[0.95vw] font-semibold hover:bg-emerald-800 disabled:opacity-60">
+      <div class="flex justify-end gap-[0.75rem] pt-[0.5rem]">
+        <button (click)="cerrarForm()" class="px-[1rem] py-[0.6rem] rounded-lg border border-gray-300 text-gray-700 text-[0.9rem]">Cancelar</button>
+        <button (click)="guardarEvento()" [disabled]="saving" class="px-[1.2rem] py-[0.7rem] rounded-lg bg-emerald-700 text-white text-[0.9rem] font-semibold hover:bg-emerald-800 disabled:opacity-60">
           {{ saving ? 'Guardando...' : (editingId ? 'Guardar cambios' : 'Crear evento') }}
         </button>
       </div>
