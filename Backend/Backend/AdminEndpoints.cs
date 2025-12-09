@@ -158,7 +158,7 @@ static class AdminEndpoints
 
             var ticketsResponse = await client
                 .From<EntradaEvento>()
-                .Filter("id_evento", Constants.Operator.Equals, eventId)
+                .Filter("fk_evento", Constants.Operator.Equals, eventId)
                 .Get();
 
             var ticketsDb = ticketsResponse.Models;
@@ -364,7 +364,6 @@ static class AdminEndpoints
     );
 
     public record EventoModifyDto(
-        Guid Id,
         string? Nombre,
         string? Descripcion,
         DateTime? Fecha,
