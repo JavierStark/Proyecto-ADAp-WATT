@@ -104,4 +104,15 @@ export class AuthService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
+  // 6. Comprobar si el usuario es admin (GET /users/me/is-admin)
+  isAdmin(): Observable<boolean> {
+    return this.http.get<{ isAdmin: boolean }>(`${this.apiUrl}/users/me/is-admin`, { headers: this.getHeaders() })
+      .pipe(map(res => !!res.isAdmin));
+  }
+
+  // 7. Listado de eventos para admins (GET /admin/events)
+  getAdminEvents(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/admin/events`, { headers: this.getHeaders() });
+  }
+
 }
