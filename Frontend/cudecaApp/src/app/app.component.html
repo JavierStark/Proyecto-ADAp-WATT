@@ -23,10 +23,12 @@
             class="flex-shrink-0 bg-transparent font-bold text-green-600 py-[1.2vw] px-[2.5vw] rounded-[1.2vw] hover:bg-green-800 hover:text-white transition-all text-[2.2vw]">
             Donar</button>
           <button
+            *ngIf="isLoggedIn"
             (click)="goToCuenta()"
             class="flex-shrink-0 bg-transparent font-bold text-green-600 py-[1.2vw] px-[2.5vw] rounded-[1.2vw] hover:bg-green-800 hover:text-white transition-all text-[2.2vw]">
             Cuenta</button>
           <button
+            *ngIf="!isLoggedIn"
             (click)="goToLogin()"
             class="flex-shrink-0 bg-transparent font-bold text-green-600 py-[1.2vw] px-[2.5vw] rounded-[1.2vw] hover:bg-green-800 hover:text-white transition-all text-[2.2vw]">
             Iniciar sesión</button>
@@ -69,8 +71,8 @@
   <button (click)="goToHome(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Inicio</button>
   <button (click)="goToEventos(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Eventos</button>
   <button (click)="goToDonation(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Donar</button>
-  <button (click)="goToCuenta(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Cuenta</button>
-  <button (click)="goToLogin(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Iniciar sesión</button>
+  <button *ngIf="isLoggedIn" (click)="goToCuenta(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Cuenta</button>
+  <button *ngIf="!isLoggedIn" (click)="goToLogin(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Iniciar sesión</button>
 
 </div>
 
