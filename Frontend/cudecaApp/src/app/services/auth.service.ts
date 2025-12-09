@@ -115,4 +115,19 @@ export class AuthService {
     return this.http.get(`${this.apiUrl}/admin/events`, { headers: this.getHeaders() });
   }
 
+  // 8. Crear evento (POST /admin/events)
+  createAdminEvent(body: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/admin/events`, body, { headers: this.getHeaders() });
+  }
+
+  // 9. Actualizar evento (PUT /admin/events/{eventId})
+  updateAdminEvent(eventId: string, body: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/admin/events/${eventId}`, body, { headers: this.getHeaders() });
+  }
+
+  // 10. Eliminar evento (DELETE /admin/events/{eventId})
+  deleteAdminEvent(eventId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/admin/events/${eventId}`, { headers: this.getHeaders() });
+  }
+
 }
