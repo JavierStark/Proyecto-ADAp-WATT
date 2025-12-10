@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { CompraService } from '../services/compra.service';
 
 interface Evento {
   id: string;
@@ -67,7 +68,8 @@ export class CompraEntradasComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private compraService: CompraService
   ) {}
 
   ngOnInit(): void {
@@ -218,12 +220,29 @@ export class CompraEntradasComponent implements OnInit {
 
     this.isProcessing = true;
 
-    // Aquí iría la llamada al backend para procesar la compra
-    setTimeout(() => {
-      this.isProcessing = false;
-      alert('¡Compra procesada correctamente! (Demo)');
-      this.router.navigate(['/eventos']);
-    }, 1000);
+    // Guardar los datos de la compra en el servicio
+    if (this.evento) {
+      this.compraService.guardarEventoCompra({
+        id: this.evento.id,
+        titulo: this.evento.titulo,
+        numeroEntradasGeneral: this.numeroEntradasGeneral,
+        numeroEntradasVip: this.numeroEntradasVip,
+        precioGeneral: this.precioGeneral,
+        precioVip: this.precioVip,
+        totalPrecio: this.totalPrecio,
+        nombreCliente: this.nombre,
+        apellidosCliente: this.apellidos,
+        telefonoCliente: this.telefono,
+        dniCliente: this.dni,
+        ubicacion: this.evento.ubicacion || (this.evento as any).ubicacion || '',
+        fecha: this.evento.fecha ? (this.evento.fecha instanceof Date ? this.evento.fecha.toLocaleDateString() : String(this.evento.fecha)) : ''
+      });
+
+      // Navegar a la página de pagos
+      this.router.navigate(['/pagos']);
+    }
+
+    this.isProcessing = false;
   }
 
   goBack(): void {
