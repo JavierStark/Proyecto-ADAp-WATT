@@ -17,7 +17,7 @@
         <!-- Información del evento y compra (debajo de la imagen) -->
         <div *ngIf="eventoCompra" class="left-event-info w-full text-left text-[3.5vw] md:text-[0.9vw] text-gray-700">
           <img 
-            src="assets/images/abuela.png" 
+            [src]="eventoCompra.imagen || 'assets/images/fondoCudeca.png'" 
             alt="Evento"
             class="w-full h-auto object-cover shadow-md rounded-[1.2vw]"
             style="aspect-ratio:16/9; width:100%; height:auto;"

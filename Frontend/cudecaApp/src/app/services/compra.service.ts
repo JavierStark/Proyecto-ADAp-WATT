@@ -15,6 +15,7 @@ export interface EventoCompra {
   dniCliente: string;
   ubicacion?: string;
   fecha?: string;
+  imagen?: string;
 }
 
 @Injectable({
