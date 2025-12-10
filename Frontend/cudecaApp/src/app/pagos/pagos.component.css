@@ -1,0 +1,16 @@
+/* Estilos del botón de pago: comportamiento cuando está deshabilitado y hover */
+.pay-button:disabled {
+	background: #d1d5db; /* gris claro */
+	color: #ffffff;
+}
+
+/* Hover cuando está deshabilitado: gris oscuro */
+.pay-button:disabled:hover {
+	background: #6b7280; /* gris oscuro */
+}
+
+/* Asegurar transición suave entre estados */
+.pay-button {
+	transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+

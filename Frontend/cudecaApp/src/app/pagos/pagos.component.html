@@ -32,9 +32,16 @@
           Completa el formulario:
         </h1>
 
-        <h2 class="font-semibold text-green-600 mb-4 text-[4vw] md:text-[1.2vw]">
+        <!-- Información del evento y compra -->
+        <div *ngIf="eventoCompra" class="w-full mb-4 text-left text-[3.5vw] md:text-[0.9vw] text-gray-700">
+          <p class="font-semibold mb-2">{{ eventoCompra.titulo }}</p>
+          <p>Entradas: {{ eventoCompra.numeroEntradasGeneral + eventoCompra.numeroEntradasVip }}</p>
+          <p class="font-bold text-green-700">Total: €{{ eventoCompra.totalPrecio }}</p>
+        </div>
+
+        <h3 class="font-semibold text-green-600 mb-4 text-[4vw] md:text-[1.2vw]">
           Método de pago
-        </h2>
+        </h3>
 
         <!-- Botones de métodos de pago -->
         <div class="flex flex-col gap-3 mb-6 w-full">
@@ -51,12 +58,11 @@
         </div>
 
         <!-- Botón realizar compra -->
-        <button 
+        <button
           (click)="processPayment()"
           [disabled]="!selectedPaymentMethod"
-          class="w-full bg-[#8FBD9F] hover:bg-[#7da88c] text-white rounded-full shadow-lg 
-                 transition-transform duration-300 transform hover:scale-[1.02] font-medium
-                 py-3 text-[5vw] md:text-[1.1vw] disabled:opacity-50 disabled:cursor-not-allowed">
+          class="w-full text-white rounded-full shadow-lg transition-transform duration-300 transform hover:scale-[1.02] font-medium py-3 text-[5vw] md:text-[1.1vw] disabled:opacity-50 disabled:cursor-not-allowed pay-button"
+          [ngClass]="selectedPaymentMethod ? 'bg-green-500 hover:bg-green-800' : 'bg-gray-300'">
           Realizar compra
         </button>
 
