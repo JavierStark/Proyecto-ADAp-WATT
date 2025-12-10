@@ -14,3 +14,16 @@
 	transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
+/* Estilos para la información que aparece debajo de la imagen en la columna izquierda */
+.left-event-info {
+	background: #ffffff;
+	padding: 0.8vw;
+	border-radius: 1.2vw;
+	box-shadow: 0 0.4vw 1.2vw rgba(0,0,0,0.06);
+}
+
+.left-event-info p { margin: 0.4vw 0; }
+
+.left-event-info .location-icon, .left-event-info .calendar-icon { margin-right: 0.6vw; }
+
+
