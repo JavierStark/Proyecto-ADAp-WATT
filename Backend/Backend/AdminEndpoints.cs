@@ -1,4 +1,5 @@
 ﻿using Backend.Models;
+using Microsoft.AspNetCore.Mvc;
 using Supabase.Postgrest;
 
 namespace Backend;
@@ -34,6 +35,7 @@ static class AdminEndpoints
                     e.EntradasVendidas,
                     e.EventoVisible,
                     e.ObjetoRecaudacion ?? "Sin especificar",
+                    e.ImagenUrl,
                     general?.Precio ?? 0,
                     general?.Cantidad ?? 0,
                     vip?.Precio,
@@ -49,7 +51,7 @@ static class AdminEndpoints
         }
     }
 
-    public static async Task<IResult> AdminCreateEvent(EventoCreateDto dto, Supabase.Client client)
+    public static async Task<IResult> AdminCreateEvent([FromForm] EventoCreateDto dto, Supabase.Client client)
     {
         try
         {
@@ -71,6 +73,28 @@ static class AdminEndpoints
                 return Results.BadRequest(new
                     { error = "Para crear entradas VIP debes indicar tanto el precio como la cantidad." });
             }
+            
+            string? imagenUrlFinal = null;
+
+            if (dto.Imagen != null)
+            {
+                // Validar nombre/extensión
+                var extension = Path.GetExtension(dto.Imagen.FileName);
+                var fileName = $"{Guid.NewGuid()}{extension}"; // Nombre único
+
+                // Convertir a bytes
+                using var memoryStream = new MemoryStream();
+                await dto.Imagen.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
+                // Subir a Supabase (Bucket "eventos")
+                await client.Storage
+                    .From("eventos")
+                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
+
+                // Obtener URL Pública
+                imagenUrlFinal = client.Storage.From("eventos").GetPublicUrl(fileName);
+            }
 
             bool tieneVip = dto is { PrecioVip: not null, CantidadVip: > 0 };
             int aforoTotal = dto.CantidadGeneral + (tieneVip ? dto.CantidadVip!.Value : 0);
@@ -83,7 +107,8 @@ static class AdminEndpoints
                 Ubicacion = dto.Ubicacion,
                 Aforo = aforoTotal,
                 EventoVisible = dto.EventoVisible,
-                ObjetoRecaudacion = dto.ObjetoRecaudacion
+                ObjetoRecaudacion = dto.ObjetoRecaudacion,
+                ImagenUrl = imagenUrlFinal
             };
 
             var eventResponse = await client
@@ -129,6 +154,7 @@ static class AdminEndpoints
                     0,
                     eventoCreado.EventoVisible,
                     eventoCreado.ObjetoRecaudacion ?? "Sin especificar",
+                    eventoCreado.ImagenUrl,
                     dto.PrecioGeneral,
                     dto.CantidadGeneral,
                     dto.PrecioVip,
@@ -143,7 +169,8 @@ static class AdminEndpoints
         }
     }
 
-    public static async Task<IResult> AdminUpdateEvent(string eventId, EventoModifyDto dto, Supabase.Client client)
+    public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm]EventoModifyDto dto, 
+        Supabase.Client client)
     {
         try
         {
@@ -167,6 +194,24 @@ static class AdminEndpoints
             var vip = ticketsDb.FirstOrDefault(t => t.Tipo == "VIP");
 
             bool huboCambiosEvento = false;
+            
+            if (dto.Imagen != null)
+            {
+                var extension = Path.GetExtension(dto.Imagen.FileName);
+                var fileName = $"{Guid.NewGuid()}{extension}";
+
+                using var memoryStream = new MemoryStream();
+                await dto.Imagen.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
+                await client.Storage
+                    .From("eventos")
+                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
+
+                // Actualizamos la URL en el objeto evento
+                evento.ImagenUrl = client.Storage.From("eventos").GetPublicUrl(fileName);
+                huboCambiosEvento = true;
+            }
 
             if (!string.IsNullOrWhiteSpace(dto.Nombre))
             {
@@ -285,6 +330,7 @@ static class AdminEndpoints
                     evento.EntradasVendidas,
                     evento.EventoVisible,
                     evento.ObjetoRecaudacion ?? "Sin especificar",
+                    evento.ImagenUrl,
 
                     // Datos planos
                     general?.Precio ?? 0,
@@ -344,6 +390,7 @@ static class AdminEndpoints
         int EntradasVendidas,
         bool? EventoVisible,
         string ObjetoRecaudacion,
+        string ImagenURL,
         decimal PrecioGeneral,
         int CantidadGeneral,
         decimal? PrecioVip,
@@ -360,7 +407,8 @@ static class AdminEndpoints
         decimal PrecioGeneral,
         int CantidadGeneral,
         decimal? PrecioVip,
-        int? CantidadVip
+        int? CantidadVip,
+        IFormFile? Imagen
     );
 
     public record EventoModifyDto(
@@ -374,6 +422,7 @@ static class AdminEndpoints
         decimal? PrecioGeneral,
         int? CantidadGeneral,
         decimal? PrecioVip,
-        int? CantidadVip
+        int? CantidadVip,
+        IFormFile? Imagen
     );
 }
