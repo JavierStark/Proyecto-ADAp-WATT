@@ -15,8 +15,6 @@ interface Evento {
   capacidad: number;
   inscritos: number;
   objetoRecaudacion?: string;
-  precioGeneral?: number | null;
-  precioVip?: number | null;
 }
 
 @Component({
@@ -61,9 +59,7 @@ export class EventoDetalleComponent implements OnInit {
         ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
         capacidad: item.capacity || item.capacidad || item.aforo || 50,
         inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
-        objetoRecaudacion: item.goalDescription || item.objetoRecaudacion,
-        precioGeneral: item.precioGeneral ?? item.priceGeneral ?? item.precio ?? null,
-        precioVip: item.precioVip ?? item.priceVip ?? null
+        objetoRecaudacion: item.goalDescription || item.objetoRecaudacion
       }))
     ).subscribe({
       next: (data) => {
@@ -93,8 +89,8 @@ export class EventoDetalleComponent implements OnInit {
   }
 
   inscribirse() {
-    console.log('Inscribirse logic here');
-    alert('¡Gracias por tu interés! Próximamente podrás inscribirte.');
+    // Navegar a página de compra de entradas
+    this.router.navigate(['/compra-entradas', this.evento?.id]);
   }
  goToDonation() {
     this.router.navigate(['/donation']);
