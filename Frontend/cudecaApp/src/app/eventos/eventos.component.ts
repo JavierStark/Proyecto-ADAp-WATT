@@ -295,9 +295,13 @@ export class EventosComponent implements OnInit {
 
   toggleVisible(evento: any) {
     const nuevoVisible = !(evento.visible ?? true);
-    const payload = { eventoVisible: nuevoVisible };
-    this.authService.updateAdminEvent(evento.id, payload).subscribe({
-      next: () => this.cargarEventosAdmin(),
+    const formData = new FormData();
+    formData.append('EventoVisible', String(nuevoVisible));
+    this.authService.updateAdminEvent(evento.id, formData).subscribe({
+      next: () => {
+        console.log(`✅ Visibilidad cambiada: ${nuevoVisible ? 'visible' : 'oculto'}`);
+        this.cargarEventosAdmin();
+      },
       error: (err) => console.error('Error cambiando visibilidad', err)
     });
   }
