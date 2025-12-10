@@ -85,6 +85,10 @@ export class AppComponent {
     this.router.navigate(['/eventos']); // Navega a la página de eventos
   }
 
+  goToPagos() {
+    this.router.navigate(['/pagos']); // Navega a la página de pagos
+  }
+
   private updateAuthStatus() {
     this.isLoggedIn = this.authService.isLoggedIn();
   }
