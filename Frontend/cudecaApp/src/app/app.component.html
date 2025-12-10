@@ -45,20 +45,22 @@
 
 <header 
   *ngIf="!isAuthRoute"
-  class="md:hidden fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-md z-50 px-4 py-3 flex items-center justify-between">
+  class="md:hidden fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-md z-50 flex items-center justify-between"
+  style="padding:calc(1vw) calc(2vw); height:calc(10vw);">
   
   <!-- Logo -->
   <img 
     src="assets/images/cudeca-logo.png" 
-    class="h-8 w-auto"
+    class="w-auto"
     (click)="goToHome()"
-    style="cursor:pointer;"
+    style="cursor:pointer; height:calc(6vw);"
   />
 
   <!-- Botón hamburguesa -->
   <button 
     (click)="menuOpen = !menuOpen"
-    class="text-green-700 text-3xl font-bold">
+    class="text-green-700 font-bold"
+    style="font-size:calc(5vw);">
     ☰
   </button>
 </header>
@@ -66,13 +68,14 @@
 <!-- MENÚ DESPLEGABLE MÓVIL -->
 <div 
   *ngIf="menuOpen"
-  class="md:hidden fixed top-[56px] left-0 w-full bg-white shadow-lg z-40 flex flex-col text-green-700 text-lg font-semibold">
+  class="md:hidden fixed left-0 w-full bg-white shadow-lg z-40 flex flex-col text-green-700 font-semibold"
+  style="top:calc(10vw); font-size:calc(2vw);">
 
-  <button (click)="goToHome(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Inicio</button>
-  <button (click)="goToEventos(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Eventos</button>
-  <button (click)="goToDonation(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Donar</button>
-  <button *ngIf="isLoggedIn" (click)="goToCuenta(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Cuenta</button>
-  <button *ngIf="!isLoggedIn" (click)="goToLogin(); menuOpen = false" class="py-4 px-6 text-left hover:bg-green-100">Iniciar sesión</button>
+  <button (click)="goToHome(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Inicio</button>
+  <button (click)="goToEventos(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Eventos</button>
+  <button (click)="goToDonation(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Donar</button>
+  <button *ngIf="isLoggedIn" (click)="goToCuenta(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Cuenta</button>
+  <button *ngIf="!isLoggedIn" (click)="goToLogin(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Iniciar sesión</button>
 
 </div>
 
@@ -85,43 +88,10 @@
 </main>
 
 <!-- ========================================================= -->
-<!-- ======================= FOOTER — PC =================== -->
+<!-- ========================= FOOTER ======================== -->
 <!-- ========================================================= -->
 
 <footer *ngIf="!isAuthRoute" class="relative  bg-green-800 text-white py-[1vw] text-center w-full text-[1.2vw]">
   <p>&copy; 2025 Cudeca - Todos los derechos reservados</p>
 </footer>
 
-
-<!-- ========================================================= -->
-<!-- ======================= FOOTER — MÓVIL =================== -->
-<!-- ========================================================= -->
-
-<footer 
-  *ngIf="!isAuthRoute"
-  class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-inner
-         flex justify-around items-center py-3 z-[50]">
-
-  <button (click)="goToHome()" class="flex flex-col items-center text-green-700">
-    <span class="text-2xl">🏠</span>
-    <span class="text-xs font-semibold">Inicio</span>
-  </button>
-
-  <button (click)="goToEventos()" class="flex flex-col items-center text-green-700">
-    <span class="text-2xl">🎉</span>
-    <span class="text-xs font-semibold">Eventos</span>
-  </button>
-
-  <button (click)="goToDonation()" class="flex flex-col items-center text-green-700">
-    <span class="text-2xl">💚</span>
-    <span class="text-xs font-semibold">Donar</span>
-  </button>
-
-  <button (click)="goToCuenta()" class="flex flex-col items-center text-green-700">
-    <span class="text-2xl">👤</span>
-    <span class="text-xs font-semibold">Cuenta</span>
-  </button>
-
-</footer>
-
-<!-- ========================================================= -->
