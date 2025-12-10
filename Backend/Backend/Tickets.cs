@@ -223,6 +223,36 @@ static class Tickets
                 cantidadTotalEntradas += item.Quantity;
             }
             
+            decimal descuentoAplicado = 0;
+        
+            if (!string.IsNullOrEmpty(dto.DiscountCode))
+            {
+                // Definir los códigos válidos (Idealmente, sacar esto a una constante o base de datos compartida)
+                var codigosValidos = new Dictionary<string, decimal>
+                {
+                    { "DESCUENTO2025", 15m },
+                    { "PROMO50", 25m },
+                    { "NAVIDAD", 10m },
+                    { "VIP", 30m }
+                };
+
+                var codigoUpper = dto.DiscountCode.ToUpper();
+
+                if (codigosValidos.ContainsKey(codigoUpper))
+                {
+                    var porcentaje = codigosValidos[codigoUpper];
+                
+                    // Calcular la cantidad a descontar
+                    descuentoAplicado = totalPagar * (porcentaje / 100m);
+                
+                    // Aplicar al total
+                    totalPagar -= descuentoAplicado;
+
+                    // Seguridad: evitar precios negativos
+                    if (totalPagar < 0) totalPagar = 0;
+                }
+            }
+            
             // ACTUALIZAR PERFIL DE USUARIO (Si faltan datos)
             var usuario = await client.From<Usuario>().Where(u => u.Id == userGuid).Single();
             var clienteRes = await client.From<Cliente>().Where(c => c.Id == userGuid).Get();
@@ -481,6 +511,7 @@ static class Tickets
         List<PurchaseItemDto> Items,
         string PaymentToken,
         string PaymentMethod,
+        string? DiscountCode,
         string? Dni,
         string? Nombre,
         string? Apellidos,
