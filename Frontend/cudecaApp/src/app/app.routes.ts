@@ -8,6 +8,8 @@ import { CuentaComponent } from './cuenta/cuenta.component';
 import { DonationComponent } from './donation/donation.component';  // Importa tu DonationComponent
 import { EventosComponent } from './eventos/eventos.component';  // Importa el EventosComponent
 import { EventoDetalleComponent } from './evento-detalles/evento-detalles.component';
+import { CompraEntradasComponent } from './compra-entradas/compra-entradas.component';
+import { PagosComponent } from './pagos/pagos.component';  // Importa el PagosComponent
 import { publicGuard } from './guards/public.guard';
 import { authGuard } from './guards/auth.guard';
 import { QrValidateComponent } from './qr-validate/qr-validate.component';
@@ -20,6 +22,8 @@ export const routes: Routes = [
   { path: 'donation', component: DonationComponent }, // Ruta para donaciones
   { path: 'eventos', component: EventosComponent }, // Ruta para eventos
   { path: 'eventos/:id', component: EventoDetalleComponent },
+  { path: 'compra-entradas/:id', component: CompraEntradasComponent },
+  { path: 'pagos', component: PagosComponent }, // Ruta para pagos
   { path: 'validar-qr', component: QrValidateComponent },
 ];
 

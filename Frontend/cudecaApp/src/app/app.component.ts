@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
-import {HostListener } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { CommonModule } from '@angular/common'; 
+import { RouterOutlet, NavigationEnd, Router } from '@angular/router';
+import { HostListener } from '@angular/core'; // Se queda por si usas el de 'storage'
+import { NgClass, CommonModule } from '@angular/common'; 
 import { AuthService } from './services/auth.service';
 
 @Component({
@@ -15,74 +14,35 @@ export class AppComponent {
 
   isAuthRoute: boolean = false;
   isLoggedIn: boolean = false;
+  menuOpen = false; // Para el menú móvil
 
   constructor(private router: Router, private authService: AuthService) {
-
-     // Detectar cambios en la ruta
+     // Detectar cambios en la ruta (login/signup)
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.isAuthRoute = event.urlAfterRedirects.includes('/log-in') || event.urlAfterRedirects.includes('/sign-up');
-        console.log('isAuthRoute:', this.isAuthRoute);
         this.updateAuthStatus();
       }
     });
-
     this.updateAuthStatus();
-
   }
 
-  menuOpen = false;
-
-
-  showHeader = true;  // Por defecto el header es visible
-    private lastScrollTop = 0;  // Última posición de scroll
-
-    @HostListener('window:scroll', ['$event'])
-    onWindowScroll() {
-      const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-      // Si el scroll está bajando, ocultamos el header
-      if (currentScroll > this.lastScrollTop && currentScroll > 0) {
-        this.showHeader = false;
-      } else {
-        this.showHeader = true;  // Si el scroll va hacia arriba, mostramos el header
-      }
-
-      this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // Evitar desplazamiento negativo
-    }
-
-    @HostListener('window:storage', ['$event'])
-    onStorageChange() {
-      this.updateAuthStatus();
-    }
-
- 
-
- 
-  
-
-  goToLogin() {
-    this.router.navigate(['/log-in']);  // Navega a la página de login
+  // Escucha cambios en el localStorage (por si hacen login en otra pestaña)
+  @HostListener('window:storage', ['$event'])
+  onStorageChange() {
+    this.updateAuthStatus();
   }
 
-  goToSignUp() {
-    this.router.navigate(['/sign-up']); // Navega a la página de registro
-  }
+  // --- NAVEGACIÓN ---
+  goToLogin() { this.router.navigate(['/log-in']); }
+  goToSignUp() { this.router.navigate(['/sign-up']); }
+  goToDonation() { this.router.navigate(['/donation']); }
+  goToCuenta() { this.router.navigate(['/cuenta']); }
+  goToHome() { this.router.navigate(['/']); }
+  goToEventos() { this.router.navigate(['/eventos']); }
 
-  goToDonation() {
-    this.router.navigate(['/donation']);
-  }
-
-  goToCuenta() {
-    this.router.navigate(['/cuenta']);
-  }
-
-  goToHome() {
-    this.router.navigate(['/']); // Navega a la raíz (Home)
-  }
-
-  goToEventos() {
-    this.router.navigate(['/eventos']); // Navega a la página de eventos
+  goToPagos() {
+    this.router.navigate(['/pagos']); // Navega a la página de pagos
   }
 
   private updateAuthStatus() {

@@ -337,7 +337,8 @@ export class EventosComponent implements OnInit {
   }
 
   inscribirseEvento(eventoId: string): void {
-    console.log('Inscribiéndose al evento:', eventoId);
+    // Navegar a página de compra de entradas
+    this.router.navigate(['/compra-entradas', eventoId]);
   }
 
   irAdminEventos(): void {

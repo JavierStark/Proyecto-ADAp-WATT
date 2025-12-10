@@ -1,4 +1,4 @@
-<section class="w-full min-h-screen pt-[7.5vw] overflow-hidden font-sans bg-green-50 relative">
+<section class="w-full min-h-screen pt-[2vw] overflow-hidden font-sans bg-green-50 relative">
   <!-- Fondo -->
   <img
     src="assets/images/fondoCudeca.png"
@@ -71,18 +71,6 @@
             </div>
           </div>
 
-          <!-- Precios -->
-          <div *ngIf="evento.precioGeneral || evento.precioVip" class="mb-[3vw] flex flex-wrap gap-[0.8vw]">
-            <div *ngIf="evento.precioGeneral !== null && evento.precioGeneral !== undefined"
-                 class="px-[1vw] py-[0.7vw] bg-green-100 text-green-800 rounded-[0.9vw] text-[1.1vw] font-semibold">
-              General: {{ evento.precioGeneral | currency:'EUR':'symbol':'1.0-0' }}
-            </div>
-            <div *ngIf="evento.precioVip !== null && evento.precioVip !== undefined"
-                 class="px-[1vw] py-[0.7vw] bg-amber-100 text-amber-800 rounded-[0.9vw] text-[1.1vw] font-semibold">
-              VIP: {{ evento.precioVip | currency:'EUR':'symbol':'1.0-0' }}
-            </div>
-          </div>
-
           <!-- Botones de acción -->
           <div class="flex flex-col sm:flex-row gap-[1vw]">
             <button (click)="inscribirse()"
@@ -92,10 +80,6 @@
               class="flex-1 bg-green-600 text-white font-bold text-[1.2vw] py-[1vw] rounded-[1vw] hover:bg-green-700 transition shadow-md justify-center items-center gap-[0.5vw] flex">
               <span *ngIf="evento.inscritos < evento.capacidad">Comprar entradas</span>
               <span *ngIf="evento.inscritos >= evento.capacidad">⛔ Aforo Completo</span>
-            </button>
-            <button (click)="goToDonation()"
-              class="flex-1 bg-green-600 text-white font-bold text-[1.2vw] py-[1vw] rounded-[1vw] hover:bg-green-700 transition shadow-md justify-center items-center flex">
-              Donar
             </button>
           </div>
 
