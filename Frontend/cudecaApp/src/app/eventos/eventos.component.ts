@@ -15,6 +15,7 @@ export interface Evento {
   descripcion: string;
   fecha: Date;
   imagen: string;
+  imageUrl?: string;
   ubicacion?: string;
   capacidad?: number;
   inscritos?: number;
@@ -76,13 +77,21 @@ export class EventosComponent implements OnInit {
     console.log('🔄 Intentando conectar con:', url);
 
     fetch(url)
-      .then(r => r.text())
-      .then(texto => this.mapearEventos(texto))
+      .then(r => {
+        console.log(`📡 Respuesta del servidor (status: ${r.status})`);
+        return r.text();
+      })
+      .then(texto => {
+        console.log(`📦 Datos recibidos (${texto.length} caracteres)`);
+        return this.mapearEventos(texto);
+      })
       .then(eventosTraducidos => {
+        console.log(`✅ Eventos parseados correctamente: ${eventosTraducidos.length} eventos`);
         this.isLoading = false;
         if (eventosTraducidos.length > 0) {
           this.eventos = eventosTraducidos;
         } else {
+          console.warn('⚠️ Sin eventos, cargando mock');
           this.cargarEventosMock();
         }
       })
@@ -95,10 +104,15 @@ export class EventosComponent implements OnInit {
 
   cargarEventosAdmin(): void {
     this.isLoading = true;
+    console.log('🔐 Cargando eventos ADMIN');
     this.authService.getAdminEvents()
-      .pipe(map(datos => this.mapearEventosDesdeAdmin(datos)))
+      .pipe(map(datos => {
+        console.log(`📦 Datos admin recibidos: ${datos.length} eventos`);
+        return this.mapearEventosDesdeAdmin(datos);
+      }))
       .subscribe({
         next: (eventosTraducidos) => {
+          console.log(`✅ Eventos admin parseados: ${eventosTraducidos.length} eventos`);
           this.isLoading = false;
           this.eventos = eventosTraducidos;
         },
@@ -245,44 +259,70 @@ export class EventosComponent implements OnInit {
   private mapearEventos(textoRespuesta: string): Evento[] {
     try {
       const datosJson = JSON.parse(textoRespuesta);
-      return datosJson.map((item: any) => ({
-        id: item.id || item.Id || '',
-        titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
-        descripcion: item.description || item.descripcion || 'Sin descripción',
-        fecha: new Date(item.date || item.fecha || item.fechaEvento || Date.now()),
-        imagen: item.imageUrl || item.imagen || 'assets/images/fondoCudeca.png',
-        ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
-        capacidad: item.capacity || item.capacidad || item.aforo || 50,
-        inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
-        objetoRecaudacion: item.goalDescription || item.objetoRecaudacion || item.objetivo || null,
-        visible: item.eventoVisible ?? true
-      }));
+      return datosJson.map((item: any) => {
+        // Buscar imageUrl en diferentes formatos
+        const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+        console.log(`📸 Evento: ${item.nombre || 'Sin título'}`);
+        console.log(`   - Raw item keys:`, Object.keys(item));
+        console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
+        console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
+        console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+        console.log(`   - item.imagen: ${item.imagen || 'undefined'}`);
+        console.log(`   - Imagen final: ${imagenUrl}`);
+        
+        return {
+          id: item.id || item.Id || '',
+          titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
+          descripcion: item.description || item.descripcion || 'Sin descripción',
+          fecha: new Date(item.date || item.fecha || item.fechaEvento || Date.now()),
+          imagen: imagenUrl,
+          imageUrl: imagenUrl,
+          ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
+          capacidad: item.capacity || item.capacidad || item.aforo || 50,
+          inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
+          objetoRecaudacion: item.goalDescription || item.objetoRecaudacion || item.objetivo || null,
+          visible: item.eventoVisible ?? true
+        };
+      });
     } catch (e) {
-      console.warn('⚠️ Error al leer los datos:', e);
+      console.error('❌ Error al leer los datos:', e);
       return [];
     }
   }
 
   private mapearEventosDesdeAdmin(datos: any): Evento[] {
     try {
-      return (datos || []).map((item: any) => ({
-        id: item.id || item.Id || '',
-        titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
-        descripcion: item.descripcion || item.description || 'Sin descripción',
-        fecha: new Date(item.fechaEvento || item.fecha || Date.now()),
-        imagen: 'assets/images/fondoCudeca.png',
-        ubicacion: item.ubicacion || 'Ubicación pendiente',
-        capacidad: item.aforo || item.capacity || 50,
-        inscritos: item.entradasVendidas || item.inscritos || 0,
-        objetoRecaudacion: item.objetoRecaudacion || null,
-        visible: item.eventoVisible ?? true,
-        precioGeneral: item.precioGeneral ?? item.PrecioGeneral ?? null,
-        cantidadGeneral: item.cantidadGeneral ?? item.CantidadGeneral ?? null,
-        precioVip: item.precioVip ?? item.PrecioVip ?? null,
-        cantidadVip: item.cantidadVip ?? item.CantidadVip ?? null
-      }));
+      return (datos || []).map((item: any) => {
+        // Buscar imageUrl en diferentes formatos (camelCase, PascalCase, snake_case)
+        const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+        console.log(`📸 Evento (ADMIN): ${item.nombre || 'Sin título'}`);
+        console.log(`   - Raw item keys:`, Object.keys(item));
+        console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
+        console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
+        console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+        console.log(`   - item.imagen: ${item.imagen || 'undefined'}`);
+        console.log(`   - Imagen final: ${imagenUrl}`);
+        
+        return {
+          id: item.id || item.Id || '',
+          titulo: item.nombre || item.titulo || item.name || 'Evento sin título',
+          descripcion: item.descripcion || item.description || 'Sin descripción',
+          fecha: new Date(item.fechaEvento || item.fecha || Date.now()),
+          imagen: imagenUrl,
+          imageUrl: imagenUrl,
+          ubicacion: item.ubicacion || 'Ubicación pendiente',
+          capacidad: item.aforo || item.capacity || 50,
+          inscritos: item.entradasVendidas || item.inscritos || 0,
+          objetoRecaudacion: item.objetoRecaudacion || null,
+          visible: item.eventoVisible ?? true,
+          precioGeneral: item.precioGeneral ?? item.PrecioGeneral ?? null,
+          cantidadGeneral: item.cantidadGeneral ?? item.CantidadGeneral ?? null,
+          precioVip: item.precioVip ?? item.PrecioVip ?? null,
+          cantidadVip: item.cantidadVip ?? item.CantidadVip ?? null
+        };
+      });
     } catch (e) {
-      console.warn('⚠️ Error al leer eventos admin:', e);
+      console.error('❌ Error al leer eventos admin:', e);
       return [];
     }
   }

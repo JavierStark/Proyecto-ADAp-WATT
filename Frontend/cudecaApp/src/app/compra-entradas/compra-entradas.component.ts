@@ -13,6 +13,7 @@ interface Evento {
   descripcion: string;
   fecha: Date;
   imagen: string;
+  imageUrl?: string;
   ubicacion: string;
   capacidad: number;
   inscritos: number;
@@ -74,6 +75,7 @@ export class CompraEntradasComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    console.log(`🎫 Compra Entradas - Evento ID: ${id}`);
     if (id) {
       this.cargarEvento(id);
     }
@@ -91,8 +93,11 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private cargarEventoPublico(id: string): void {
+    console.log(`🌐 Cargando evento PÚBLICO: ${id}`);
     this.http.get<any>(`${this.apiUrl}/events/${id}`).subscribe({
       next: (item) => {
+        console.log(`📊 Respuesta del backend (público):`, item);
+        console.log(`   - imageUrl: ${item.imageUrl || 'undefined'}`);
         this.evento = this.mapearEvento(item);
         // Sin datos de admin, usamos valores por defecto
         this.precioGeneral = item.precioGeneral || 25;
@@ -100,9 +105,11 @@ export class CompraEntradasComponent implements OnInit {
         this.cantidadGeneralDisponible = item.cantidadGeneral || (item.aforo || 50);
         this.cantidadVipDisponible = item.cantidadVip || 0;
         this.tieneEntradasVip = this.cantidadVipDisponible > 0;
+        console.log(`✅ Evento público cargado: ${this.evento?.titulo}`);
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error(`❌ Error cargando evento público:`, err);
         this.isLoading = false;
         this.errorMessage = 'Error cargando el evento';
       }
@@ -110,27 +117,34 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private cargarEventoDesdeAdmin(id: string): void {
+    console.log(`🔐 Cargando evento ADMIN: ${id}`);
     this.http.get<any[]>(`${this.apiUrl}/admin/events`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     }).subscribe({
       next: (items) => {
+        console.log(`📊 Respuesta del backend (admin) - Total eventos:`, items.length);
         const item = items.find((e) => `${e.id}` === `${id}`);
 
         if (!item) {
+          console.warn(`⚠️ Evento ${id} no encontrado en admin, intentando endpoint público`);
           // Si no se encuentra en admin, usamos el público
           this.cargarEventoPublico(id);
           return;
         }
 
+        console.log(`📸 Evento encontrado en admin:`, item);
+        console.log(`   - imageUrl: ${item.imageUrl || 'undefined'}`);
         this.evento = this.mapearEventoAdmin(item);
         this.precioGeneral = item.precioGeneral ?? item.PrecioGeneral ?? 25;
         this.precioVip = item.precioVip ?? item.PrecioVip ?? 0;
         this.cantidadGeneralDisponible = item.cantidadGeneral ?? item.CantidadGeneral ?? item.aforo ?? 50;
         this.cantidadVipDisponible = item.cantidadVip ?? item.CantidadVip ?? 0;
         this.tieneEntradasVip = (this.precioVip ?? 0) > 0 && this.cantidadVipDisponible > 0;
+        console.log(`✅ Evento admin cargado: ${this.evento?.titulo}`);
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error(`❌ Error cargando eventos admin, intentando endpoint público:`, err);
         // Si falla admin, intentamos público
         this.cargarEventoPublico(id);
       }
@@ -138,12 +152,20 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private mapearEvento(item: any): Evento {
+    const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+    console.log(`🎫 Mapeando evento (público): ${item.nombre || 'Sin título'}`);
+    console.log(`   - Raw item keys:`, Object.keys(item));
+    console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
+    console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
+    console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+    console.log(`   - Imagen final: ${imagenUrl}`);
     return {
       id: item.id,
       titulo: item.nombre || item.titulo || 'Evento sin título',
       descripcion: item.description || item.descripcion || 'Sin descripción',
       fecha: new Date(item.date || item.fecha || Date.now()),
-      imagen: item.imageUrl || item.imagen || 'assets/images/fondoCudeca.png',
+      imagen: imagenUrl,
+      imageUrl: imagenUrl,
       ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
       capacidad: item.capacity || item.capacidad || item.aforo || 50,
       inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
@@ -156,12 +178,20 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private mapearEventoAdmin(item: any): Evento {
+    const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+    console.log(`🎫 Mapeando evento (admin): ${item.nombre || 'Sin título'}`);
+    console.log(`   - Raw item keys:`, Object.keys(item));
+    console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
+    console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
+    console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+    console.log(`   - Imagen final: ${imagenUrl}`);
     return {
       id: item.id,
       titulo: item.nombre || item.titulo || 'Evento sin título',
       descripcion: item.descripcion || item.description || 'Sin descripción',
       fecha: new Date(item.fechaEvento || item.fecha || Date.now()),
-      imagen: item.imageUrl || item.imagen || 'assets/images/fondoCudeca.png',
+      imagen: imagenUrl,
+      imageUrl: imagenUrl,
       ubicacion: item.ubicacion || 'Ubicación pendiente',
       capacidad: item.aforo || item.capacity || 50,
       inscritos: item.entradasVendidas || item.inscritos || 0,
