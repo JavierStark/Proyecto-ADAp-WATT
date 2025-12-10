@@ -163,7 +163,8 @@ static class Tickets
     private static byte[] GenerateQr(string ticketId)
     {
         var qrGenerator = new QRCodeGenerator();
-        var qrCodeData = qrGenerator.CreateQrCode(ticketId, QRCodeGenerator.ECCLevel.Q);
+        var value = $"https://cudeca-watt/validar-qr?qr={ticketId}";
+        var qrCodeData = qrGenerator.CreateQrCode(value, QRCodeGenerator.ECCLevel.Q);
         var qrCode = new QRCode(qrCodeData);
 
         using var bitMap = qrCode.GetGraphic(20);
