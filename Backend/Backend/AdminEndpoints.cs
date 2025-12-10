@@ -411,18 +411,19 @@ static class AdminEndpoints
         IFormFile? Imagen
     );
 
-    public record EventoModifyDto(
-        string? Nombre,
-        string? Descripcion,
-        DateTime? Fecha,
-        string? Ubicacion,
-        int? Aforo,
-        bool? EventoVisible,
-        string? ObjetoRecaudacion,
-        decimal? PrecioGeneral,
-        int? CantidadGeneral,
-        decimal? PrecioVip,
-        int? CantidadVip,
-        IFormFile? Imagen
-    );
+    public class EventoModifyDto
+    {
+        public string? Nombre { get; set; }
+        public string? Descripcion { get; set; }
+        public DateTime? Fecha { get; set; }
+        public string? Ubicacion { get; set; }
+        public int? Aforo { get; set; }
+        public bool? EventoVisible { get; set; }
+        public string? ObjetoRecaudacion { get; set; }
+        public decimal? PrecioGeneral { get; set; }
+        public int? CantidadGeneral { get; set; }
+        public decimal? PrecioVip { get; set; }
+        public int? CantidadVip { get; set; }
+        public IFormFile? Imagen { get; set; }
+    }
 }
