@@ -89,11 +89,6 @@ static class Events
         string? ImagenUrl
     );
 
-    record EventoDto(
-        EventoListDto Evento,
-        List<TipoEntradaPublicoDto> TiposEntrada
-    );
-
     public record TipoEntradaPublicoDto(
         Guid Id,
         string Nombre,

@@ -496,16 +496,6 @@ static class Tickets
         int Quantity
     );
 
-    public record ReservationDto(
-        Guid IdReserva,
-        string NombreEvento,
-        string TipoEntrada,
-        int Cantidad,
-        decimal PrecioUnitario,
-        decimal Total,
-        string TiempoRestante
-    );
-
     public record BuyTicketDto(
         Guid EventId,
         List<PurchaseItemDto> Items,
