@@ -6,7 +6,7 @@ namespace Backend.Models;
 [Table("entrada_evento")]
 public class EntradaEvento : BaseModel
 {
-    [PrimaryKey("id")] public Guid FkEntradaEvento { get; set; }
+    [PrimaryKey("id")] public Guid Id { get; set; }
 
     [Column("fk_evento")] public Guid FkEvento { get; set; }
 
