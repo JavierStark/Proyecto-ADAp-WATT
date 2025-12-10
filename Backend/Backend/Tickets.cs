@@ -55,7 +55,7 @@ static class Tickets
                 .Filter("id", Operator.In, tiposIds)
                 .Get();
 
-            var dictTipos = tiposResponse.Models.ToDictionary(t => t.FkEntradaEvento);
+            var dictTipos = tiposResponse.Models.ToDictionary(t => t.Id);
 
             // Mapeo a DTO
             var listaFinal = misTickets.Select(t =>
@@ -357,7 +357,7 @@ static class Tickets
             // CREAR RESERVA
             var nuevaReserva = new ReservaEntrada
             {
-                FkEntradaEvento = tipoEntrada.FkEntradaEvento,
+                FkEntradaEvento = tipoEntrada.Id,
                 FkUsuario = usuarioDb.Id,
                 Cantidad = dto.Quantity,
                 FechaExpiracion = DateTime.UtcNow.AddMinutes(10)
