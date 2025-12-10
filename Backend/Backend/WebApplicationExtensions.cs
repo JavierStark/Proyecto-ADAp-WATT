@@ -102,8 +102,8 @@ public static class WebApplicationExtensions
             .AddEndpointFilter<SupabaseAuthFilter>()
             .AddEndpointFilter<AdminAuthFilter>();
         admin.MapGet("", AdminEndpoints.AdminListEvents);
-        admin.MapPost("", AdminEndpoints.AdminCreateEvent);
-        admin.MapPut("/{eventId}", AdminEndpoints.AdminUpdateEvent);
+        admin.MapPost("", AdminEndpoints.AdminCreateEvent).DisableAntiforgery();
+        admin.MapPut("/{eventId}", AdminEndpoints.AdminUpdateEvent).DisableAntiforgery();
         admin.MapDelete("/{eventId}", AdminEndpoints.AdminDeleteEvent);
 
         return app;
