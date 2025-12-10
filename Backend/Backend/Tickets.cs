@@ -163,7 +163,7 @@ static class Tickets
     private static byte[] GenerateQr(string ticketId)
     {
         var qrGenerator = new QRCodeGenerator();
-        var value = $"https://cudeca-watt/validar-qr?qr={ticketId}";
+        var value = $"https://cudeca-watt.es/validar-qr?qr={ticketId}";
         var qrCodeData = qrGenerator.CreateQrCode(value, QRCodeGenerator.ECCLevel.Q);
         var qrCode = new QRCode(qrCodeData);
 
@@ -282,7 +282,7 @@ static class Tickets
                 else camposFaltantes.Add("Dirección");
             }
 
-            if (camposFaltantes.Any())
+            if (camposFaltantes.Count != 0)
             {
                 return Results.BadRequest(new
                 {
@@ -346,7 +346,7 @@ static class Tickets
                     ticketsGenerados.Add(nuevaEntrada);
 
                     // Enviar Email Individual
-                    _ = emailService.SendEmailAsync(
+                    await emailService.SendEmailAsync(
                         usuario.Email!,
                         $"Tu Entrada ({tipoDb.Tipo}) - " + (await client.From<Evento>()
                             .Filter("id", Operator.Equals, dto.EventId.ToString()).Single())?.Nombre,

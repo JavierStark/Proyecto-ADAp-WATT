@@ -183,16 +183,14 @@ static class AdminEndpoints
 
         if (evento == null)
             return Results.NotFound(new { error = $"No se encontró ningún evento con el ID {eventId}." });
-
-        // 2. Preparar la Query de Actualización EXPLÍCITA
-        // En lugar de confiar en .Update(evento), construimos la sentencia SQL campo a campo.
+        
         var updateQuery = client.From<Evento>().Where(x => x.Id == parsed);
         bool hayCambiosEnEvento = false;
 
-        // --- GESTIÓN DE LA IMAGEN ---
+        // Gestión de la imagen
         if (dto.Imagen != null && dto.Imagen.Length > 0)
         {
-            // A. Borrar foto antigua si existe
+            // Borrar foto antigua si existe
             if (!string.IsNullOrEmpty(evento.ImagenUrl))
             {
                 var nombreArchivoViejo = GetFileNameFromUrl(evento.ImagenUrl);
@@ -202,7 +200,7 @@ static class AdminEndpoints
                 }
             }
 
-            // B. Subir nueva foto
+            // Subir nueva foto
             var extension = Path.GetExtension(dto.Imagen.FileName);
             var fileName = $"{Guid.NewGuid()}{extension}";
 
@@ -214,16 +212,14 @@ static class AdminEndpoints
                 .From("eventos")
                 .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
 
-            // C. Obtener URL y preparar actualización
+            // Obtener URL y preparar actualización
             var nuevaUrl = client.Storage.From("eventos").GetPublicUrl(fileName);
             
-            // Actualizamos objeto local (para el return) y la Query (para la BD)
             evento.ImagenUrl = nuevaUrl;
             updateQuery = updateQuery.Set(x => x.ImagenUrl, nuevaUrl);
             hayCambiosEnEvento = true;
         }
-
-        // --- GESTIÓN DE CAMPOS DE TEXTO ---
+        
         if (!string.IsNullOrWhiteSpace(dto.Nombre))
         {
             evento.Nombre = dto.Nombre;
@@ -251,8 +247,7 @@ static class AdminEndpoints
             updateQuery = updateQuery.Set(x => x.ObjetoRecaudacion, dto.ObjetoRecaudacion);
             hayCambiosEnEvento = true;
         }
-
-        // --- GESTIÓN DE CAMPOS DE VALOR (Fechas, Bools) ---
+        
         if (dto.Fecha.HasValue)
         {
             if (dto.Fecha.Value < DateTime.UtcNow) 
@@ -270,8 +265,7 @@ static class AdminEndpoints
             hayCambiosEnEvento = true;
         }
 
-        // --- GESTIÓN DE TICKETS Y AFORO ---
-        // Recuperamos los tickets para actualizarlos y recalcular el aforo total
+        // Tickets y aforo
         var ticketsResponse = await client
             .From<EntradaEvento>()
             .Filter("fk_evento", Constants.Operator.Equals, eventId)
@@ -288,8 +282,7 @@ static class AdminEndpoints
             if (dto.PrecioGeneral.HasValue) { general.Precio = dto.PrecioGeneral.Value; cambioG = true; }
             if (dto.CantidadGeneral.HasValue) { general.Cantidad = dto.CantidadGeneral.Value; cambioG = true; }
             
-            // Aquí usamos Update directo porque EntradaEvento es otro objeto,
-            // pero si te fallara también, habría que usar .Set() igual que arriba.
+            // Aquí usamos Update directo porque EntradaEvento es otro objeto
             if (cambioG) await client.From<EntradaEvento>().Update(general);
         }
 
@@ -315,13 +308,12 @@ static class AdminEndpoints
             vip = nuevaVip;
         }
 
-        // --- RECALCULAR AFORO (Y añadirlo al Update del Evento) ---
+        // Recalcular aforo
         if (dto.CantidadGeneral.HasValue || dto.CantidadVip.HasValue)
         {
             int nuevoGen = dto.CantidadGeneral ?? (general?.Cantidad ?? 0);
             int nuevoVip = dto.CantidadVip ?? (vip?.Cantidad ?? 0);
-
-            // Aforo = Stock Actual + Lo que ya se ha vendido
+            
             int nuevoAforo = nuevoGen + nuevoVip + evento.EntradasVendidas;
 
             evento.Aforo = nuevoAforo;
@@ -329,10 +321,9 @@ static class AdminEndpoints
             hayCambiosEnEvento = true;
         }
 
-        // --- EJECUCIÓN FINAL DE LA ACTUALIZACIÓN DEL EVENTO ---
+        // Ejecución de la actualización
         if (hayCambiosEnEvento)
         {
-            // ESTA ES LA CLAVE: Ejecutamos la query construida con los .Set()
             await updateQuery.Update();
         }
 
