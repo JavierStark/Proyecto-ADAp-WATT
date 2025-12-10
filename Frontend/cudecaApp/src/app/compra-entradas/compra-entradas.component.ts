@@ -108,16 +108,24 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private cargarEventoDesdeAdmin(id: string): void {
-    this.http.get<any>(`${this.apiUrl}/admin/events/${id}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    this.http.get<any[]>(`${this.apiUrl}/admin/events`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     }).subscribe({
-      next: (item) => {
+      next: (items) => {
+        const item = items.find((e) => `${e.id}` === `${id}`);
+
+        if (!item) {
+          // Si no se encuentra en admin, usamos el público
+          this.cargarEventoPublico(id);
+          return;
+        }
+
         this.evento = this.mapearEventoAdmin(item);
-        this.precioGeneral = item.precioGeneral || 25;
-        this.precioVip = item.precioVip || 0;
-        this.cantidadGeneralDisponible = item.cantidadGeneral || (item.aforo || 50);
-        this.cantidadVipDisponible = item.cantidadVip || 0;
-        this.tieneEntradasVip = this.cantidadVipDisponible > 0;
+        this.precioGeneral = item.precioGeneral ?? item.PrecioGeneral ?? 25;
+        this.precioVip = item.precioVip ?? item.PrecioVip ?? 0;
+        this.cantidadGeneralDisponible = item.cantidadGeneral ?? item.CantidadGeneral ?? item.aforo ?? 50;
+        this.cantidadVipDisponible = item.cantidadVip ?? item.CantidadVip ?? 0;
+        this.tieneEntradasVip = (this.precioVip ?? 0) > 0 && this.cantidadVipDisponible > 0;
         this.isLoading = false;
       },
       error: () => {
