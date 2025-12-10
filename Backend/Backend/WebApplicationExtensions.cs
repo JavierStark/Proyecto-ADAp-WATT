@@ -27,7 +27,7 @@ public static class WebApplicationExtensions
         users.MapGet("/is-corporate", Auth.IsCorporate);
         
         users.MapGet("/tickets", Tickets.GetMyTickets);
-        users.MapGet("/tickets/{ticketId:int}", Tickets.GetMyTickets);
+        users.MapGet("/tickets/{ticketId}", Tickets.GetMyTickets);
         users.MapGet("/donations", Donations.GetMyDonations);
         users.MapGet("/donations/summary", Donations.GetMyDonationSummary);
 
