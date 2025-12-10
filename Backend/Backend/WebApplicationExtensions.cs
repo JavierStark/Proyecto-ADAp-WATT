@@ -108,4 +108,13 @@ public static class WebApplicationExtensions
 
         return app;
     }
+    
+    public static WebApplication MapDevEndpoints(this WebApplication app)
+    {
+        if (app.Environment.IsDevelopment()) // Solo en desarrollo por seguridad
+        {
+            app.MapGet("/dev/dtos", DevTools.GetAllDtoStructures);
+        }
+        return app;
+    }
 }

@@ -93,7 +93,8 @@ app.MapAuthEndpoints()
     .MapDonationEndpoints()
     .MapPaymentEndpoints()
     .MapDiscountEndpoints()
-    .MapAdminEndpoints();
+    .MapAdminEndpoints()
+    .MapDevEndpoints();
 
 app.Run();
 return;
