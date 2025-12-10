@@ -47,7 +47,7 @@ static class Tickets
             var eventosResponse = await client.From<Evento>()
                 .Filter("id", Operator.In, eventosIds)
                 .Get();
-            
+
             var dictEventos = eventosResponse.Models.ToDictionary(e => e.Id);
 
             // Traer Tipos de Entrada
@@ -84,8 +84,9 @@ static class Tickets
         }
     }
 
-    
-    public static async Task<IResult> SendTestEmail(string ticketId, string email, Client client, IEmailService emailService, IConfiguration config)
+
+    public static async Task<IResult> SendTestEmail(string ticketId, string email, Client client,
+        IEmailService emailService, IConfiguration config)
     {
         try
         {
@@ -95,9 +96,9 @@ static class Tickets
 
             var emailResponse = await emailService.SendEmailAsync(email, "Your Ticket", html, qr, config);
 
-            return emailResponse.IsSuccessful ?
-                Results.Ok(new { message = "Ticket enviado por email correctamente." }) : 
-                Results.Problem("Error enviando el email: " + emailResponse.ErrorMessage);
+            return emailResponse.IsSuccessful
+                ? Results.Ok(new { message = "Ticket enviado por email correctamente." })
+                : Results.Problem("Error enviando el email: " + emailResponse.ErrorMessage);
         }
         catch (Exception ex)
         {
@@ -117,39 +118,39 @@ static class Tickets
                                       box-shadow:0 4px 16px rgba(0,0,0,0.08); padding:40px;">
                           <tr>
                             <td style="text-align:center;">
-                    
+
                               <h1 style="font-size:28px; color:#1e1e1e; margin-bottom:10px; font-weight:600;">
                                 ¡Aquí tienes tu entrada! 🎫
                               </h1>
-                    
+
                               <p style="font-size:16px; color:#4a4a4a; margin-bottom:25px;">
                                 Gracias por tu compra. Presenta este código QR en la entrada para acceder al evento.
                               </p>
-                    
+
                               <div style="margin:30px 0;">
                                 <img src="cid:qr.png" alt="QR Code" 
                                      style="width:180px; height:180px; border-radius:8px; 
                                             box-shadow:0 4px 12px rgba(0,0,0,0.15);" />
                               </div>
-                    
+
                               <p style="font-size:16px; color:#1e1e1e; margin-bottom:10px; font-weight:600;">
                                 Ticket ID:
                               </p>
                               <p style="font-size:18px; color:#4f46e5; margin-bottom:30px; font-weight:bold;">
                                 {ticketId}
                               </p>
-                    
+
                               <hr style="border:none; border-top:1px solid #e5e7eb; margin:40px 0;">
-                    
+
                               <p style="font-size:14px; color:#6b7280;">
                                 Si tienes algún problema con tu ticket o necesitas asistencia,
                                 ponte en contacto con nuestro equipo de soporte.
                               </p>
-                    
+
                               <p style="font-size:13px; color:#9ca3af; margin-top:25px;">
                                 Gracias por confiar en nosotros. ¡Disfruta del evento!
                               </p>
-                    
+
                             </td>
                           </tr>
                         </table>
@@ -171,301 +172,181 @@ static class Tickets
 
         return ms.ToArray(); // PNG bytes
     }
-    
-    public static async Task<IResult> ConfirmPurchase(PurchaseConfirmDto dto, Client client,
+
+    public static async Task<IResult> PurchaseTickets(BuyTicketDto dto, Supabase.Client client,
         IPaymentService paymentService, HttpContext httpContext, IEmailService emailService, IConfiguration config)
     {
         try
         {
-            var userId = (string)httpContext.Items["user_id"]!;
+            // VALIDACIONES
+            if (dto.Items == null || !dto.Items.Any())
+                return Results.BadRequest(new { error = "El carrito está vacío." });
 
-            var usuarioDb = await client.From<Usuario>()
-                .Filter("id", Operator.Equals, userId)
-                .Single();
+            if (dto.Items.Any(i => i.Quantity <= 0))
+                return Results.BadRequest(new { error = "La cantidad de cada entrada debe ser al menos 1." });
 
-
-            if (!dto.ReservationIds.Any())
-                return Results.BadRequest(new { error = "No has seleccionado ninguna reserva." });
-
-            // Obtenemos las reseervas a partir de sus Ids
-            var responseReservas = await client.From<ReservaEntrada>()
-                .Filter("fk_usuario", Operator.Equals, usuarioDb.Id.ToString())
-                .Filter("fecha_expiracion", Operator.GreaterThan, DateTime.UtcNow.ToString("o")) // Solo válidas
+            var userIdString = httpContext.Items["user_id"]?.ToString();
+            if (string.IsNullOrEmpty(userIdString)) return Results.Unauthorized();
+            var userGuid = Guid.Parse(userIdString);
+            
+            // OBTENER TIPOS DE ENTRADA Y VALIDAR STOCK
+            var ticketTypeIds = dto.Items.Select(i => i.TicketEventId).ToList();
+            
+            var responseTipos = await client.From<EntradaEvento>()
+                .Filter("id", Operator.In, ticketTypeIds) // Traemos todos los tipos requeridos
                 .Get();
 
-            var reservasAConfirmar = responseReservas.Models
-                .Where(r => dto.ReservationIds.Contains(r.IdReserva))
-                .ToList();
+            var tiposDb = responseTipos.Models;
 
-            if (reservasAConfirmar.Count != dto.ReservationIds.Count)
+            // Validaciones lógicas
+            decimal totalPagar = 0;
+            int cantidadTotalEntradas = 0;
+
+            foreach (var item in dto.Items)
+            {
+                var tipoDb = tiposDb.FirstOrDefault(t => t.Id == item.TicketEventId);
+
+                if (tipoDb == null)
+                    return Results.NotFound(
+                        new { error = $"El tipo de entrada con ID {item.TicketEventId} no existe." });
+
+                if (tipoDb.FkEvento != dto.EventId)
+                    return Results.BadRequest(new
+                        { error = $"La entrada '{tipoDb.Tipo}' no pertenece al evento solicitado." });
+
+                if (tipoDb.Cantidad < item.Quantity)
+                    return Results.BadRequest(new
+                        { error = $"Stock insuficiente para '{tipoDb.Tipo}'. Quedan {tipoDb.Cantidad}." });
+
+                // Sumar al total
+                totalPagar += tipoDb.Precio * item.Quantity;
+                cantidadTotalEntradas += item.Quantity;
+            }
+            
+            // ACTUALIZAR PERFIL DE USUARIO (Si faltan datos)
+            var usuario = await client.From<Usuario>().Where(u => u.Id == userGuid).Single();
+            var clienteRes = await client.From<Cliente>().Where(c => c.Id == userGuid).Get();
+            var cliente = clienteRes.Models.FirstOrDefault() ?? new Cliente { Id = userGuid };
+
+            bool datosActualizados = false;
+            var camposFaltantes = new List<string>();
+
+            if (string.IsNullOrEmpty(usuario.Dni))
+            {
+                if (!string.IsNullOrEmpty(dto.Dni))
+                {
+                    usuario.Dni = dto.Dni;
+                    datosActualizados = true;
+                }
+                else camposFaltantes.Add("DNI");
+            }
+
+            if (string.IsNullOrEmpty(cliente.Calle))
+            {
+                if (!string.IsNullOrEmpty(dto.Direccion))
+                {
+                    cliente.Calle = dto.Direccion;
+                    datosActualizados = true;
+                }
+                else camposFaltantes.Add("Dirección");
+            }
+
+            if (camposFaltantes.Any())
             {
                 return Results.BadRequest(new
-                    { error = "Algunas reservas han caducado o no existen. Vuelve a iniciar la compra." });
+                {
+                    error = "Faltan datos fiscales necesarios.",
+                    missing_fields = camposFaltantes,
+                    code = "MISSING_DATA"
+                });
             }
 
-            decimal totalPagar = 0;
-            var eventosAfectados = new Dictionary<Guid, int>();
+            if (datosActualizados) await client.From<Cliente>().Upsert(cliente);
 
-            var idsTipos = reservasAConfirmar.Select(r => r.FkEntradaEvento).Distinct().ToList();
-            var preciosDict = new Dictionary<Guid, (decimal Precio, Guid IdEvento)>();
-
-            foreach (var idTipo in idsTipos)
+            // PROCESAR PAGO
+            if (totalPagar > 0)
             {
-                var tipo = await client.From<EntradaEvento>().Filter("id", Operator.Equals, idTipo.ToString()).Single();
-                if (tipo != null) preciosDict.Add(idTipo, (tipo.Precio, tipo.FkEvento));
+                try
+                {
+                    await paymentService.ProcessPaymentAsync(totalPagar, dto.PaymentToken);
+                }
+                catch (Exception ex)
+                {
+                    return Results.BadRequest(new { error = "Error en el pago: " + ex.Message });
+                }
             }
-
-            foreach (var reserva in reservasAConfirmar)
-            {
-                if (!preciosDict.TryGetValue(reserva.FkEntradaEvento, out var info)) continue;
-                
-                
-                totalPagar += info.Precio * reserva.Cantidad;
-
-                // Contabilizar para aforo global
-                eventosAfectados.TryAdd(info.IdEvento, 0);
-                eventosAfectados[info.IdEvento] += reserva.Cantidad;
-            }
-
-            if (totalPagar == 0) return Results.BadRequest(new { error = "Carrito vacío." });
-
-            // PASARELA DE PAGO (STRIPE REAL + SIMULACIÓN)
-            // Convertimos a céntimos
-            long cantidadEnCentimos = (long)(totalPagar * 100);
             
-            try 
-            {
-                await paymentService.ProcessPaymentAsync(totalPagar, dto.PaymentToken);
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-
-            // Crear Pago
+            // Crear Pago 
             var nuevoPago = new Pago
             {
                 Monto = totalPagar,
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado",
                 MetodoDePago = dto.PaymentMethod,
-                FkCliente = usuarioDb.Id
+                FkCliente = userGuid
             };
             var pagoRes = await client.From<Pago>().Insert(nuevoPago);
             var pagoCreado = pagoRes.Models.First();
 
-            // Procesar Entradas y Stock
-            var ticketsNuevos = new List<Entrada>();
+            var ticketsGenerados = new List<Entrada>();
 
-            foreach (var reserva in reservasAConfirmar)
+            // Procesamiento de cada TIPO de entrada comprado
+            foreach (var item in dto.Items)
             {
-                var infoTipo = preciosDict[reserva.FkEntradaEvento];
+                var tipoDb = tiposDb.First(t => t.Id == item.TicketEventId);
 
-                // Restar Stock de la tabla 'entrada_evento'
-                var tipoDb = await client.From<EntradaEvento>()
-                    .Filter("id", Operator.Equals, reserva.FkEntradaEvento.ToString()).Single();
-                if (tipoDb != null)
-                {
-                    tipoDb.Cantidad -= reserva.Cantidad; // Restamos lo que se ha comprado
-                    await client.From<EntradaEvento>().Update(tipoDb);
-                }
+                // Descontar Stock
+                tipoDb.Cantidad -= item.Quantity;
+                await client.From<EntradaEvento>().Update(tipoDb);
 
-                // Crear entradas
-                for (int i = 0; i < reserva.Cantidad; i++)
+                // Generar N entradas individuales
+                for (int i = 0; i < item.Quantity; i++)
                 {
-                    ticketsNuevos.Add(new Entrada
+                    var nuevaEntrada = new Entrada
                     {
-                        FkUsuario = usuarioDb.Id,
-                        FkEvento = infoTipo.IdEvento,
+                        FkUsuario = userGuid,
+                        FkEvento = dto.EventId,
                         FkPago = pagoCreado.Id,
                         FechaCompra = DateTime.UtcNow,
-                        Precio = infoTipo.Precio,
-                        FkEntradaEvento = reserva.FkEntradaEvento,
+                        Precio = tipoDb.Precio,
+                        FkEntradaEvento = tipoDb.Id,
                         CodigoQr = Guid.NewGuid().ToString()
-                    });
-                    
-                    await emailService.SendEmailAsync(
-                        usuarioDb.Email!,
-                        "Entrada Comprada",
-                        GetTicketEmailHtml(ticketsNuevos.Last().CodigoQr!),
-                        GenerateQr(ticketsNuevos.Last().CodigoQr!),
+                    };
+                    ticketsGenerados.Add(nuevaEntrada);
+
+                    // Enviar Email Individual
+                    _ = emailService.SendEmailAsync(
+                        usuario.Email!,
+                        $"Tu Entrada ({tipoDb.Tipo}) - " + (await client.From<Evento>()
+                            .Filter("id", Operator.Equals, dto.EventId.ToString()).Single())?.Nombre,
+                        GetTicketEmailHtml(nuevaEntrada.CodigoQr),
+                        GenerateQr(nuevaEntrada.CodigoQr),
                         config
                     );
                 }
-
-                // Borrar la reserva procesada
-                await client.From<ReservaEntrada>().Delete(reserva);
             }
 
-            await client.From<Entrada>().Insert(ticketsNuevos);
+            // Insertar todas las entradas de golpe
+            await client.From<Entrada>().Insert(ticketsGenerados);
 
-            // Actualizar las entradas vendidas
-            foreach (var kvp in eventosAfectados)
-            {
-                var evento = await client.From<Evento>().Filter("id", Operator.Equals, kvp.Key.ToString()).Single();
-                if (evento != null)
-                {
-                    evento.EntradasVendidas += kvp.Value;
-                    await client.From<Evento>().Update(evento);
-                }
-            }
-
-            return Results.Ok(new { status = "success", message = "Compra realizada." });
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem("Error: " + ex.Message);
-        }
-    }
-
-    public static async Task<IResult> StartPurchase(Tickets.PurchaseStartDto dto, Supabase.Client client, HttpContext httpContext)
-    {
-        if (dto.Quantity <= 0) return Results.BadRequest(new { error = "Cantidad mínima: 1." });
-
-        try
-        {
-            var userId = (string)httpContext.Items["user_id"]!;
-            
-            var usuarioDb = await client.From<Usuario>()
-                .Filter("id", Operator.Equals, userId)
-                .Single();
-            
-            var tipoEntrada = await client.From<EntradaEvento>()
-                .Filter("id", Operator.Equals, dto.TicketEventId.ToString()) 
-                .Single();
-
-            if (tipoEntrada == null) return Results.NotFound(new { error = "Entrada no encontrada." });
-            if (tipoEntrada.FkEvento != dto.EventId)
-                return Results.BadRequest(new { error = "La entrada no coincide con el evento." });
-
-            // CALCULAR STOCK REAL
-            var ahora = DateTime.UtcNow;
-            
-            var reservasActivas = await client.From<ReservaEntrada>()
-                .Filter("fk_entrada_evento", Operator.Equals, dto.TicketEventId.ToString())
-                .Filter("fecha_expiracion", Operator.GreaterThan, ahora.ToString("o"))
-                .Get();
-
-            int cantidadBloqueada = reservasActivas.Models.Sum(r => r.Cantidad);
-            int stockDisponible = tipoEntrada.Cantidad - cantidadBloqueada;
-
-            if (stockDisponible < dto.Quantity)
-            {
-                return Results.BadRequest(new { error = $"Solo quedan {stockDisponible} entradas disponibles." });
-            }
-
-            // CREAR RESERVA
-            var nuevaReserva = new ReservaEntrada
-            {
-                FkEntradaEvento = tipoEntrada.Id,
-                FkUsuario = usuarioDb.Id,
-                Cantidad = dto.Quantity,
-                FechaExpiracion = DateTime.UtcNow.AddMinutes(10)
-            };
-
-            await client.From<ReservaEntrada>().Insert(nuevaReserva);
-
+            // Actualizar estadísticas del evento (Total vendido)
             var evento = await client.From<Evento>().Filter("id", Operator.Equals, dto.EventId.ToString()).Single();
+            if (evento != null)
+            {
+                evento.EntradasVendidas += cantidadTotalEntradas;
+                await client.From<Evento>().Update(evento);
+            }
 
             return Results.Ok(new
             {
                 status = "success",
-                message = "Entradas reservadas por 10 minutos.",
-                carrito = new
-                {
-                    evento = evento?.Nombre,
-                    tipo = tipoEntrada.Tipo,
-                    cantidad = dto.Quantity,
-                    total = tipoEntrada.Precio * dto.Quantity,
-                    expira_en = nuevaReserva.FechaExpiracion
-                }
+                message = $"Compra realizada. Se han generado {cantidadTotalEntradas} entradas.",
+                totalPagado = totalPagar
             });
         }
         catch (Exception ex)
         {
-            return Results.Problem("Error en reserva: " + ex.Message);
-        }
-    }
-
-    public static async Task<IResult> GetMyReservations(Supabase.Client client, HttpContext httpContext)
-    {
-        try
-        {
-            if (httpContext.Items["user_id"] is not string userAuth)
-                return Results.Unauthorized();
-
-            var usuarioDb = await client.From<Usuario>()
-                .Filter("id", Operator.Equals, userAuth)
-                .Single();
-
-            var reservasResponse = await client.From<ReservaEntrada>()
-                .Filter("fk_usuario", Operator.Equals, usuarioDb.Id.ToString())
-                .Filter("fecha_expiracion", Operator.GreaterThan, DateTime.UtcNow.ToString("o"))
-                .Get();
-
-            var misReservas = reservasResponse.Models;
-
-            if (!misReservas.Any()) return Results.Ok(new List<Tickets.ReservationDto>());
-
-            var idsTipos = misReservas.Select(r => r.FkEntradaEvento).Distinct().ToList();
-            var infoTipos = new Dictionary<Guid, (string Tipo, decimal Precio, Guid IdEvento)>();
-            var infoEventos = new Dictionary<Guid, string>();
-
-            foreach (var idTipo in idsTipos)
-            {
-                var tipo = await client.From<EntradaEvento>().Filter("id", Operator.Equals, idTipo.ToString()).Single();
-                
-                if (tipo == null) continue;
-                if (infoEventos.ContainsKey(tipo.FkEvento)) continue;
-                
-                
-                infoTipos[idTipo] = (tipo.Tipo, tipo.Precio, tipo.FkEvento);
-
-
-                var evt = await client.From<Evento>().Filter("id", Operator.Equals, tipo.FkEvento.ToString())
-                    .Single();
-                if (evt != null) infoEventos[tipo.FkEvento] = evt.Nombre ?? "Evento";
-            }
-
-            // Mapear a DTO
-            var resultado = misReservas.Select(r =>
-            {
-                var info = infoTipos.ContainsKey(r.FkEntradaEvento)
-                    ? infoTipos[r.FkEntradaEvento]
-                    : (Tipo: "Desconocido", Precio: 0m, IdEvento: Guid.Empty);
-
-                var nombreEvento = infoEventos.ContainsKey(info.IdEvento)
-                    ? infoEventos[info.IdEvento]
-                    : "Desconocido";
-
-                // Cálculo del tiempo restante
-                var expiracionUtc = r.FechaExpiracion.Kind == DateTimeKind.Utc
-                    ? r.FechaExpiracion
-                    : r.FechaExpiracion.ToUniversalTime();
-
-                // 2. Restamos contra UTC real
-                var tiempoRestante = expiracionUtc - DateTime.UtcNow;
-
-                string reloj = tiempoRestante.TotalSeconds <= 0
-                    ? "00:00"
-                    : $"{(int)tiempoRestante.TotalMinutes:D2}:{tiempoRestante.Seconds:D2}";
-
-                return new Tickets.ReservationDto(
-                    r.IdReserva,
-                    nombreEvento,
-                    info.Tipo,
-                    r.Cantidad,
-                    info.Precio,
-                    info.Precio * r.Cantidad,
-                    reloj
-                );
-            }).ToList();
-
-            return Results.Ok(resultado);
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem("Error obteniendo carrito: " + ex.Message);
+            return Results.Problem("Error procesando la compra: " + ex.Message);
         }
     }
 
@@ -531,7 +412,7 @@ static class Tickets
             return await Task.FromResult(Results.Problem("Error validando descuento: " + ex.Message));
         }
     }
-    
+
     public static async Task<IResult> ValidateTicketQr(string qrCode, Client client)
     {
         try
@@ -568,7 +449,7 @@ static class Tickets
             return Results.Problem("Error validando código QR: " + ex.Message);
         }
     }
-    
+
     public record TicketDto(
         Guid TicketId,
         string EventoNombre,
@@ -595,19 +476,19 @@ static class Tickets
         string TiempoRestante
     );
 
-    public record PurchaseConfirmDto(
-        string PaymentMethod,
+    public record BuyTicketDto(
+        Guid EventId,
+        List<PurchaseItemDto> Items,
         string PaymentToken,
-        List<Guid> ReservationIds
+        string PaymentMethod,
+        string? Dni,
+        string? Nombre,
+        string? Apellidos,
+        string? Direccion,
+        string? Ciudad,
+        string? CodigoPostal,
+        string? Provincia
     );
 
     public record DiscountCheckDto(string Code);
-
-    public record PurchaseStartDto(
-        Guid EventId,
-        Guid TicketEventId,
-        int Quantity,
-        bool IsCompany,
-        string BillingAddress,
-        string? DiscountCode);
 }
