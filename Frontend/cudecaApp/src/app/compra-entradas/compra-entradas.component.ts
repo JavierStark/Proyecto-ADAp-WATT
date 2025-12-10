@@ -152,12 +152,13 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private mapearEvento(item: any): Evento {
-    const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+    const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagenURL || item.imagen || 'assets/images/fondoCudeca.png';
     console.log(`🎫 Mapeando evento (público): ${item.nombre || 'Sin título'}`);
     console.log(`   - Raw item keys:`, Object.keys(item));
     console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
     console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
     console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+    console.log(`   - item.imagenURL: ${item.imagenURL || 'undefined'}`);
     console.log(`   - Imagen final: ${imagenUrl}`);
     return {
       id: item.id,
@@ -178,12 +179,13 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private mapearEventoAdmin(item: any): Evento {
-    const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+    const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagenURL || item.imagen || 'assets/images/fondoCudeca.png';
     console.log(`🎫 Mapeando evento (admin): ${item.nombre || 'Sin título'}`);
     console.log(`   - Raw item keys:`, Object.keys(item));
     console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
     console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
     console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+    console.log(`   - item.imagenURL: ${item.imagenURL || 'undefined'}`);
     console.log(`   - Imagen final: ${imagenUrl}`);
     return {
       id: item.id,

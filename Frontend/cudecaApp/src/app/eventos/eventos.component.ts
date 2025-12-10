@@ -307,12 +307,13 @@ export class EventosComponent implements OnInit {
       const datosJson = JSON.parse(textoRespuesta);
       return datosJson.map((item: any) => {
         // Buscar imageUrl en diferentes formatos
-        const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+        const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagenURL || item.imagen || 'assets/images/fondoCudeca.png';
         console.log(`📸 Evento: ${item.nombre || 'Sin título'}`);
         console.log(`   - Raw item keys:`, Object.keys(item));
         console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
         console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
         console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+        console.log(`   - item.imagenURL: ${item.imagenURL || 'undefined'}`);
         console.log(`   - item.imagen: ${item.imagen || 'undefined'}`);
         console.log(`   - Imagen final: ${imagenUrl}`);
         
@@ -340,12 +341,13 @@ export class EventosComponent implements OnInit {
     try {
       return (datos || []).map((item: any) => {
         // Buscar imageUrl en diferentes formatos (camelCase, PascalCase, snake_case)
-        const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+        const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagenURL || item.imagen || 'assets/images/fondoCudeca.png';
         console.log(`📸 Evento (ADMIN): ${item.nombre || 'Sin título'}`);
         console.log(`   - Raw item keys:`, Object.keys(item));
         console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
         console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
         console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+        console.log(`   - item.imagenURL: ${item.imagenURL || 'undefined'}`);
         console.log(`   - item.imagen: ${item.imagen || 'undefined'}`);
         console.log(`   - Imagen final: ${imagenUrl}`);
         

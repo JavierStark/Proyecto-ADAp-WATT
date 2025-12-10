@@ -53,12 +53,13 @@ export class EventoDetalleComponent implements OnInit {
     //
     this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map(item => {
-        const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagen || 'assets/images/fondoCudeca.png';
+        const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagenURL || item.imagen || 'assets/images/fondoCudeca.png';
         console.log(`📸 Evento Detalle: ${item.nombre || 'Sin título'}`);
         console.log(`   - Raw item keys:`, Object.keys(item));
         console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
         console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
         console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
+        console.log(`   - item.imagenURL: ${item.imagenURL || 'undefined'}`);
         console.log(`   - item.imagen: ${item.imagen || 'undefined'}`);
         console.log(`   - Imagen final: ${imagenUrl}`);
         
