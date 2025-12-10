@@ -13,6 +13,8 @@ export interface EventoCompra {
   apellidosCliente: string;
   telefonoCliente: string;
   dniCliente: string;
+  ubicacion?: string;
+  fecha?: string;
 }
 
 @Injectable({

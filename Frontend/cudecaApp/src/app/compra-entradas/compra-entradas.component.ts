@@ -233,7 +233,9 @@ export class CompraEntradasComponent implements OnInit {
         nombreCliente: this.nombre,
         apellidosCliente: this.apellidos,
         telefonoCliente: this.telefono,
-        dniCliente: this.dni
+        dniCliente: this.dni,
+        ubicacion: this.evento.ubicacion || (this.evento as any).ubicacion || '',
+        fecha: this.evento.fecha ? (this.evento.fecha instanceof Date ? this.evento.fecha.toLocaleDateString() : String(this.evento.fecha)) : ''
       });
 
       // Navegar a la página de pagos

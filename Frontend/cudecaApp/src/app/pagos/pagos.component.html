@@ -17,12 +17,20 @@
 
       <!-- Imagen -->
       <div class="w-full flex justify-center md:w-[22vw] md:flex-shrink-0">
-        <img 
-          src="assets/images/abuela.png" 
-          alt="Evento"
-          class="w-[80%] md:w-full h-auto object-cover shadow-md rounded-xl"
-          style="aspect-ratio:1;"
-        >
+        <!-- Información del evento y compra (debajo de la imagen) -->
+        <div *ngIf="eventoCompra" class="left-event-info w-full mb-4 text-left text-[3.5vw] md:text-[0.9vw] text-gray-700">
+          <img 
+            src="assets/images/abuela.png" 
+            alt="Evento"
+            class="w-[80%] md:w-full h-auto object-cover shadow-md rounded-xl"
+            style="aspect-ratio:16/9; width:100%; height:auto;"
+          >
+          <p class="font-semibold mb-2">{{ eventoCompra.titulo }}</p>
+          <p>Entradas: {{ eventoCompra.numeroEntradasGeneral + eventoCompra.numeroEntradasVip }}</p>
+          <p class="font-bold text-green-700">Total: €{{ eventoCompra.totalPrecio }}</p>
+          <p class="mt-2"><span class="location-icon">📍</span> {{ eventoCompra.ubicacion }}</p>
+          <p><span class="calendar-icon">📅</span> {{ eventoCompra.fecha }}</p>
+        </div>
       </div>
 
       <!-- Formulario -->
@@ -31,13 +39,6 @@
         <h1 class="font-bold text-green-700 mb-4 text-[6vw] md:text-[1.6vw]">
           Completa el formulario:
         </h1>
-
-        <!-- Información del evento y compra -->
-        <div *ngIf="eventoCompra" class="w-full mb-4 text-left text-[3.5vw] md:text-[0.9vw] text-gray-700">
-          <p class="font-semibold mb-2">{{ eventoCompra.titulo }}</p>
-          <p>Entradas: {{ eventoCompra.numeroEntradasGeneral + eventoCompra.numeroEntradasVip }}</p>
-          <p class="font-bold text-green-700">Total: €{{ eventoCompra.totalPrecio }}</p>
-        </div>
 
         <h3 class="font-semibold text-green-600 mb-4 text-[4vw] md:text-[1.2vw]">
           Método de pago
