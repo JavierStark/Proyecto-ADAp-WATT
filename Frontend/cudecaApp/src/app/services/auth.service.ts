@@ -78,6 +78,15 @@ export class AuthService {
     });
   }
 
+  // Headers para FormData (sin Content-Type para que se envíe automáticamente)
+  private getHeadersWithoutContentType() {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // NO agregar Content-Type, el navegador lo establece automáticamente para FormData
+    });
+  }
+
   // 1. Obtener Perfil (GET /users/me)
   getProfile(): Observable<any> {
     return this.http.get(`${this.apiUrl}/users/me`, { headers: this.getHeaders() });
@@ -117,11 +126,21 @@ export class AuthService {
 
   // 8. Crear evento (POST /admin/events)
   createAdminEvent(body: any): Observable<any> {
+    // Si es FormData, usar headers sin Content-Type
+    if (body instanceof FormData) {
+      return this.http.post(`${this.apiUrl}/admin/events`, body, { headers: this.getHeadersWithoutContentType() });
+    }
+    // Si es JSON, usar headers normales
     return this.http.post(`${this.apiUrl}/admin/events`, body, { headers: this.getHeaders() });
   }
 
   // 9. Actualizar evento (PUT /admin/events/{eventId})
   updateAdminEvent(eventId: string, body: any): Observable<any> {
+    // Si es FormData, usar headers sin Content-Type
+    if (body instanceof FormData) {
+      return this.http.put(`${this.apiUrl}/admin/events/${eventId}`, body, { headers: this.getHeadersWithoutContentType() });
+    }
+    // Si es JSON, usar headers normales
     return this.http.put(`${this.apiUrl}/admin/events/${eventId}`, body, { headers: this.getHeaders() });
   }
 

@@ -187,6 +187,18 @@
           <input [(ngModel)]="formData.ubicacion" class="border rounded-[0.6vw] px-[0.6vw] py-[0.5vw]" />
         </label>
 
+        <label class="flex flex-col gap-[0.3vw] col-span-2">
+          <span class="text-gray-700 font-semibold">Imagen (JPG, PNG, etc.)</span>
+          <div class="flex gap-[0.5vw]">
+            <input type="file" accept="image/*" (change)="onFileSelected($event)" class="border rounded-[0.6vw] px-[0.6vw] py-[0.5vw] flex-1" />
+          </div>
+          <div *ngIf="previewUrl" class="mt-[0.5vw]">
+            <p class="text-[0.8vw] text-gray-600 mb-[0.3vw]">Preview:</p>
+            <img [src]="previewUrl" alt="Preview" class="max-w-[150px] max-h-[100px] rounded-[0.5vw] border border-gray-300" />
+          </div>
+          <p class="text-[0.75vw] text-gray-500 mt-[0.2vw]">Máximo 5MB. Formatos: JPG, PNG, GIF, etc.</p>
+        </label>
+
         <label class="flex flex-col gap-[0.3vw]">
           <span class="text-gray-700 font-semibold">Objetivo / Recaudación</span>
           <input [(ngModel)]="formData.objetoRecaudacion" class="border rounded-[0.6vw] px-[0.6vw] py-[0.5vw]" />
