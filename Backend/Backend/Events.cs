@@ -29,7 +29,8 @@ static class Events
                 e.Ubicacion,
                 e.Aforo ?? 0,
                 e.EntradasVendidas,
-                e.ObjetoRecaudacion ?? "Sin especificar"
+                e.ObjetoRecaudacion ?? "Sin especificar",
+                e.ImagenUrl
             ));
 
             return Results.Ok(eventos);
@@ -64,7 +65,8 @@ static class Events
                 eventoDb.Ubicacion,
                 eventoDb.Aforo ?? 0,
                 eventoDb.EntradasVendidas,
-                eventoDb.ObjetoRecaudacion ?? "Sin especificar"
+                eventoDb.ObjetoRecaudacion ?? "Sin especificar",
+                eventoDb.ImagenUrl
             );
 
             return Results.Ok(eventoDto);
@@ -83,7 +85,8 @@ static class Events
         string? Ubicacion,
         int Aforo,
         int EntradasVendidas,
-        string ObjetoRecaudacion
+        string ObjetoRecaudacion,
+        string? ImagenUrl
     );
 
     record EventoDto(
