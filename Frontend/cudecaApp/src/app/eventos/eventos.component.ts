@@ -47,6 +47,8 @@ export class EventosComponent implements OnInit {
   saving: boolean = false;
   formError: string = '';
   formData: any = this.getEmptyForm();
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
 
   constructor(
     private router: Router,
@@ -146,13 +148,16 @@ export class EventosComponent implements OnInit {
       precioGeneral: 0,
       cantidadGeneral: 0,
       precioVip: null,
-      cantidadVip: null
+      cantidadVip: null,
+      imagen: null as File | null
     };
   }
 
   abrirCrear() {
     this.editingId = null;
     this.formData = this.getEmptyForm();
+    this.selectedFile = null;
+    this.previewUrl = null;
     this.showForm = true;
   }
 
@@ -168,8 +173,11 @@ export class EventosComponent implements OnInit {
       precioGeneral: evento.precioGeneral ?? 0,
       cantidadGeneral: evento.cantidadGeneral ?? 0,
       precioVip: evento.precioVip ?? null,
-      cantidadVip: evento.cantidadVip ?? null
+      cantidadVip: evento.cantidadVip ?? null,
+      imagen: null
     };
+    this.selectedFile = null;
+    this.previewUrl = evento.imagen || null;
     this.showForm = true;
   }
 
@@ -177,6 +185,35 @@ export class EventosComponent implements OnInit {
     if (this.saving) return;
     this.showForm = false;
     this.formError = '';
+    this.selectedFile = null;
+    this.previewUrl = null;
+  }
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      // Validar que sea imagen
+      if (!file.type.startsWith('image/')) {
+        this.formError = 'Por favor selecciona una imagen válida.';
+        return;
+      }
+      
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.formError = 'La imagen no debe superar 5MB.';
+        return;
+      }
+
+      this.selectedFile = file;
+      this.formError = '';
+
+      // Mostrar preview
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.previewUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   guardarEvento() {
@@ -207,22 +244,31 @@ export class EventosComponent implements OnInit {
     this.formError = '';
     this.saving = true;
 
-    const payload: any = {
-      nombre: this.formData.nombre,
-      descripcion: this.formData.descripcion,
-      fecha: this.formData.fecha ? new Date(this.formData.fecha).toISOString() : null,
-      ubicacion: this.formData.ubicacion,
-      eventoVisible: !!this.formData.eventoVisible,
-      objetoRecaudacion: this.formData.objetoRecaudacion || null,
-      precioGeneral: Number(this.formData.precioGeneral) || 0,
-      cantidadGeneral: Number(this.formData.cantidadGeneral) || 0,
-      precioVip: this.formData.precioVip !== null && this.formData.precioVip !== '' ? Number(this.formData.precioVip) : null,
-      cantidadVip: this.formData.cantidadVip !== null && this.formData.cantidadVip !== '' ? Number(this.formData.cantidadVip) : null
-    };
+    const formData = new FormData();
+    formData.append('Nombre', this.formData.nombre);
+    formData.append('Descripcion', this.formData.descripcion);
+    formData.append('Fecha', this.formData.fecha ? new Date(this.formData.fecha).toISOString() : '');
+    formData.append('Ubicacion', this.formData.ubicacion);
+    formData.append('EventoVisible', String(!!this.formData.eventoVisible));
+    formData.append('ObjetoRecaudacion', this.formData.objetoRecaudacion || '');
+    formData.append('PrecioGeneral', String(Number(this.formData.precioGeneral) || 0));
+    formData.append('CantidadGeneral', String(Number(this.formData.cantidadGeneral) || 0));
+    if (this.formData.precioVip !== null && this.formData.precioVip !== '') {
+      formData.append('PrecioVip', String(Number(this.formData.precioVip)));
+    }
+    if (this.formData.cantidadVip !== null && this.formData.cantidadVip !== '') {
+      formData.append('CantidadVip', String(Number(this.formData.cantidadVip)));
+    }
+
+    // Agregar imagen si existe
+    if (this.selectedFile) {
+      formData.append('Imagen', this.selectedFile, this.selectedFile.name);
+      console.log(`📸 Subiendo imagen: ${this.selectedFile.name}`);
+    }
 
     const obs = this.editingId
-      ? this.authService.updateAdminEvent(this.editingId, payload)
-      : this.authService.createAdminEvent(payload);
+      ? this.authService.updateAdminEvent(this.editingId, formData)
+      : this.authService.createAdminEvent(formData);
 
     obs.subscribe({
       next: () => {
