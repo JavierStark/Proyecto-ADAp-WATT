@@ -5,38 +5,44 @@
 
 <header 
   *ngIf="!isAuthRoute"
-  class="hidden md:block text-white py-[1.2vw] px-0 fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out"
-  [ngClass]="{ 'transform -translate-y-full': !showHeader }">
-  <!-- Logo de Cudeca -->
-        <div class="flex items-center justify-between w-[96vw] ml-[2vw]">
-          <!-- Todos los elementos son hijos directos; justify-between reparte el espacio entre ellos para cubrir todo el ancho -->
-          <img src="assets/images/cudeca-logo.png" alt="Cudeca Logo" class="flex-shrink-0 w-[15vw] h-auto" (click)="goToHome()" style="cursor:pointer;">
-          <button
-            (click)="goToHome()"
-            class="flex-shrink-0 bg-transparent font-bold text-green-600 py-[1.2vw] px-[2.5vw] rounded-[1.2vw] hover:bg-green-800 hover:text-white transition-all text-[2.2vw]">
-            Inicio</button>
-          <button
-            (click)="goToEventos()"
-            class="flex-shrink-0 bg-transparent font-bold text-green-600 py-[1.2vw] px-[2.5vw] rounded-[1.2vw] hover:bg-green-800 hover:text-white transition-all text-[2.2vw]">
-            Eventos</button>
-          <button (click)="goToDonation()"
-            class="flex-shrink-0 bg-transparent font-bold text-green-600 py-[1.2vw] px-[2.5vw] rounded-[1.2vw] hover:bg-green-800 hover:text-white transition-all text-[2.2vw]">
-            Donar</button>
-          <button
-            *ngIf="isLoggedIn"
-            (click)="goToCuenta()"
-            class="flex-shrink-0 bg-transparent font-bold text-green-600 py-[1.2vw] px-[2.5vw] rounded-[1.2vw] hover:bg-green-800 hover:text-white transition-all text-[2.2vw]">
-            Cuenta</button>
-          <button
-            *ngIf="!isLoggedIn"
-            (click)="goToLogin()"
-            class="flex-shrink-0 bg-transparent font-bold text-green-600 py-[1.2vw] px-[2.5vw] rounded-[1.2vw] hover:bg-green-800 hover:text-white transition-all text-[2.2vw]">
-            Iniciar sesión</button>
-          <button
-            (click)="goToLogin()"
-            class="flex-shrink-0 w-[6vw] h-[6vw] rounded-full flex items-center justify-center bg-white text-green-600 hover:bg-green-800 hover:text-white transition-all text-[2.4vw]">
-            ?</button>
-        </div>
+  class="hidden md:block bg-white shadow-md py-[1.5vw] relative w-full z-50">
+  
+  <div class="flex items-center justify-between w-[96vw] ml-[2vw]">
+    
+    <img 
+      src="assets/images/cudeca-logo.png" 
+      alt="Cudeca Logo" 
+      class="flex-shrink-0 w-[12vw] h-auto hover:opacity-80 transition-opacity" 
+      (click)="goToHome()" 
+      style="cursor:pointer;">
+
+    <nav class="flex items-center gap-[1vw]">
+      <button (click)="goToHome()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-600 hover:text-white transition-all text-[1.5vw]">
+        Inicio
+      </button>
+      
+      <button (click)="goToEventos()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-600 hover:text-white transition-all text-[1.5vw]">
+        Eventos
+      </button>
+      
+      <button (click)="goToDonation()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-600 hover:text-white transition-all text-[1.5vw]">
+        Donar
+      </button>
+
+      <button *ngIf="isLoggedIn" (click)="goToCuenta()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-600 hover:text-white transition-all text-[1.5vw]">
+        Cuenta
+      </button>
+      
+      <button *ngIf="!isLoggedIn" (click)="goToLogin()" class="bg-green-600 text-white font-bold py-[1vw] px-[2.2vw] rounded-full hover:bg-green-700 shadow-md transition-all text-[1.5vw]">
+        Iniciar sesión
+      </button>
+
+      <button (click)="goToLogin()" class="w-[3vw] h-[3vw] rounded-full flex items-center justify-center bg-gray-100 text-green-700 font-bold hover:bg-green-100 transition-all text-[1.5vw] ml-[1vw]">
+        ?
+      </button>
+    </nav>
+
+  </div>
 </header>
 
 <!-- ========================================================= -->
