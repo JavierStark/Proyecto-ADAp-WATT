@@ -267,7 +267,8 @@ export class CompraEntradasComponent implements OnInit {
         telefonoCliente: this.telefono,
         dniCliente: this.dni,
         ubicacion: this.evento.ubicacion || (this.evento as any).ubicacion || '',
-        fecha: this.evento.fecha ? (this.evento.fecha instanceof Date ? this.evento.fecha.toLocaleDateString() : String(this.evento.fecha)) : ''
+        fecha: this.evento.fecha ? (this.evento.fecha instanceof Date ? this.evento.fecha.toLocaleDateString() : String(this.evento.fecha)) : '',
+        imagen: this.evento.imagen || 'assets/images/fondoCudeca.png'
       });
 
       // Navegar a la página de pagos
