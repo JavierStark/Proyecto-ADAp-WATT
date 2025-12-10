@@ -16,28 +16,28 @@
       (click)="goToHome()" 
       style="cursor:pointer;">
 
-    <nav class="flex items-center gap-[1vw]">
-      <button (click)="goToHome()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-600 hover:text-white transition-all text-[1.5vw]">
+    <nav class="flex items-center gap-[3vw]">
+      <button (click)="goToHome()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-700 hover:text-white transition-all text-[2vw]">
         Inicio
       </button>
       
-      <button (click)="goToEventos()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-600 hover:text-white transition-all text-[1.5vw]">
+      <button (click)="goToEventos()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-700 hover:text-white transition-all text-[2vw]">
         Eventos
       </button>
       
-      <button (click)="goToDonation()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-600 hover:text-white transition-all text-[1.5vw]">
+      <button (click)="goToDonation()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-700 hover:text-white transition-all text-[2vw]">
         Donar
       </button>
 
-      <button *ngIf="isLoggedIn" (click)="goToCuenta()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-600 hover:text-white transition-all text-[1.5vw]">
+      <button *ngIf="isLoggedIn" (click)="goToCuenta()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-700 hover:text-white transition-all text-[2vw]">
         Cuenta
       </button>
       
-      <button *ngIf="!isLoggedIn" (click)="goToLogin()" class="bg-green-600 text-white font-bold py-[1vw] px-[2.2vw] rounded-full hover:bg-green-700 shadow-md transition-all text-[1.5vw]">
+      <button *ngIf="!isLoggedIn" (click)="goToLogin()" class="bg-green-600 text-white font-bold py-[1vw] px-[2.2vw] rounded-full hover:bg-green-700 shadow-md transition-all text-[2vw]">
         Iniciar sesión
       </button>
 
-      <button (click)="goToLogin()" class="w-[3vw] h-[3vw] rounded-full flex items-center justify-center bg-gray-100 text-green-700 font-bold hover:bg-green-100 transition-all text-[1.5vw] ml-[1vw]">
+      <button (click)="goToLogin()" class="w-[4vw] h-[4vw] rounded-full flex items-center justify-center bg-gray-100 text-green-700 font-bold hover:bg-green-100 transition-all text-[2vw] ml-[1vw] mr-[1vw]">
         ?
       </button>
     </nav>
