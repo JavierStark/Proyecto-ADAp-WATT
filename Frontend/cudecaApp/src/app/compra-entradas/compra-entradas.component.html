@@ -1,0 +1,227 @@
+<section class="w-full min-h-screen pt-[7.5vw] pb-[4vw] overflow-hidden font-sans bg-green-50 relative">
+  <!-- Fondo -->
+  <img
+    src="assets/images/fondoCudeca.png"
+    alt="Fondo"
+    class="absolute inset-0 w-full h-full object-cover -z-10"
+  />
+  <div class="absolute inset-0 bg-green-400 opacity-30 -z-5"></div>
+
+  <div class="max-w-[95vw] mx-auto relative z-10">
+    
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center h-[50vh]">
+      <div class="animate-spin rounded-full h-[5vw] w-[5vw] border-b-[0.4vw] border-green-700 mb-[2vw]"></div>
+      <p class="text-green-800 text-[1.5vw] font-bold">Cargando evento...</p>
+    </div>
+
+    <!-- Contenido principal -->
+    <div *ngIf="!isLoading && evento" class="bg-white rounded-[2vw] shadow-2xl overflow-hidden p-[2vw]">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-[2.5vw]">
+        
+        <!-- IZQUIERDA: Resumen del evento seleccionado -->
+        <div class="lg:col-span-1">
+          <h1 class="text-[1.6vw] font-bold text-green-700 mb-[1.5vw]">Has seleccionado:</h1>
+          
+          <div class="bg-green-50 border border-green-200 rounded-[1.5vw] p-[1.5vw] shadow-sm">
+            <!-- Imagen evento -->
+            <img [src]="evento.imagen" alt="Evento" class="w-full h-[12vw] object-cover rounded-[1vw] mb-[1vw]">
+            
+            <!-- Título evento -->
+            <h3 class="text-[1.3vw] font-bold text-green-800 mb-[1vw]">{{ evento.titulo }}</h3>
+            
+            <!-- Ubicación -->
+            <div class="flex items-center gap-[0.5vw] text-[0.95vw] text-gray-700 mb-[1vw]">
+              <span>📍</span>
+              <span>{{ evento.ubicacion }}</span>
+            </div>
+            
+            <!-- Fecha -->
+            <div class="flex items-center gap-[0.5vw] text-[0.95vw] text-gray-700 mb-[1.5vw]">
+              <span>📅</span>
+              <span>{{ evento.fecha | date:'d MMMM yyyy':'':'es-ES' }}</span>
+            </div>
+
+            <!-- Resumen de entradas y precios -->
+            <div class="bg-white rounded-[1vw] p-[1.2vw] mb-[1.5vw]">
+              <div class="mb-[1vw]">
+                <div class="text-[0.85vw] text-gray-600 mb-[0.3vw]">Entradas General:</div>
+                <div class="text-[1.2vw] font-bold text-green-700">
+                  {{ numeroEntradasGeneral }} × {{ precioGeneral }}€ = {{ totalGeneral }}€
+                </div>
+              </div>
+              
+              <div class="mb-[1vw]">
+                <div class="text-[0.85vw] text-gray-600 mb-[0.3vw]">Entradas VIP:</div>
+                <div class="text-[1.2vw] font-bold text-amber-700">
+                  {{ numeroEntradasVip }} × {{ precioVip }}€ = {{ totalVip }}€
+                </div>
+              </div>
+
+              <div class="border-t border-gray-300 pt-[1vw] mt-[1vw]">
+                <div class="text-[0.9vw] text-gray-600 mb-[0.3vw]">Total ({{ totalEntradas }} entradas):</div>
+                <div class="text-[1.4vw] font-bold text-green-800">{{ totalPrecio }}€</div>
+              </div>
+            </div>
+
+            <!-- Botón volver -->
+            <button 
+              (click)="goBack()"
+              class="w-full bg-gray-400 text-white text-[1vw] font-semibold py-[0.8vw] rounded-[0.8vw] hover:bg-gray-500 transition-colors">
+              Volver
+            </button>
+          </div>
+        </div>
+
+        <!-- DERECHA: Formulario de compra -->
+        <div class="lg:col-span-2">
+          <h1 class="text-[1.6vw] font-bold text-green-700 mb-[1.5vw]">Completa el formulario:</h1>
+
+          <!-- Número de entradas -->
+          <div class="mb-[2vw] grid grid-cols-2 gap-[1.5vw]">
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-[1.5vw] p-[1.5vw] border border-green-200">
+              <label class="block text-[0.95vw] text-gray-700 font-semibold mb-[0.8vw]">
+                Número de entradas General ({{ precioGeneral }}€ c/u)
+              </label>
+              <input 
+                type="number" 
+                min="0" 
+                [(ngModel)]="numeroEntradasGeneral"
+                class="w-full border-2 border-green-300 rounded-[0.8vw] px-[1vw] py-[0.7vw] text-[1.1vw] font-semibold text-green-800 text-center"
+              />
+            </div>
+
+            <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[1.5vw] p-[1.5vw] border border-amber-200">
+              <label class="block text-[0.95vw] text-gray-700 font-semibold mb-[0.8vw]">
+                Número de entradas VIP ({{ precioVip }}€ c/u)
+              </label>
+              <input 
+                type="number" 
+                min="0" 
+                [(ngModel)]="numeroEntradasVip"
+                class="w-full border-2 border-amber-300 rounded-[0.8vw] px-[1vw] py-[0.7vw] text-[1.1vw] font-semibold text-amber-800 text-center"
+              />
+            </div>
+          </div>
+
+          <!-- Tipo de comprador -->
+          <div class="mb-[2vw] grid grid-cols-2 gap-[1.5vw]">
+            <button 
+              (click)="esEmpresa = false"
+              [class.bg-green-600]="!esEmpresa"
+              [class.text-white]="!esEmpresa"
+              [class.bg-gray-200]="esEmpresa"
+              [class.text-gray-700]="esEmpresa"
+              class="py-[0.8vw] rounded-[0.8vw] text-[1vw] font-semibold transition-all">
+              Soy persona
+            </button>
+            <button 
+              (click)="esEmpresa = true"
+              [class.bg-green-600]="esEmpresa"
+              [class.text-white]="esEmpresa"
+              [class.bg-gray-200]="!esEmpresa"
+              [class.text-gray-700]="!esEmpresa"
+              class="py-[0.8vw] rounded-[0.8vw] text-[1vw] font-semibold transition-all">
+              Soy empresa
+            </button>
+          </div>
+
+          <!-- Mensaje de error -->
+          <div *ngIf="errorMessage" class="bg-red-50 border border-red-300 text-red-700 rounded-[1vw] p-[1.2vw] mb-[1.5vw] text-[0.95vw]">
+            {{ errorMessage }}
+          </div>
+
+          <!-- Datos personales -->
+          <div class="bg-gray-50 rounded-[1.5vw] p-[1.5vw] mb-[1.5vw]">
+            <h3 class="text-[1.2vw] font-bold text-gray-800 mb-[1vw]">Datos personales:</h3>
+            
+            <div class="grid grid-cols-2 gap-[1vw] mb-[1vw]">
+              <input 
+                type="text" 
+                [(ngModel)]="nombre"
+                placeholder="Nombre"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+              <input 
+                type="text" 
+                [(ngModel)]="apellidos"
+                placeholder="Apellidos"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-[1vw] mb-[1vw]">
+              <input 
+                type="tel" 
+                [(ngModel)]="telefono"
+                placeholder="Teléfono"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+              <input 
+                type="text" 
+                [(ngModel)]="dni"
+                placeholder="DNI / Identificación"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 gap-[1vw] mb-[1vw]">
+              <input 
+                type="text" 
+                [(ngModel)]="direccion"
+                placeholder="Dirección"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+            </div>
+
+            <div class="grid grid-cols-3 gap-[1vw]">
+              <input 
+                type="text" 
+                [(ngModel)]="codigoPostal"
+                placeholder="Código Postal"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+              <input 
+                type="text" 
+                [(ngModel)]="ciudad"
+                placeholder="Ciudad"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+              <input 
+                type="text" 
+                [(ngModel)]="pais"
+                placeholder="País"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+            </div>
+          </div>
+
+          <!-- Código de descuento -->
+          <div class="mb-[1.5vw]">
+            <label class="block text-[0.95vw] text-gray-700 font-semibold mb-[0.5vw]">
+              ¿Tienes código de descuento?
+            </label>
+            <input 
+              type="text" 
+              [(ngModel)]="codigoDescuento"
+              placeholder="Código de descuento (opcional)"
+              class="w-full border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+            />
+          </div>
+
+          <!-- Botón enviar -->
+          <button 
+            (click)="procesarCompra()"
+            [disabled]="isProcessing || totalEntradas === 0"
+            [class.opacity-50]="isProcessing || totalEntradas === 0"
+            [class.cursor-not-allowed]="isProcessing || totalEntradas === 0"
+            class="w-full bg-green-600 text-white text-[1.2vw] font-bold py-[1vw] rounded-[1vw] hover:bg-green-700 transition-colors shadow-lg">
+            {{ isProcessing ? 'Procesando...' : 'Enviar' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
