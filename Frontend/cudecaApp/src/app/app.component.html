@@ -1,4 +1,17 @@
 
+<!-- PANTALLA DE TRANSICIÓN INICIAL -->
+<div
+    *ngIf="!loaded"
+    class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-700"
+    [class.opacity-0]="fadeOut"
+>
+    <img 
+        src="assets/images/logo-cudeca.jpg"
+        class="w-[35vw] md:w-[15vw] animate-fade-zoom"
+    />
+</div>
+
+
 <!-- ========================================================= -->
 <!-- ======================= HEADER — PC =================== -->
 <!-- ========================================================= -->
@@ -90,7 +103,7 @@
 
 
 <!-- Router Outlet: donde se renderizan los componentes -->
-<main class="">
+<main class="opacity-0 transition-opacity duration-700" [class.opacity-100]="loaded">
   <router-outlet></router-outlet>
 </main>
 
