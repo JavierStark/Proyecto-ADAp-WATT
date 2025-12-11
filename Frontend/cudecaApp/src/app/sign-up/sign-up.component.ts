@@ -15,6 +15,7 @@ export class SignUpComponent {
   
   email: string = '';
   password: string = '';
+  confirmPassword: string = '';
   isLoading: boolean = false;
 
   // 2. Inyectamos el AuthService
@@ -26,6 +27,18 @@ export class SignUpComponent {
 
   onSubmit() {
     if (this.isLoading) return; // Evita doble clic accidental
+
+    // Validar que las contraseñas coincidan
+    if (this.password !== this.confirmPassword) {
+      alert('Las contraseñas no coinciden. Por favor, verifica que ambas sean iguales.');
+      return;
+    }
+
+    // Validar que la contraseña no esté vacía
+    if (!this.password || this.password.trim() === '') {
+      alert('La contraseña no puede estar vacía.');
+      return;
+    }
 
     console.log('Enviando registro...');
 

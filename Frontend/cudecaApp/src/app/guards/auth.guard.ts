@@ -6,12 +6,19 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // LÓGICA INVERSA AL OTRO GUARDIA:
-  if (authService.isLoggedIn()) {
-    return true; 
-  } else {
+  // Verificar si está logueado
+  if (!authService.isLoggedIn()) {
     alert('Debes iniciar sesión para ver tu perfil');
     router.navigate(['/log-in']);
     return false;
   }
+
+  // Verificar si el token está expirado
+  if (authService.isTokenExpired()) {
+    authService.forceLogout('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+    router.navigate(['/log-in']);
+    return false;
+  }
+
+  return true;
 };

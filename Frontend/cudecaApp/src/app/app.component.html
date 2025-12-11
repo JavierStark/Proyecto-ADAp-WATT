@@ -37,7 +37,7 @@
         Iniciar sesión
       </button>
 
-      <button (click)="goToLogin()" class="w-[4vw] h-[4vw] rounded-full flex items-center justify-center bg-gray-100 text-green-700 font-bold hover:bg-green-100 transition-all text-[2vw] ml-[1vw] mr-[1vw]">
+      <button (click)="openHelpModal()" class="w-[4vw] h-[4vw] rounded-full flex items-center justify-center bg-gray-100 text-green-700 font-bold hover:bg-green-100 transition-all text-[2vw] ml-[1vw] mr-[1vw]">
         ?
       </button>
     </nav>
@@ -82,6 +82,7 @@
   <button (click)="goToDonation(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Donar</button>
   <button *ngIf="isLoggedIn" (click)="goToCuenta(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Cuenta</button>
   <button *ngIf="!isLoggedIn" (click)="goToLogin(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Iniciar sesión</button>
+  <button (click)="openHelpModal(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">¿Necesitas ayuda?</button>
 
 </div>
 
@@ -100,4 +101,7 @@
 <footer *ngIf="!isAuthRoute" class="relative  bg-green-800 text-white py-[1vw] text-center w-full text-[1.2vw]">
   <p>&copy; 2025 Cudeca - Todos los derechos reservados</p>
 </footer>
+
+<!-- Help Modal -->
+<app-help-modal *ngIf="showHelpModal" (close)="closeHelpModal()"></app-help-modal>
 

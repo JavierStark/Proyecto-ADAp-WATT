@@ -63,6 +63,32 @@ export class AuthService {
     return !!localStorage.getItem('token');
   }
 
+  // Verificar si el token está expirado
+  isTokenExpired(): boolean {
+    const token = localStorage.getItem('token');
+    if (!token) return true;
+
+    try {
+      // Decodificar el JWT sin verificación (solo para leer el payload)
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+
+      const decoded = JSON.parse(atob(parts[1]));
+      const expirationTime = decoded.exp * 1000; // Convertir de segundos a milisegundos
+      const currentTime = new Date().getTime();
+
+      return currentTime > expirationTime;
+    } catch (error) {
+      return true;
+    }
+  }
+
+  // Método para hacer logout desde cualquier lugar
+  forceLogout(message: string = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'): void {
+    alert(message);
+    this.logout();
+  }
+
 
 
 
