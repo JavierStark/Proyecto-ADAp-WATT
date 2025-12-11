@@ -181,40 +181,48 @@
       </div>
 
       <!-- VISTA ENTRADAS -->
-      <div *ngIf="vistaActual === 'tickets'" class="max-w-[70vw] mx-auto">
+      <div *ngIf="vistaActual === 'tickets'" class="max-w-[70vw] pt-[3vw] mx-auto">
         <h1 class="text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mis Entradas</h1>
         
-        <div *ngIf="tickets.length === 0" class="text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">
-          <p>No has adquirido ninguna entrada aún. ¡Apúntate a un evento!</p>
+        <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-[5vw]">
+          <div class="animate-spin rounded-full h-[3vw] w-[3vw] border-b-[0.4vw] border-green-600 mb-[1vw]"></div>
+          <p class="text-green-800 text-[1vw] font-bold">Buscando tus entradas...</p>
         </div>
 
-        <div class="grid gap-[1.5vw]">
-          <div *ngFor="let ticket of tickets" class="bg-white p-[2vw] rounded-[1.5vw] shadow-lg border-l-4 border-green-600">
-            <div class="flex flex-col gap-[0.4vw]">
-              <div class="flex items-center justify-between gap-[1vw] flex-wrap">
-                <h3 class="font-bold text-[1.3vw] text-gray-800">{{ ticket.eventoNombre || 'Evento' }}</h3>
-                <span class="inline-flex items-center gap-[0.5vw] bg-green-100 text-green-800 px-[1.2vw] py-[0.4vw] rounded-full text-[0.9vw] font-bold">
-                  {{ ticket.tipoEntrada || 'Entrada' }}
-                </span>
-              </div>
-
-              <p class="text-gray-600 text-[1vw]">Fecha del evento: {{ ticket.fechaEvento | date:'dd/MM/yyyy' }}</p>
-              <p class="text-gray-600 text-[1vw]">Ubicación: {{ ticket.ubicacion || 'Ubicación pendiente' }}</p>
-              <p class="text-gray-600 text-[1vw]">Precio pagado: {{ ticket.precioPagado | currency:'EUR' }}</p>
-
-              <div class="flex items-center justify-between flex-wrap gap-[1vw] mt-[0.6vw]">
-                <span class="inline-flex items-center gap-[0.5vw] bg-green-50 text-green-700 px-[1.2vw] py-[0.5vw] rounded-full text-[0.9vw] font-semibold">
-                  {{ ticket.estado || 'Activo' }}
-                </span>
-                <span class="text-[0.95vw] text-gray-500">Ticket ID: {{ ticket.ticketId }}</span>
-              </div>
-
-              <a *ngIf="ticket.codigoQrUrl" [href]="ticket.codigoQrUrl" target="_blank"
-                 class="text-green-700 text-[0.95vw] font-semibold hover:underline mt-[0.4vw] inline-flex items-center gap-[0.4vw]">
-                Ver QR
-              </a>
+        <div *ngIf="!isLoading" class="animate-fade-in">
+            
+            <div *ngIf="tickets.length === 0" class="text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">
+              <p>No has adquirido ninguna entrada aún. ¡Apúntate a un evento!</p>
             </div>
-          </div>
+
+            <div *ngIf="tickets.length > 0" class="grid gap-[1.5vw]">
+              <div *ngFor="let ticket of tickets" class="bg-white p-[2vw] rounded-[1.5vw] shadow-lg border-l-4 border-green-600">
+                <div class="flex flex-col gap-[0.4vw]">
+                  <div class="flex items-center justify-between gap-[1vw] flex-wrap">
+                    <h3 class="font-bold text-[1.3vw] text-gray-800">{{ ticket.eventoNombre || 'Evento' }}</h3>
+                    <span class="inline-flex items-center gap-[0.5vw] bg-green-100 text-green-800 px-[1.2vw] py-[0.4vw] rounded-full text-[0.9vw] font-bold">
+                      {{ ticket.tipoEntrada || 'Entrada' }}
+                    </span>
+                  </div>
+
+                  <p class="text-gray-600 text-[1vw]">Fecha del evento: {{ ticket.fechaEvento | date:'dd/MM/yyyy' }}</p>
+                  <p class="text-gray-600 text-[1vw]">Ubicación: {{ ticket.ubicacion || 'Ubicación pendiente' }}</p>
+                  <p class="text-gray-600 text-[1vw]">Precio pagado: {{ ticket.precioPagado | currency:'EUR' }}</p>
+
+                  <div class="flex items-center justify-between flex-wrap gap-[1vw] mt-[0.6vw]">
+                    <span class="inline-flex items-center gap-[0.5vw] bg-green-50 text-green-700 px-[1.2vw] py-[0.5vw] rounded-full text-[0.9vw] font-semibold">
+                      {{ ticket.estado || 'Activo' }}
+                    </span>
+                  </div>
+
+                  <a *ngIf="ticket.codigoQrUrl" [href]="ticket.codigoQrUrl" target="_blank"
+                    class="text-green-700 text-[0.95vw] font-semibold hover:underline mt-[0.4vw] inline-flex items-center gap-[0.4vw]">
+                    Ver QR
+                  </a>
+                </div>
+              </div>
+            </div>
+
         </div>
 
         <div class="flex justify-center mt-[2vw]">
