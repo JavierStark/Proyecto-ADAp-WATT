@@ -1,4 +1,4 @@
-﻿using Backend.Models;
+﻿﻿using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Supabase.Postgrest;
 
@@ -52,227 +52,251 @@ static class AdminEndpoints
     }
 
     public static async Task<IResult> AdminCreateEvent([FromForm] EventoCreateDto dto, Supabase.Client client)
-{
-    try
     {
-        // 1. Validación: Nombre obligatorio
-        if (string.IsNullOrWhiteSpace(dto.Nombre))
-            return Results.BadRequest(new { error = "El nombre del evento es obligatorio." });
-
-        // 2. Validación: Fecha obligatoria
-        if (!dto.Fecha.HasValue)
+        try
         {
-            return Results.BadRequest(new { error = "La fecha del evento es obligatoria." });
-        }
-        
-        if (dto.Fecha < DateTime.UtcNow)
-            return Results.BadRequest(new { error = "La fecha del evento no puede ser en el pasado." });
+            if (string.IsNullOrWhiteSpace(dto.Nombre))
+                return Results.BadRequest(new { error = "El título del evento es obligatorio." });
 
-        // 3. Validación: Entradas Generales (Opcionales, pero si se ponen, deben estar completas y positivas)
-        bool crearGeneral = dto.PrecioGeneral.HasValue && dto.CantidadGeneral.HasValue;
-        if ((dto.PrecioGeneral.HasValue && !dto.CantidadGeneral.HasValue) || (!dto.PrecioGeneral.HasValue && dto.CantidadGeneral.HasValue))
-             return Results.BadRequest(new { error = "Para crear entradas Generales debes indicar tanto precio como cantidad." });
-        
-        if (dto.PrecioGeneral.HasValue && dto.PrecioGeneral < 0)
-            return Results.BadRequest(new { error = "El precio General no puede ser negativo." });
+            if (dto.Fecha < DateTime.UtcNow)
+                return Results.BadRequest(new { error = "La fecha del evento no puede ser en el pasado." });
 
-        // 4. Validación: Entradas VIP (Opcionales)
-        bool crearVip = dto.PrecioVip.HasValue && dto.CantidadVip.HasValue;
-        if ((dto.PrecioVip.HasValue && !dto.CantidadVip.HasValue) || (!dto.PrecioVip.HasValue && dto.CantidadVip.HasValue))
-            return Results.BadRequest(new { error = "Para crear entradas VIP debes indicar tanto precio como cantidad." });
+            if (dto.CantidadGeneral <= 0)
+                return Results.BadRequest(new { error = "Debes crear al menos 1 entrada General." });
 
-        if (dto.PrecioVip.HasValue && dto.PrecioVip < 0)
-            return Results.BadRequest(new { error = "El precio VIP no puede ser negativo." });
+            if (dto.PrecioGeneral < 0)
+                return Results.BadRequest(new { error = "El precio General no puede ser negativo." });
 
+            if (dto is { PrecioVip: not null, CantidadVip: null } ||
+                (!dto.PrecioVip.HasValue && dto.CantidadVip.HasValue))
+            {
+                return Results.BadRequest(new
+                    { error = "Para crear entradas VIP debes indicar tanto el precio como la cantidad." });
+            }
+            
+            string? imagenUrlFinal = null;
 
-        // 5. Gestión de Imagen
-        string? imagenUrlFinal = null;
-        if (dto.Imagen != null)
-        {
-            var extension = Path.GetExtension(dto.Imagen.FileName);
-            var fileName = $"{Guid.NewGuid()}{extension}";
-            using var memoryStream = new MemoryStream();
-            await dto.Imagen.CopyToAsync(memoryStream);
-            var fileBytes = memoryStream.ToArray();
+            if (dto.Imagen != null)
+            {
+                // Validar nombre/extensión
+                var extension = Path.GetExtension(dto.Imagen.FileName);
+                var fileName = $"{Guid.NewGuid()}{extension}"; // Nombre único
 
-            await client.Storage.From("eventos").Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
-            imagenUrlFinal = client.Storage.From("eventos").GetPublicUrl(fileName);
-        }
+                // Convertir a bytes
+                using var memoryStream = new MemoryStream();
+                await dto.Imagen.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
 
-        // 6. Calcular Aforo inicial
-        int aforoTotal = (crearGeneral ? dto.CantidadGeneral!.Value : 0) + (crearVip ? dto.CantidadVip!.Value : 0);
+                // Subir a Supabase (Bucket "eventos")
+                await client.Storage
+                    .From("eventos")
+                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
 
-        var nuevoEvento = new Evento
-        {
-            Nombre = dto.Nombre,
-            Descripcion = dto.Descripcion,
-            FechaEvento = dto.Fecha, // Puede ser null ahora
-            Ubicacion = dto.Ubicacion,
-            Aforo = aforoTotal,
-            EventoVisible = dto.EventoVisible,
-            ObjetoRecaudacion = dto.ObjetoRecaudacion,
-            ImagenUrl = imagenUrlFinal
-        };
+                // Obtener URL Pública
+                imagenUrlFinal = client.Storage.From("eventos").GetPublicUrl(fileName);
+            }
 
-        var eventResponse = await client.From<Evento>().Insert(nuevoEvento);
-        var eventoCreado = eventResponse.Models.First();
+            bool tieneVip = dto is { PrecioVip: not null, CantidadVip: > 0 };
+            int aforoTotal = dto.CantidadGeneral + (tieneVip ? dto.CantidadVip!.Value : 0);
 
-        // 7. Insertar Entradas (si aplica)
-        var entradasAInsertar = new List<EntradaEvento>();
+            var nuevoEvento = new Evento
+            {
+                Nombre = dto.Nombre,
+                Descripcion = dto.Descripcion,
+                FechaEvento = dto.Fecha,
+                Ubicacion = dto.Ubicacion,
+                Aforo = aforoTotal,
+                EventoVisible = dto.EventoVisible,
+                ObjetoRecaudacion = dto.ObjetoRecaudacion,
+                ImagenUrl = imagenUrlFinal
+            };
 
-        if (crearGeneral)
-        {
+            var eventResponse = await client
+                .From<Evento>()
+                .Insert(nuevoEvento);
+
+            var eventoCreado = eventResponse.Models.First();
+
+            var entradasAInsertar = new List<EntradaEvento>();
+
             entradasAInsertar.Add(new EntradaEvento
             {
                 FkEvento = eventoCreado.Id,
                 Tipo = "General",
-                Precio = dto.PrecioGeneral!.Value,
-                Cantidad = dto.CantidadGeneral!.Value
+                Precio = dto.PrecioGeneral,
+                Cantidad = dto.CantidadGeneral
             });
-        }
 
-        if (crearVip)
-        {
-            entradasAInsertar.Add(new EntradaEvento
+            if (tieneVip)
             {
-                FkEvento = eventoCreado.Id,
-                Tipo = "VIP",
-                Precio = dto.PrecioVip!.Value,
-                Cantidad = dto.CantidadVip!.Value
+                entradasAInsertar.Add(new EntradaEvento
+                {
+                    FkEvento = eventoCreado.Id,
+                    Tipo = "VIP",
+                    Precio = dto.PrecioVip!.Value,
+                    Cantidad = dto.CantidadVip!.Value
+                });
+            }
+
+            await client.From<EntradaEvento>().Insert(entradasAInsertar);
+
+            return Results.Created($"/events/{eventoCreado.Id}", new
+            {
+                status = "success",
+                message = "Evento y tickets creados correctamente.",
+                evento = new EventoAdminDto(
+                    eventoCreado.Id,
+                    eventoCreado.Nombre,
+                    eventoCreado.Descripcion,
+                    eventoCreado.FechaEvento,
+                    eventoCreado.Ubicacion,
+                    eventoCreado.Aforo ?? 0,
+                    0,
+                    eventoCreado.EventoVisible,
+                    eventoCreado.ObjetoRecaudacion ?? "Sin especificar",
+                    eventoCreado.ImagenUrl,
+                    dto.PrecioGeneral,
+                    dto.CantidadGeneral,
+                    dto.PrecioVip,
+                    dto.CantidadVip
+                ),
+                tickets_creados = entradasAInsertar.Select(t => new { t.Tipo, t.Precio, Stock = t.Cantidad })
             });
         }
-
-        if (entradasAInsertar.Any())
+        catch (Exception ex)
         {
-            await client.From<EntradaEvento>().Insert(entradasAInsertar);
+            return Results.Problem("Error al crear el evento y sus entradas: " + ex.Message);
         }
-
-        return Results.Created($"/events/{eventoCreado.Id}", new
-        {
-            status = "success",
-            message = "Evento creado correctamente.",
-            evento = eventoCreado,
-            tickets_creados = entradasAInsertar.Select(t => new { t.Tipo, t.Precio, Stock = t.Cantidad })
-        });
     }
-    catch (Exception ex)
-    {
-        return Results.Problem("Error al crear el evento: " + ex.Message);
-    }
-}
 
-public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] EventoModifyDto dto, Supabase.Client client)
+    public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] EventoModifyDto dto, Supabase.Client client)
 {
     try
     {
         var parsed = Guid.Parse(eventId);
 
-        // --- VALIDACIONES ---
-        // 1. Nombre obligatorio
-        if (string.IsNullOrWhiteSpace(dto.Nombre))
-            return Results.BadRequest(new { error = "El nombre del evento no puede estar vacío." });
+        // 1. Obtener el evento actual (para tener los datos viejos y la URL de imagen vieja)
+        var evento = await client
+            .From<Evento>()
+            .Where(e => e.Id == parsed)
+            .Single();
 
-        // 2. Fecha obligatoria
-        if (!dto.Fecha.HasValue)
-        {
-            return Results.BadRequest(new { error = "La fecha del evento es obligatoria." });
-        }
-        
-        if (dto.Fecha < DateTimeOffset.UtcNow)
-            return Results.BadRequest(new { error = "La fecha debe ser posterior a hoy." });
-
-        // 3. Precios no negativos (solo si se envían)
-        if (dto.PrecioGeneral.HasValue && dto.PrecioGeneral < 0)
-            return Results.BadRequest(new { error = "El precio General no puede ser negativo." });
-        if (dto.PrecioVip.HasValue && dto.PrecioVip < 0)
-            return Results.BadRequest(new { error = "El precio VIP no puede ser negativo." });
-
-
-        // --- OBTENCIÓN DE DATOS ---
-        var evento = await client.From<Evento>().Where(e => e.Id == parsed).Single();
         if (evento == null)
-            return Results.NotFound(new { error = $"No se encontró evento con ID {eventId}." });
-
+            return Results.NotFound(new { error = $"No se encontró ningún evento con el ID {eventId}." });
+        
         var updateQuery = client.From<Evento>().Where(x => x.Id == parsed);
+        bool hayCambiosEnEvento = false;
 
-        // --- ACTUALIZACIÓN DE IMAGEN ---
+        // Gestión de la imagen
         if (dto.Imagen != null && dto.Imagen.Length > 0)
         {
+            // Borrar foto antigua si existe
             if (!string.IsNullOrEmpty(evento.ImagenUrl))
             {
                 var nombreArchivoViejo = GetFileNameFromUrl(evento.ImagenUrl);
                 if (nombreArchivoViejo != null)
-                     _ = client.Storage.From("eventos").Remove(new List<string> { nombreArchivoViejo });
+                {
+                    _ = client.Storage.From("eventos").Remove(new List<string> { nombreArchivoViejo });
+                }
             }
 
+            // Subir nueva foto
             var extension = Path.GetExtension(dto.Imagen.FileName);
             var fileName = $"{Guid.NewGuid()}{extension}";
+
             using var memoryStream = new MemoryStream();
             await dto.Imagen.CopyToAsync(memoryStream);
             var fileBytes = memoryStream.ToArray();
 
-            await client.Storage.From("eventos").Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
-            var nuevaUrl = client.Storage.From("eventos").GetPublicUrl(fileName);
+            await client.Storage
+                .From("eventos")
+                .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
 
-            updateQuery = updateQuery.Set(x => x.ImagenUrl, nuevaUrl);
+            // Obtener URL y preparar actualización
+            var nuevaUrl = client.Storage.From("eventos").GetPublicUrl(fileName);
+            
             evento.ImagenUrl = nuevaUrl;
+            updateQuery = updateQuery.Set(x => x.ImagenUrl, nuevaUrl);
+            hayCambiosEnEvento = true;
+        }
+        
+        if (!string.IsNullOrWhiteSpace(dto.Nombre))
+        {
+            evento.Nombre = dto.Nombre;
+            updateQuery = updateQuery.Set(x => x.Nombre, dto.Nombre);
+            hayCambiosEnEvento = true;
         }
 
-        // --- ACTUALIZACIÓN DE CAMPOS DEL EVENTO ---
-        updateQuery = updateQuery.Set(x => x.Nombre, dto.Nombre);
-        evento.Nombre = dto.Nombre;
+        if (!string.IsNullOrWhiteSpace(dto.Descripcion))
+        {
+            evento.Descripcion = dto.Descripcion;
+            updateQuery = updateQuery.Set(x => x.Descripcion, dto.Descripcion);
+            hayCambiosEnEvento = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.Ubicacion))
+        {
+            evento.Ubicacion = dto.Ubicacion;
+            updateQuery = updateQuery.Set(x => x.Ubicacion, dto.Ubicacion);
+            hayCambiosEnEvento = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.ObjetoRecaudacion))
+        {
+            evento.ObjetoRecaudacion = dto.ObjetoRecaudacion;
+            updateQuery = updateQuery.Set(x => x.ObjetoRecaudacion, dto.ObjetoRecaudacion);
+            hayCambiosEnEvento = true;
+        }
         
-        updateQuery = updateQuery.Set(x => x.FechaEvento, dto.Fecha);
-        evento.FechaEvento = dto.Fecha;
+        if (dto.Fecha.HasValue)
+        {
+            if (dto.Fecha.Value < DateTime.UtcNow) 
+                return Results.BadRequest(new { error = "Fecha inválida (es anterior a hoy)." });
 
-        if (dto.Descripcion != null) { updateQuery = updateQuery.Set(x => x.Descripcion, dto.Descripcion); evento.Descripcion = dto.Descripcion; }
-        if (dto.Ubicacion != null) { updateQuery = updateQuery.Set(x => x.Ubicacion, dto.Ubicacion); evento.Ubicacion = dto.Ubicacion; }
-        if (dto.ObjetoRecaudacion != null) { updateQuery = updateQuery.Set(x => x.ObjetoRecaudacion, dto.ObjetoRecaudacion); evento.ObjetoRecaudacion = dto.ObjetoRecaudacion; }
-        if (dto.EventoVisible.HasValue) { updateQuery = updateQuery.Set(x => x.EventoVisible, dto.EventoVisible.Value); evento.EventoVisible = dto.EventoVisible.Value; }
+            evento.FechaEvento = dto.Fecha.Value;
+            updateQuery = updateQuery.Set(x => x.FechaEvento, dto.Fecha.Value);
+            hayCambiosEnEvento = true;
+        }
 
-        // --- GESTIÓN DE TICKETS (Crear si no existen, Actualizar si existen) ---
-        var ticketsResponse = await client.From<EntradaEvento>().Filter("fk_evento", Constants.Operator.Equals, eventId).Get();
+        if (dto.EventoVisible.HasValue)
+        {
+            evento.EventoVisible = dto.EventoVisible.Value;
+            updateQuery = updateQuery.Set(x => x.EventoVisible, dto.EventoVisible.Value);
+            hayCambiosEnEvento = true;
+        }
+
+        // Tickets y aforo
+        var ticketsResponse = await client
+            .From<EntradaEvento>()
+            .Filter("fk_evento", Constants.Operator.Equals, eventId)
+            .Get();
+
         var ticketsDb = ticketsResponse.Models;
         var general = ticketsDb.FirstOrDefault(t => t.Tipo == "General");
         var vip = ticketsDb.FirstOrDefault(t => t.Tipo == "VIP");
 
-        // 1. Gestión GENERAL
+        // Actualizar Entrada GENERAL
         if (general != null)
         {
-            // Actualizar existente
-            bool cambio = false;
-            if (dto.PrecioGeneral.HasValue) { general.Precio = dto.PrecioGeneral.Value; cambio = true; }
-            if (dto.CantidadGeneral.HasValue) { general.Cantidad = dto.CantidadGeneral.Value; cambio = true; }
+            bool cambioG = false;
+            if (dto.PrecioGeneral.HasValue) { general.Precio = dto.PrecioGeneral.Value; cambioG = true; }
+            if (dto.CantidadGeneral.HasValue) { general.Cantidad = dto.CantidadGeneral.Value; cambioG = true; }
             
-            if(cambio) await client.From<EntradaEvento>().Update(general);
-        }
-        else if (dto.PrecioGeneral.HasValue && dto.CantidadGeneral.HasValue)
-        {
-            // Crear nueva General (porque no existía)
-            var nuevaGeneral = new EntradaEvento
-            {
-                FkEvento = evento.Id,
-                Tipo = "General",
-                Precio = dto.PrecioGeneral.Value,
-                Cantidad = dto.CantidadGeneral.Value
-            };
-            await client.From<EntradaEvento>().Insert(nuevaGeneral);
-            general = nuevaGeneral; // Asignamos para el cálculo del aforo
+            // Aquí usamos Update directo porque EntradaEvento es otro objeto
+            if (cambioG) await client.From<EntradaEvento>().Update(general);
         }
 
-        // 2. Gestión VIP
+        // Actualizar Entrada VIP
         if (vip != null)
         {
-            // Actualizar existente
-            bool cambio = false;
-            if (dto.PrecioVip.HasValue) { vip.Precio = dto.PrecioVip.Value; cambio = true; }
-            if (dto.CantidadVip.HasValue) { vip.Cantidad = dto.CantidadVip.Value; cambio = true; }
-
-            if(cambio) await client.From<EntradaEvento>().Update(vip);
+            bool cambioV = false;
+            if (dto.PrecioVip.HasValue) { vip.Precio = dto.PrecioVip.Value; cambioV = true; }
+            if (dto.CantidadVip.HasValue) { vip.Cantidad = dto.CantidadVip.Value; cambioV = true; }
+            
+            if (cambioV) await client.From<EntradaEvento>().Update(vip);
         }
-        else if (dto.PrecioVip.HasValue && dto.CantidadVip.HasValue)
+        else if (dto.PrecioVip.HasValue && dto.CantidadVip.HasValue) // Crear VIP si no existe
         {
-            // Crear nueva VIP (porque no existía)
             var nuevaVip = new EntradaEvento
             {
                 FkEvento = evento.Id,
@@ -281,22 +305,29 @@ public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] Ev
                 Cantidad = dto.CantidadVip.Value
             };
             await client.From<EntradaEvento>().Insert(nuevaVip);
-            vip = nuevaVip; // Asignamos para el cálculo del aforo
+            vip = nuevaVip;
         }
 
-        // --- RECALCULAR AFORO ---
-        // Tomamos el valor nuevo del DTO, si no, el valor de la base de datos (o recién creado), si no, 0.
-        int cantGen = dto.CantidadGeneral ?? (general?.Cantidad ?? 0);
-        int cantVip = dto.CantidadVip ?? (vip?.Cantidad ?? 0);
-        
-        // Asumimos que el aforo es la suma de capacidades actuales + entradas vendidas históricas (según tu lógica original)
-        int nuevoAforo = cantGen + cantVip + evento.EntradasVendidas;
+        // Recalcular aforo
+        if (dto.CantidadGeneral.HasValue || dto.CantidadVip.HasValue)
+        {
+            int nuevoGen = dto.CantidadGeneral ?? (general?.Cantidad ?? 0);
+            int nuevoVip = dto.CantidadVip ?? (vip?.Cantidad ?? 0);
+            
+            int nuevoAforo = nuevoGen + nuevoVip + evento.EntradasVendidas;
 
-        updateQuery = updateQuery.Set(x => x.Aforo, nuevoAforo);
-        evento.Aforo = nuevoAforo;
+            evento.Aforo = nuevoAforo;
+            updateQuery = updateQuery.Set(x => x.Aforo, nuevoAforo);
+            hayCambiosEnEvento = true;
+        }
 
-        await updateQuery.Update();
+        // Ejecución de la actualización
+        if (hayCambiosEnEvento)
+        {
+            await updateQuery.Update();
+        }
 
+        // Devolver respuesta con los datos actualizados
         return Results.Ok(new
         {
             status = "success",
@@ -312,7 +343,7 @@ public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] Ev
                 evento.EventoVisible,
                 evento.ObjetoRecaudacion ?? "Sin especificar",
                 evento.ImagenUrl,
-                general?.Precio ?? 0, // Si es null devuelve 0 para visualización
+                general?.Precio ?? 0,
                 general?.Cantidad ?? 0,
                 vip?.Precio,
                 vip?.Cantidad
@@ -340,7 +371,7 @@ public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] Ev
 
             if (eventoDb == null)
                 return Results.NotFound(new { error = $"No se encontró ningún evento con el ID {eventId}." });
-
+            
             // Borrar foto de supabase
             if (!string.IsNullOrEmpty(eventoDb.ImagenUrl))
             {
@@ -368,14 +399,14 @@ public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] Ev
             return Results.Problem("Error al eliminar el evento: " + ex.Message);
         }
     }
-
+    
     private static string? GetFileNameFromUrl(string url)
     {
         if (string.IsNullOrEmpty(url)) return null;
         try
         {
             var uri = new Uri(url);
-            return uri.Segments.Last();
+            return uri.Segments.Last(); 
         }
         catch
         {
@@ -403,12 +434,12 @@ public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] Ev
     public record EventoCreateDto(
         string Nombre,
         string? Descripcion,
-        DateTimeOffset? Fecha,
+        DateTime Fecha,
         string? Ubicacion,
         bool EventoVisible,
-        string? ObjetoRecaudacion,
-        decimal? PrecioGeneral,
-        int? CantidadGeneral,
+        string ObjetoRecaudacion,
+        decimal PrecioGeneral,
+        int CantidadGeneral,
         decimal? PrecioVip,
         int? CantidadVip,
         IFormFile? Imagen
