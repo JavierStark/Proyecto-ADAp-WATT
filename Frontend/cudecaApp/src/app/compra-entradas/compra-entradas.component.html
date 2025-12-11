@@ -185,8 +185,29 @@
             <div class="grid grid-cols-1 gap-[1vw] mb-[1vw]">
               <input 
                 type="text" 
-                [(ngModel)]="direccion"
-                placeholder="Dirección"
+                [(ngModel)]="calle"
+                placeholder="Calle"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+            </div>
+
+            <div class="grid grid-cols-3 gap-[1vw] mb-[1vw]">
+              <input 
+                type="text" 
+                [(ngModel)]="numero"
+                placeholder="Número"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+              <input 
+                type="text" 
+                [(ngModel)]="pisoPuerta"
+                placeholder="Piso/Puerta"
+                class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+              />
+              <input 
+                type="text" 
+                [(ngModel)]="codigoPostal"
+                placeholder="Código Postal"
                 class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
               />
             </div>
@@ -194,14 +215,14 @@
             <div class="grid grid-cols-3 gap-[1vw]">
               <input 
                 type="text" 
-                [(ngModel)]="codigoPostal"
-                placeholder="Código Postal"
+                [(ngModel)]="ciudad"
+                placeholder="Ciudad"
                 class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
               />
               <input 
                 type="text" 
-                [(ngModel)]="ciudad"
-                placeholder="Ciudad"
+                [(ngModel)]="provincia"
+                placeholder="Provincia"
                 class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
               />
               <input 

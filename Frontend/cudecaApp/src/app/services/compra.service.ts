@@ -18,10 +18,13 @@ export interface EventoCompra {
   imagen?: string;
   generalTicketEventId?: string;
   vipTicketEventId?: string;
-  direccion?: string;
+  calle?: string;
+  numero?: string;
+  pisoPuerta?: string;
   codigoPostal?: string;
   ciudad?: string;
   provincia?: string;
+  pais?: string;
   codigoDescuento?: string;
 }
 

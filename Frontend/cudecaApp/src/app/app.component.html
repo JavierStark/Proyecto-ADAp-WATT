@@ -129,6 +129,9 @@
         />
     </div>
 
+<!-- ========================================================= -->
+<!-- ========================= POP-UP ======================== -->
+<!-- ========================================================= -->
 
     <div class="flex-1 p-[1vw] flex flex-col gap-[0.5vw]">
         <div class="flex justify-between items-start gap-[0.5vw]">
@@ -148,7 +151,7 @@
         </p>
 
         <button
-            (click)="irACompraEntradasDestacada()"
+            (click)="irACompraEntradasDestacada(); cerrarPopupEvento()"
             class="self-end bg-emerald-600 text-white text-[0.9vw] font-semibold px-[1.4vw] py-[0.6vw] rounded-full hover:bg-emerald-700 transition-colors"
         >
             Comprar entradas

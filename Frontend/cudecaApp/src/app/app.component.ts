@@ -90,7 +90,7 @@ export class AppComponent implements OnInit {
 
                 setTimeout(() => {
                     this.showEventPopup = true;
-                }, 3000);
+                }, 5000); // Mostrar después de 5 segundos
             })
             .catch(err => {
                 console.error('Error cargando evento destacado', err);
