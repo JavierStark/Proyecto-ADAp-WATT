@@ -59,8 +59,18 @@ static class AdminEndpoints
         if (string.IsNullOrWhiteSpace(dto.Nombre))
             return Results.BadRequest(new { error = "El nombre del evento es obligatorio." });
 
-        // 2. Validación: Fecha (si se proporciona)
-        if (dto.Fecha.HasValue && dto.Fecha.Value < DateTime.UtcNow)
+        // 2. Validación: Fecha obligatoria
+        if (!dto.Fecha.HasValue)
+        {
+            return Results.BadRequest(new { error = "La fecha del evento es obligatoria." });
+        }
+        
+        if (!dto.Fecha.HasValue)
+        {
+            return Results.BadRequest(new { error = "La fecha del evento es obligatoria." });
+        }
+        
+        if (dto.Fecha < DateTime.UtcNow)
             return Results.BadRequest(new { error = "La fecha del evento no puede ser en el pasado." });
 
         // 3. Validación: Entradas Generales (Opcionales, pero si se ponen, deben estar completas y positivas)
@@ -167,8 +177,8 @@ public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] Ev
         if (string.IsNullOrWhiteSpace(dto.Nombre))
             return Results.BadRequest(new { error = "El nombre del evento no puede estar vacío." });
 
-        // 2. Fecha no pasada (solo si se envía)
-        if (dto.Fecha.HasValue && dto.Fecha.Value < DateTimeOffset.UtcNow)
+        // 2. Fecha obligatoria
+        if (dto.Fecha < DateTimeOffset.UtcNow)
             return Results.BadRequest(new { error = "La fecha debe ser posterior a hoy." });
 
         // 3. Precios no negativos (solo si se envían)
@@ -211,12 +221,9 @@ public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] Ev
         // --- ACTUALIZACIÓN DE CAMPOS DEL EVENTO ---
         updateQuery = updateQuery.Set(x => x.Nombre, dto.Nombre);
         evento.Nombre = dto.Nombre;
-
-        if (dto.Fecha.HasValue)
-        {
-            updateQuery = updateQuery.Set(x => x.FechaEvento, dto.Fecha.Value);
-            evento.FechaEvento = dto.Fecha.Value;
-        }
+        
+        updateQuery = updateQuery.Set(x => x.FechaEvento, dto.Fecha);
+        evento.FechaEvento = dto.Fecha;
 
         if (dto.Descripcion != null) { updateQuery = updateQuery.Set(x => x.Descripcion, dto.Descripcion); evento.Descripcion = dto.Descripcion; }
         if (dto.Ubicacion != null) { updateQuery = updateQuery.Set(x => x.Ubicacion, dto.Ubicacion); evento.Ubicacion = dto.Ubicacion; }
