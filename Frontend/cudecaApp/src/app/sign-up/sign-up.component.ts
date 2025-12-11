@@ -17,6 +17,8 @@ export class SignUpComponent {
   password: string = '';
   confirmPassword: string = '';
   isLoading: boolean = false;
+  showPassword: boolean = false;
+  showConfirmPassword: boolean = false;
 
   // 2. Inyectamos el AuthService
   constructor(
