@@ -451,7 +451,6 @@ static class AdminEndpoints
         public string? Descripcion { get; set; }
         public DateTimeOffset? Fecha { get; set; }
         public string? Ubicacion { get; set; }
-        public int? Aforo { get; set; }
         public bool? EventoVisible { get; set; }
         public string? ObjetoRecaudacion { get; set; }
         public decimal? PrecioGeneral { get; set; }
