@@ -104,7 +104,7 @@ export class PagosComponent implements OnInit {
     const purchasePayload = {
       eventId: this.eventoCompra.id,
       items: items,
-      paymentToken: 'mock_token_' + Date.now(),
+      paymentToken: 'sim_ok', // En un caso real, aquí iría el token generado por el gateway de pago
       paymentMethod: this.selectedPaymentMethod,
       discountCode: this.eventoCompra.codigoDescuento || null,
       dni: this.eventoCompra.dniCliente,
