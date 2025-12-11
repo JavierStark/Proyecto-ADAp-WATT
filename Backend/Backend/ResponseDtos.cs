@@ -169,6 +169,7 @@ public record DiscountDetailsDto(
     decimal Descuento,
     decimal Porcentaje,
     int? UsosRestantes,
+    string TipoDescuento,
     DateTime? FechaExpiracion,
     bool Valido
 );

@@ -339,7 +339,15 @@ static class Tickets
                 cliente.PisoPuerta = dto.PisoPuerta; 
                 datosClienteActualizados = true; 
             }
-
+            var camposFaltantes = new List<string>();
+            
+            // Verificamos el objeto 'usuario' (que ya tiene los datos nuevos si se enviaron)
+            if (string.IsNullOrEmpty(usuario.Dni)) camposFaltantes.Add("DNI");
+            
+            // Verificamos el objeto 'cliente'
+            if (string.IsNullOrEmpty(cliente.Calle) || string.IsNullOrEmpty(cliente.Numero)) 
+                camposFaltantes.Add("Dirección completa");
+            
             if (camposFaltantes.Count != 0)
             {
                 return Results.BadRequest(new
@@ -350,7 +358,11 @@ static class Tickets
                 });
             }
 
-            if (datosActualizados) await client.From<Cliente>().Upsert(cliente);
+            if (datosUsuarioActualizados) 
+                await client.From<Usuario>().Update(usuario);
+            
+            if (datosClienteActualizados) 
+                await client.From<Cliente>().Upsert(cliente);
 
             // Procesar pago
             if (totalPagar > 0)
@@ -491,9 +503,8 @@ static class Tickets
                     descuento.Codigo,
                     descuento.Descuento,
                     descuento.Descuento * 100,
-                    tipo = "porcentaje",
-
                     descuento.Cantidad,
+                    "porcentaje",  
                     descuento.FechaExpiracion,
                     true
                 )
