@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompraService, EventoCompra } from '../services/compra.service';
+import { Router } from '@angular/router';
 
 interface PaymentMethod {
   id: string;
@@ -28,7 +29,7 @@ export class PagosComponent implements OnInit {
     { id: 'google_pay', name: 'Google Pay' }
   ];
 
-  constructor(private compraService: CompraService) {}
+  constructor(private compraService: CompraService, private router: Router) {}
 
   ngOnInit(): void {
     // Obtener los datos de la compra del servicio
@@ -48,5 +49,7 @@ export class PagosComponent implements OnInit {
     console.log('Procesando pago con:', this.selectedPaymentMethod);
     console.log('Evento compra:', this.eventoCompra);
     // Aquí se integraría la lógica de pago real
+    // Simulamos éxito y redirigimos a la página de compra finalizada
+    this.router.navigate(['/compra-finalizada']);
   }
 }

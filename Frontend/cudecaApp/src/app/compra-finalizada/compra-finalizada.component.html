@@ -1,0 +1,58 @@
+<section class="relative w-full min-h-screen pt-[10vw] overflow-hidden font-sans flex flex-col">
+
+  <img
+    src="assets/images/fondoCudeca.png"
+    alt="Fondo decorativo"
+    class="absolute inset-0 w-full h-full object-cover z-0"
+  />
+
+  <div class="absolute inset-0 bg-green-400/40 z-0"></div>
+
+  <div class="relative z-10 flex-grow flex items-center justify-center px-4 pt-[1vw] pb-10
+              md:pt-[1vw] md:pb-[4vw] md:px-[4vw]">
+
+    <div class="bg-white rounded-[1.5vw] shadow-2xl w-full max-w-[90vw] flex flex-col 
+                p-[1.5vw] gap-[1.5vw] animate-fade-in-up
+                md:flex-row md:w-[55vw] md:max-w-[48vw] md:p-[1.5vw] md:gap-[1.5vw]">
+
+      <!-- Imagen (tick verde) -->
+      <div class="w-full flex justify-center md:w-[15vw] md:flex-shrink-0">
+        <img 
+          src="assets/images/green-tick.svg" 
+          alt="Compra finalizada"
+          class="w-[60%] md:w-full h-auto object-contain shadow-md rounded-[0.8vw]"
+          style="aspect-ratio:1;"
+        >
+      </div>
+
+      <!-- Mensaje -->
+      <div class="w-full flex flex-col items-center justify-center md:w-[22vw]">
+
+        <h1 class="font-bold text-green-700 mb-[1vw] text-[7vw] md:text-[1.8vw]">
+          Compra finalizada
+        </h1>
+
+        <p class="text-center text-[4.5vw] md:text-[0.95vw] mb-[1.2vw] text-gray-700">
+          ¡Gracias por tu compra! Tu pedido se ha procesado correctamente.
+        </p>
+
+        <button
+          (click)="downloadCertificate()"
+          class="w-full bg-white border border-green-600 text-green-700 rounded-full shadow-sm mb-[0.8vw]
+                 hover:bg-green-50 transition-colors duration-150 font-medium
+                 py-[0.8vw] text-[4.5vw] md:text-[0.95vw]">
+          Descargar certificado de donación
+        </button>
+
+        <button 
+          routerLink="/"
+          class="w-full bg-[#8FBD9F] hover:bg-[#7da88c] text-white rounded-full shadow-lg 
+                 transition-transform duration-300 transform hover:scale-[1.02] font-medium
+                 py-[0.8vw] text-[5vw] md:text-[1.1vw]">
+          Volver al inicio
+        </button>
+
+      </div>
+    </div>
+  </div>
+</section>
