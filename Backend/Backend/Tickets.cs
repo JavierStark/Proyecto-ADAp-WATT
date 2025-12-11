@@ -470,7 +470,8 @@ static class Tickets
                     descuento = descuento.Descuento,
                     porcentaje = descuento.Descuento * 100,
                     usosRestantes = descuento.Cantidad,
-                    fechaExpiracion = descuento.FechaExpiracion
+                    fechaExpiracion = descuento.FechaExpiracion,
+                    valido = true
                 }
             });
         }
