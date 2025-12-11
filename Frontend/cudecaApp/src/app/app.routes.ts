@@ -6,6 +6,7 @@ import { SignUpComponent } from './sign-up/sign-up.component';  // Importa tu Si
 import { EmptyLayoutComponent } from './layouts/empty-layout/empty-layout.component';
 import { CuentaComponent } from './cuenta/cuenta.component';
 import { DonationComponent } from './donation/donation.component';  // Importa tu DonationComponent
+import { CompraFinalizadaComponent } from './compra-finalizada/compra-finalizada.component';
 import { EventosComponent } from './eventos/eventos.component';  // Importa el EventosComponent
 import { EventoDetalleComponent } from './evento-detalles/evento-detalles.component';
 import { CompraEntradasComponent } from './compra-entradas/compra-entradas.component';
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: 'sign-up', component: SignUpComponent, canActivate: [publicGuard]},  // Ruta para registrarse
   { path: 'cuenta', component: CuentaComponent,canActivate: [authGuard] },
   { path: 'donation', component: DonationComponent }, // Ruta para donaciones
+  { path: 'compra-finalizada', component: CompraFinalizadaComponent },
   { path: 'eventos', component: EventosComponent }, // Ruta para eventos
   { path: 'eventos/:id', component: EventoDetalleComponent },
   { path: 'compra-entradas/:id', component: CompraEntradasComponent },
