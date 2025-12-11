@@ -1,4 +1,4 @@
-﻿using Backend.Models;
+﻿﻿using Backend.Models;
 
 namespace Backend;
 
@@ -21,28 +21,22 @@ static class Profile
                 .Where(c => c.Id == parsed)
                 .Single();
 
-            var perfilCompleto = new
-            {
-                // Datos de identificación
-                id_interno = usuario.Id,
-                email = usuario.Email,
-
-                // Datos personales (Tabla Usuario)
-                dni = usuario.Dni,
-                nombre = usuario.Nombre,
-                apellidos = usuario.Apellidos,
-                telefono = usuario.Telefono,
-
-                // Datos de cliente (Tabla Cliente)
-                calle = cliente.Calle,
-                numero = cliente.Numero,
-                piso = cliente.PisoPuerta,
-                cp = cliente.CodigoPostal,
-                ciudad = cliente.Ciudad,
-                provincia = cliente.Provincia,
-                pais = cliente.Pais,
-                suscrito_newsletter = cliente.SuscritoNewsletter
-            };
+            var perfilCompleto = new UserProfileDto(
+                usuario.Id,
+                usuario.Email!,
+                usuario.Dni,
+                usuario.Nombre,
+                usuario.Apellidos,
+                usuario.Telefono,
+                cliente.Calle,
+                cliente.Numero,
+                cliente.PisoPuerta,
+                cliente.CodigoPostal,
+                cliente.Ciudad,
+                cliente.Provincia,
+                cliente.Pais,
+                cliente.SuscritoNewsletter
+            );
 
             return Results.Ok(perfilCompleto);
         }
@@ -101,26 +95,24 @@ static class Profile
             var clienteResponse = await client.From<Cliente>().Update(cliente);
             var clienteNuevo = clienteResponse.Models.First();
 
-            var resultado = new
-            {
-                status = "success",
-                message = "Perfil actualizado correctamente",
-                data = new
-                {
-                    nombre = usuarioNuevo.Nombre,
-                    apellidos = usuarioNuevo.Apellidos,
-                    dni = usuarioNuevo.Dni,
-                    telefono = usuarioNuevo.Telefono,
-                    calle = clienteNuevo.Calle,
-                    numero = clienteNuevo.Numero,
-                    piso = clienteNuevo.PisoPuerta,
-                    cp = clienteNuevo.CodigoPostal,
-                    ciudad = clienteNuevo.Ciudad,
-                    provincia = clienteNuevo.Provincia,
-                    pais = clienteNuevo.Pais,
-                    newsletter = clienteNuevo.SuscritoNewsletter
-                }
-            };
+            var resultado = new ProfileUpdateResponseDto(
+                "success",
+                "Perfil actualizado correctamente",
+                new ProfileDataDto(
+                    usuarioNuevo.Nombre,
+                    usuarioNuevo.Apellidos,
+                    usuarioNuevo.Dni,
+                    usuarioNuevo.Telefono,
+                    clienteNuevo.Calle,
+                    clienteNuevo.Numero,
+                    clienteNuevo.PisoPuerta,
+                    clienteNuevo.CodigoPostal,
+                    clienteNuevo.Ciudad,
+                    clienteNuevo.Provincia,
+                    clienteNuevo.Pais,
+                    clienteNuevo.SuscritoNewsletter
+                )
+            );
 
             return Results.Ok(resultado);
         }

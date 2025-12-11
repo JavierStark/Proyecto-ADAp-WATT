@@ -1,4 +1,4 @@
-﻿using Backend.Models;
+﻿﻿using Backend.Models;
 using static Supabase.Postgrest.Constants;
 
 namespace Backend;
@@ -59,16 +59,14 @@ public class Corporate
                 mensaje = "Perfil corporativo creado correctamente.";
             }
 
-            return Results.Ok(new 
-            { 
-                message = mensaje, 
-                datos = new 
-                {
-                    id = resultadoFinal.Id,
-                    nombreEmpresa = resultadoFinal.NombreEmpresa,
-                    fkCliente = resultadoFinal.FkCliente
-                }
-            });
+            return Results.Ok(new CorporateUpdateResponseDto(
+                mensaje,
+                new CorporateDataDetailsDto(
+                    resultadoFinal.Id,
+                    resultadoFinal.NombreEmpresa!,
+                    resultadoFinal.FkCliente
+                )
+            ));
         }
         catch (Exception ex)
         {
@@ -95,10 +93,9 @@ public class Corporate
                 return Results.NotFound(new { error = "El usuario no tiene perfil corporativo." });
             }
 
-            return Results.Ok(new
-            {
-                nombreEmpresa = empresa.NombreEmpresa
-            });
+            return Results.Ok(new CorporateDataDto(
+                empresa.NombreEmpresa!
+            ));
         }
         catch (Exception ex)
         {

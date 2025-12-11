@@ -111,12 +111,11 @@ public class Partner
 
             await client.From<PeriodoSocio>().Insert(nuevaMensualidad);
 
-            return Results.Ok(new
-            {
-                Mensaje = "Suscripción activada/renovada con éxito.",
-                Vence = nuevaFechaFin,
-                PagoRef = pagoCreado.Id
-            });
+            return Results.Ok(new PartnerSubscriptionResponseDto(
+                "Suscripción activada/renovada con éxito.",
+                nuevaFechaFin,
+                pagoCreado.Id
+            ));
         }
         catch (Exception ex)
         {
@@ -144,16 +143,14 @@ public class Partner
             }
 
             // Devolvemos datos
-            return Results.Ok(new
-            {
-                plan = socio.TipoSuscripcion,
-                cuota = socio.Cuota,
-                fechaInicio = socio.FechaInicio,
-                fechaFin = socio.FechaFin,
-
-                isActivo = socio.FechaFin > DateTime.UtcNow,
-                diasRestantes = (socio.FechaFin - DateTime.UtcNow).Days
-            });
+            return Results.Ok(new PartnerDataDto(
+                socio.TipoSuscripcion,
+                socio.Cuota,
+                socio.FechaInicio,
+                socio.FechaFin,
+                socio.FechaFin > DateTime.UtcNow,
+                (socio.FechaFin - DateTime.UtcNow).Days
+            ));
         }
         catch (Exception ex)
         {

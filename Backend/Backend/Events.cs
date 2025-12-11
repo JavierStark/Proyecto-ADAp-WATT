@@ -1,4 +1,4 @@
-﻿using Backend.Models;
+﻿﻿using Backend.Models;
 using Backend.Services;
 using static Supabase.Postgrest.Constants;
 
@@ -77,7 +77,7 @@ static class Events
         }
     }
 
-    record EventoListDto(
+    public record EventoListDto(
         Guid Id,
         string? Nombre,
         string? Descripcion,
