@@ -60,8 +60,17 @@ export class CompraEntradasComponent implements OnInit {
   pais: string = '';
   
   esEmpresa: boolean = false;
-  codigoDescuento: string = '';
+
+  // --- VARIABLES PARA EL DESCUENTO ---
+  codigoDescuento: string = '';       // Lo que escribe el usuario en el input
+  codigoValido: boolean = false;      // Si el backend dice que es OK
+  validandoCodigo: boolean = false;   // Para mostrar la ruedita de carga mientras comprueba
+  mensajeDescuento: string = '';      // "¡Código válido!" o "Error..."
   
+  tipoDescuento: 'porcentaje' | 'fijo' | null = null; // Backend usa 'porcentaje' según Tickets.cs
+  valorDescuento: number = 0;         // El número del porcentaje (ej: 15, 25, 10)
+  // ------------------------------------
+
   isProcessing: boolean = false;
   errorMessage: string = '';
   
@@ -264,6 +273,12 @@ export class CompraEntradasComponent implements OnInit {
     return this.totalGeneral + this.totalVip;
   }
 
+  get importeDescuento(): number {
+    if (!this.codigoValido) return 0;
+    // El backend aplica el porcentaje sobre el total
+    return (this.totalPrecio * this.valorDescuento) / 100;
+  }
+
   procesarCompra(): void {
     this.errorMessage = '';
 
@@ -336,6 +351,50 @@ export class CompraEntradasComponent implements OnInit {
     }
 
     this.isProcessing = false;
+  }
+
+  validarCodigo() {
+    const codigo = this.codigoDescuento.trim().toUpperCase();
+    
+    if (!codigo) {
+      this.codigoValido = false;
+      this.mensajeDescuento = '';
+      this.tipoDescuento = null;
+      this.valorDescuento = 0;
+      return;
+    }
+
+    this.validandoCodigo = true;
+    this.mensajeDescuento = '';
+
+    const url = `${this.apiUrl}/discounts/validate`; 
+
+    // El backend espera: DiscountCheckDto(string Code) -> JSON: { "code": "..." }
+    this.http.post<any>(url, { code: codigo }).subscribe({
+      next: (response) => {
+        console.log('Respuesta Descuento:', response); // <--- MIRA ESTO EN CONSOLA (F12)
+        
+        if (response.descuento && response.descuento.valido) {
+          this.codigoValido = true;
+          this.tipoDescuento = 'porcentaje';
+          // Asegúrate de que esta propiedad coincida con lo que ves en consola (puede ser 'Porcentaje' con mayúscula)
+          this.valorDescuento = response.descuento.porcentaje || response.descuento.Porcentaje || 0; 
+          
+          this.mensajeDescuento = `¡Éxito! Descuento del ${this.valorDescuento}% aplicado.`;
+        }
+        
+        this.validandoCodigo = false;
+      },
+      error: (error) => {
+        console.error('Error descuento:', error);
+        this.codigoValido = false;
+        // El backend devuelve errores 400/404 con { error: "mensaje" }
+        this.mensajeDescuento = error.error?.error || 'El código no existe o ha expirado.';
+        this.tipoDescuento = null;
+        this.valorDescuento = 0;
+        this.validandoCodigo = false;
+      }
+    });
   }
 
   goBack(): void {
