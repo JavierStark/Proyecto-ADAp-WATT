@@ -25,7 +25,7 @@ export const routes: Routes = [
   { path: 'eventos', component: EventosComponent }, // Ruta para eventos
   { path: 'eventos/:id', component: EventoDetalleComponent },
   { path: 'compra-entradas/:id', component: CompraEntradasComponent },
-  { path: 'pagos', component: PagosComponent }, // Ruta para pagos
+  { path: 'pagos/:id', component: PagosComponent }, // Ruta para pagos
   { path: 'validar-qr', component: QrValidateComponent },
 ];
 

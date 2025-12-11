@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompraService, EventoCompra } from '../services/compra.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 interface PaymentMethod {
   id: string;
@@ -19,6 +19,7 @@ interface PaymentMethod {
 export class PagosComponent implements OnInit {
   selectedPaymentMethod: string | null = null;
   eventoCompra: EventoCompra | null = null;
+  eventoId: string | null = null;
 
   // Métodos de pago disponibles
   paymentMethods: PaymentMethod[] = [
@@ -29,9 +30,15 @@ export class PagosComponent implements OnInit {
     { id: 'google_pay', name: 'Google Pay' }
   ];
 
-  constructor(private compraService: CompraService, private router: Router) {}
+  constructor(
+    private compraService: CompraService, 
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
+    // Capturar el ID del evento desde la ruta
+    this.eventoId = this.route.snapshot.paramMap.get('id');
     // Obtener los datos de la compra del servicio
     this.eventoCompra = this.compraService.obtenerEventoCompra();
   }
@@ -50,6 +57,10 @@ export class PagosComponent implements OnInit {
     console.log('Evento compra:', this.eventoCompra);
     // Aquí se integraría la lógica de pago real
     // Simulamos éxito y redirigimos a la página de compra finalizada
+    
+    // Limpiar los datos de compra del sessionStorage después del pago exitoso
+    this.compraService.limpiarEventoCompra();
+    
     this.router.navigate(['/compra-finalizada']);
   }
 }

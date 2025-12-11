@@ -271,8 +271,8 @@ export class CompraEntradasComponent implements OnInit {
         imagen: this.evento.imagen || 'assets/images/fondoCudeca.png'
       });
 
-      // Navegar a la página de pagos
-      this.router.navigate(['/pagos']);
+      // Navegar a la página de pagos con el ID del evento
+      this.router.navigate(['/pagos', this.evento.id]);
     }
 
     this.isProcessing = false;
