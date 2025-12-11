@@ -173,6 +173,43 @@ static class Tickets
 
         return ms.ToArray(); // PNG bytes
     }
+    
+    public static async Task<IResult> GetEventTicketTypes(string eventId, Supabase.Client client)
+    {
+        try
+        {
+            // Validar que el ID sea un GUID válido
+            if (!Guid.TryParse(eventId, out var guidEventId))
+                return Results.BadRequest(new { error = "Formato de ID de evento inválido." });
+
+            // Consultar la tabla EntradaEvento filtrando por el evento
+            var response = await client.From<EntradaEvento>()
+                .Filter("fk_evento", Operator.Equals, eventId)
+                .Order("precio", Ordering.Ascending) // Ordenar por precio (opcional)
+                .Get();
+
+            var tiposEntrada = response.Models;
+
+            // Mapear a un objeto anónimo o DTO para el frontend
+            var resultado = tiposEntrada.Select(t => new 
+            {
+                TicketEventId = t.Id,       // <--- ESTE ES EL ID QUE NECESITAS PARA COMPRAR
+                Nombre = t.Tipo,            // Ej: "General", "VIP"
+                Precio = t.Precio,
+                Stock = t.Cantidad          // Para que el frontend sepa si quedan entradas
+            });
+
+            return Results.Ok(new
+            {
+                status = "success",
+                data = resultado
+            });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error al obtener los tipos de entrada: " + ex.Message);
+        }
+    }
 
     public static async Task<IResult> PurchaseTickets(BuyTicketDto dto, Supabase.Client client,
         IPaymentService paymentService, HttpContext httpContext, IEmailService emailService, IConfiguration config)
