@@ -54,13 +54,18 @@
           </button>
         </div>
 
+        <!-- Mensaje de error -->
+        <div *ngIf="errorMessage" class="bg-red-50 border border-red-300 text-red-700 rounded-[0.8vw] p-[1vw] mb-[1.5vw] w-full text-[3vw] md:text-[0.9vw]">
+          {{ errorMessage }}
+        </div>
+
         <!-- Botón realizar compra -->
         <button
           (click)="processPayment()"
-          [disabled]="!selectedPaymentMethod"
+          [disabled]="!selectedPaymentMethod || isProcessing"
           class="w-full text-white rounded-full shadow-lg transition-transform duration-300 transform font-medium py-[4.5vw] px-[4.5vw] md:py-[1vw] md:px-[1vw] text-[4.5vw] md:text-[1.2vw] disabled:opacity-50 disabled:cursor-not-allowed pay-button"
-          [ngClass]="selectedPaymentMethod ? 'bg-green-500 hover:bg-green-800' : 'bg-gray-300'">
-          Realizar compra
+          [ngClass]="selectedPaymentMethod && !isProcessing ? 'bg-green-500 hover:bg-green-800' : 'bg-gray-300'">
+          {{ isProcessing ? 'Procesando...' : 'Realizar compra' }}
         </button>
 
       </div>

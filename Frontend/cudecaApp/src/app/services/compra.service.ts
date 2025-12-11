@@ -16,6 +16,13 @@ export interface EventoCompra {
   ubicacion?: string;
   fecha?: string;
   imagen?: string;
+  generalTicketEventId?: string;
+  vipTicketEventId?: string;
+  direccion?: string;
+  codigoPostal?: string;
+  ciudad?: string;
+  provincia?: string;
+  codigoDescuento?: string;
 }
 
 @Injectable({
