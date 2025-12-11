@@ -15,6 +15,7 @@ export class LoginComponent {
   email: string = '';
   password: string = '';
   isLoading: boolean = false;
+  showPassword: boolean = false;
 
   constructor(
     private router: Router,

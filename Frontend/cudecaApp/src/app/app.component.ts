@@ -62,40 +62,55 @@ export class AppComponent implements OnInit {
     this.cargarEventoDestacado();
   }
 
+  // En app.component.ts
+
   private cargarEventoDestacado() {
-        const url = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/events';
+      const url = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/events';
 
-        fetch(url)
-            .then(r => r.json())
-            .then((items: any[]) => {
-                if (!items || items.length === 0) {
-                    return;
-                }
+      fetch(url)
+          .then(r => r.json())
+          .then((items: any[]) => {
+              // Verificar si hay elementos en la lista
+              if (!items || items.length === 0) {
+                  return;
+              }
 
-                const evento = items[0];
+              // --- CAMBIO: SELECCIÓN ALEATORIA ---
+              // Generamos un índice aleatorio entre 0 y el total de eventos
+              const randomIndex = Math.floor(Math.random() * items.length);
+              const evento = items[randomIndex];
 
-                this.promoEventId = evento.id || evento.Id || null;
-                this.promoEventTitle =
-                    evento.nombre ||
-                    evento.titulo ||
-                    evento.name ||
-                    'Nuevo evento solidario';
-                this.promoEventImage =
-                    evento.imageUrl ||
-                    evento.imagenUrl ||
-                    evento.ImagenUrl ||
-                    evento.imagenURL ||
-                    evento.imagen ||
-                    'assets/images/fondoCudeca.png';
+              // Asignamos las variables del evento seleccionado
+              this.promoEventId = evento.id || evento.Id || null;
+              this.promoEventTitle =
+                  evento.nombre ||
+                  evento.titulo ||
+                  evento.name ||
+                  'Nuevo evento solidario';
+              this.promoEventImage =
+                  evento.imageUrl ||
+                  evento.imagenUrl ||
+                  evento.ImagenUrl ||
+                  evento.imagenURL ||
+                  evento.imagen ||
+                  'assets/images/fondoCudeca.png';
 
-                setTimeout(() => {
-                    this.showEventPopup = true;
-                }, 5000); // Mostrar después de 5 segundos
-            })
-            .catch(err => {
-                console.error('Error cargando evento destacado', err);
-            });
-    }
+              // --- CAMBIO: TEMPORIZADORES ---
+              // 1. Mostrar el popup a los 5 segundos de cargar la app
+              setTimeout(() => {
+                  this.showEventPopup = true;
+
+                  // 2. Ocultar el popup automáticamente 10 segundos después de mostrarse
+                  setTimeout(() => {
+                      this.showEventPopup = false;
+                  }, 15000); 
+
+              }, 5000); 
+          })
+          .catch(err => {
+              console.error('Error cargando evento destacado', err);
+          });
+  } 
 
   cerrarPopupEvento() {
         this.showEventPopup = false;
