@@ -118,3 +118,39 @@
 <!-- Help Modal -->
 <app-help-modal *ngIf="showHelpModal" (close)="closeHelpModal()"></app-help-modal>
 
+<div
+    *ngIf="showEventPopup && promoEventTitle"
+    class="fixed bottom-[1.5vw] right-[1.5vw] z-[60] max-w-[26vw] bg-white rounded-[1vw] shadow-2xl border border-green-100 flex overflow-hidden animate-popup"
+>
+    <div class="hidden md:block w-[30%] h-full">
+        <img
+            [src]="promoEventImage || 'assets/images/fondoCudeca.png'"
+            class="w-full h-full object-cover"
+        />
+    </div>
+
+    <div class="flex-1 p-[1vw] flex flex-col gap-[0.5vw]">
+        <div class="flex justify-between items-start gap-[0.5vw]">
+            <h4 class="text-[1vw] font-bold text-green-900 leading-snug">
+                Último evento Cudeca
+            </h4>
+            <button
+                (click)="cerrarPopupEvento()"
+                class="text-gray-400 hover:text-gray-600 text-[1.1vw] leading-none"
+            >
+                ✕
+            </button>
+        </div>
+
+        <p class="text-[0.95vw] text-gray-700 leading-snug line-clamp-3">
+            {{ promoEventTitle }}
+        </p>
+
+        <button
+            (click)="irACompraEntradasDestacada()"
+            class="self-end bg-emerald-600 text-white text-[0.9vw] font-semibold px-[1.4vw] py-[0.6vw] rounded-full hover:bg-emerald-700 transition-colors"
+        >
+            Comprar entradas
+        </button>
+    </div>
+</div>
