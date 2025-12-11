@@ -4,6 +4,7 @@ using Backend.Filters;
 using Backend.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using QuestPDF.Infrastructure;
+using Scalar.AspNetCore;
 
 QuestPDF.Settings.License = LicenseType.Community;
 
@@ -22,6 +23,7 @@ builder.Services.AddSwaggerGen(c =>
     SwaggerAuthSetup(c);
     c.SchemaFilter<SwaggerEmptyStringDefaultFilter>();
 });
+
 builder.Services.AddCors();
 builder.Services.AddHttpClient(); // For JWKS fetching in SupabaseAuthFilter
 
@@ -63,6 +65,8 @@ builder.Services.AddScoped<IPaymentService, SimulatedPaymentService>();
 
 builder.Services.AddScoped<IEmailService, MailGunService>();
 
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
 app.UseCors(policy =>
@@ -76,8 +80,15 @@ app.UseCors(policy =>
         .AllowCredentials()
 );
 
+app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.MapScalarApiReference(opt =>
+{
+    opt.Title = "Cudeca Watt API";
+    opt.Theme = ScalarTheme.DeepSpace;
+});
 
 app.UseHttpsRedirection();
 
