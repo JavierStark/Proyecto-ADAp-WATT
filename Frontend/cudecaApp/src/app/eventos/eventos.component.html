@@ -85,8 +85,8 @@
               </div>
             </div>
 
-            <p class="text-[1.2vw] md:text-[1vw] text-gray-600 mb-[1vw] line-clamp-2 md:line-clamp-3">
-              {{ evento.descripcion }}
+            <p class="text-[1.2vw] md:text-[1vw] text-gray-600 mb-[1vw]">
+                {{ (evento.descripcion.length > 110) ? (evento.descripcion | slice:0:110) + ' ...' : evento.descripcion }}
             </p>
 
             <div *ngIf="evento.ubicacion" class="flex items-center text-[1vw] text-gray-500 mb-[1vw]">
