@@ -86,14 +86,25 @@ static class AdminEndpoints
                 using var memoryStream = new MemoryStream();
                 await dto.Imagen.CopyToAsync(memoryStream);
                 var fileBytes = memoryStream.ToArray();
+                
+                var bucket = client.Storage.From("eventos");
 
-                // Subir a Supabase (Bucket "eventos")
-                await client.Storage
-                    .From("eventos")
-                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
+                _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await bucket
+                                .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log upload failure
+                            Console.WriteLine(ex);
+                        }
+                    }
+                );
 
-                // Obtener URL Pública
-                imagenUrlFinal = client.Storage.From("eventos").GetPublicUrl(fileName);
+                imagenUrlFinal = bucket.GetPublicUrl(fileName);
             }
 
             bool tieneVip = dto is { PrecioVip: not null, CantidadVip: > 0 };
