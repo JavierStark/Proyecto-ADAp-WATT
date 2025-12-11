@@ -232,10 +232,6 @@ export class EventosComponent implements OnInit {
       this.formError = 'La fecha no puede ser en el pasado.';
       return;
     }
-    if (Number(this.formData.cantidadGeneral) <= 0) {
-      this.formError = 'Debe haber al menos 1 entrada General.';
-      return;
-    }
     if (Number(this.formData.precioGeneral) < 0) {
       this.formError = 'El precio General no puede ser negativo.';
       return;
