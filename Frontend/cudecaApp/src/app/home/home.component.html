@@ -1,65 +1,79 @@
 <section class="relative w-full h-screen overflow-hidden">
 
-  <!-- Imagen de fondo -->
   <img
     src="assets/images/fondoCudeca.png"
     class="absolute inset-0 w-full h-full object-cover"
   />
 
-
-
-  <!-- Filtro verde -->
   <div class="absolute inset-0 bg-green-400/40"></div>
 
-  <!-- Fade blanco (PC) -->
   <div class="absolute inset-0 top-[-5%] bottom-[-5%] left-[-5%] w-[58%] bg-white/85 blur-[2vw] hidden md:block"></div>
-  <!-- Fade blanco superior SOLO en móvil -->
+  
   <div class="absolute top-0 left-0 w-full h-[50%] bg-white/80 blur-[2vw] md:hidden"></div>
 
-  <!-- Contenido -->
-  <div class="relative z-10 flex flex-col justify-center
-            w-[45vw] pl-[4vw] pt-[2vw] gap-[1vw]
-            md:items-start
-            max-md:w-full max-md:px-6 max-md:pt-0 max-md:gap-6 max-md:text-center max-md:items-center
-            max-md:mt-[20vw]">
 
-    <!-- Título -->
-    <h1 class="text-green-800 font-bold text-left max-w-[30vw]
-               text-[4vw] 
-               max-md:text-[10vw] max-md:max-w-full">
-      Donaciones y Eventos
-    </h1>
+  <div class="relative z-10 w-full h-full flex flex-col md:flex-row items-center">
 
-    <!-- Texto (oculto en móvil) -->
-    <p class="text-green-600 text-[2vw] font-medium max-w-[50vw] min-h-[14vw] leading-snug
-              hidden md:block">
-      {{ texto }}
-    </p>
+    <div class="flex flex-col justify-center
+              w-[45vw] pl-[4vw] pt-[2vw] gap-[1vw]
+              md:items-start
+              max-md:w-full max-md:px-6 max-md:pt-0 max-md:gap-6 max-md:text-center max-md:items-center
+              max-md:mt-[20vw]">
 
-    <!-- Botones -->
-    <div class="flex gap-[3vw]
-                max-md:flex-col max-md:gap-[5vw] max-md:w-full max-md:items-center">
+      <h1 class="text-green-800 font-bold text-left max-w-[30vw]
+                text-[4vw] 
+                max-md:text-[10vw] max-md:max-w-full">
+        Donaciones y Eventos
+      </h1>
 
-      <!-- Botón 1 -->
-            <button
-        (click)="goToEventos()"
-        class="bg-green-600 text-white font-bold transition-all
-              text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
-              hover:bg-green-700
-              max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
-        Eventos
-      </button>
+      <p class="text-green-600 text-[2vw] font-medium max-w-[50vw] min-h-[14vw] leading-snug
+                hidden md:block">
+        {{ texto }}
+      </p>
+
+      <div class="flex gap-[3vw]
+                  max-md:flex-col max-md:gap-[5vw] max-md:w-full max-md:items-center">
+        
+        <button
+          (click)="goToEventos()"
+          class="bg-green-600 text-white font-bold transition-all
+                text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
+                hover:bg-green-700
+                max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
+          Eventos
+        </button>
+
+        <button
+          (click)="goToDonation()"
+          class="bg-green-600 text-white font-bold transition-all
+                text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
+                hover:bg-green-700
+                max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
+          Donar
+        </button>
+
+      </div>
+    </div>
 
 
-      <!-- Botón 2 -->
-      <button
-        (click)="goToDonation()"
-        class="bg-green-600 text-white font-bold transition-all
-               text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
-               hover:bg-green-700
-               max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
-        Donar
-      </button>
+    <div class="hidden md:flex flex-1 justify-center pl-[4vw] items-center">
+      
+      <div class="w-[40vw] aspect-video bg-black rounded-[1.5vw] shadow-2xl overflow-hidden 
+                  border-[0.4vw] border-white/80 
+                  transform md:rotate-2 hover:rotate-0 transition-transform duration-500 ease-out">
+        
+        <iframe 
+          width="100%" 
+          height="100%" 
+          src="https://www.youtube.com/embed/OMRaaIXL9UI?autoplay=1&mute=1&rel=0"
+          title="YouTube video player" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen
+          class="w-full h-full object-cover scale-[1.04]">
+        </iframe>
+
+      </div>
 
     </div>
 
