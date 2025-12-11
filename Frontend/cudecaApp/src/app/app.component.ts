@@ -3,11 +3,12 @@ import { RouterOutlet, NavigationEnd, Router } from '@angular/router';
 import { HostListener } from '@angular/core'; // Se queda por si usas el de 'storage'
 import { NgClass, CommonModule } from '@angular/common'; 
 import { AuthService } from './services/auth.service';
+import { HelpModalComponent } from './help-modal/help-modal.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [RouterOutlet, NgClass, CommonModule],
+  imports: [RouterOutlet, NgClass, CommonModule, HelpModalComponent],
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
@@ -15,6 +16,7 @@ export class AppComponent implements OnInit {
   isAuthRoute: boolean = false;
   isLoggedIn: boolean = false;
   menuOpen = false; // Para el menú móvil
+  showHelpModal = false; // Para el modal de ayuda
   private tokenCheckInterval: any;
 
   constructor(private router: Router, private authService: AuthService) {
@@ -62,6 +64,14 @@ export class AppComponent implements OnInit {
 
   goToPagos() {
     this.router.navigate(['/pagos']); // Navega a la página de pagos
+  }
+
+  openHelpModal() {
+    this.showHelpModal = true;
+  }
+
+  closeHelpModal() {
+    this.showHelpModal = false;
   }
 
   private updateAuthStatus() {
