@@ -97,6 +97,16 @@ export class AppComponent implements OnInit {
             });
     }
 
+  cerrarPopupEvento() {
+        this.showEventPopup = false;
+    }
+
+  irACompraEntradasDestacada() {
+        if (this.promoEventId) {
+            this.router.navigate(['/compra-entradas', this.promoEventId]);
+        }
+    }
+
   ngOnDestroy() {
     // Limpiar el intervalo cuando se destruya el componente
     if (this.tokenCheckInterval) {
