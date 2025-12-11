@@ -65,21 +65,21 @@
 <header 
   *ngIf="!isAuthRoute"
   class="md:hidden fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-md z-50 flex items-center justify-between"
-  style="padding:calc(1vw) calc(2vw); height:calc(10vw);">
+  style="padding:calc(3vw) calc(4vw); height:calc(16vw);">
   
   <!-- Logo -->
   <img 
     src="assets/images/cudeca-logo.png" 
     class="w-auto"
     (click)="goToHome()"
-    style="cursor:pointer; height:calc(6vw);"
+    style="cursor:pointer; height:calc(10vw);"
   />
 
   <!-- Botón hamburguesa -->
   <button 
     (click)="menuOpen = !menuOpen"
     class="text-green-700 font-bold"
-    style="font-size:calc(5vw);">
+    style="font-size:calc(8vw);">
     ☰
   </button>
 </header>
@@ -88,14 +88,14 @@
 <div 
   *ngIf="menuOpen"
   class="md:hidden fixed left-0 w-full bg-white shadow-lg z-40 flex flex-col text-green-700 font-semibold"
-  style="top:calc(10vw); font-size:calc(2vw);">
+  style="top:calc(16vw); font-size:calc(3.5vw);">
 
-  <button (click)="goToHome(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Inicio</button>
-  <button (click)="goToEventos(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Eventos</button>
-  <button (click)="goToDonation(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Donar</button>
-  <button *ngIf="isLoggedIn" (click)="goToCuenta(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Cuenta</button>
-  <button *ngIf="!isLoggedIn" (click)="goToLogin(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Iniciar sesión</button>
-  <button (click)="openHelpModal(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">¿Necesitas ayuda?</button>
+  <button (click)="goToHome(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(3vw);">Inicio</button>
+  <button (click)="goToEventos(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(3vw);">Eventos</button>
+  <button (click)="goToDonation(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(3vw);">Donar</button>
+  <button *ngIf="isLoggedIn" (click)="goToCuenta(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(3vw);">Cuenta</button>
+  <button *ngIf="!isLoggedIn" (click)="goToLogin(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(3vw);">Iniciar sesión</button>
+  <button (click)="openHelpModal(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(3vw);">¿Necesitas ayuda?</button>
 
 </div>
 
