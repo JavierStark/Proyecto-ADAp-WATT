@@ -2,14 +2,19 @@
 
   <img
     src="assets/images/fondoCudeca.png"
-    class="absolute inset-0 w-full h-full object-cover"
+    class="absolute inset-0 w-full h-full object-cover
+           md:absolute
+           max-md:fixed max-md:-z-10"
   />
 
-  <div class="absolute inset-0 bg-green-400/40"></div>
+  <div class="absolute inset-0 bg-green-400/40
+              md:absolute
+              max-md:fixed max-md:-z-10"></div>
 
   <div class="absolute inset-0 top-[-5%] bottom-[-5%] left-[-5%] w-[58%] bg-white/85 blur-[2vw] hidden md:block"></div>
   
-  <div class="absolute top-0 left-0 w-full h-[125vw] bg-white/80 blur-[2vw] md:hidden"></div>
+  <div class="absolute top-0 left-0 w-full h-[125vw] bg-white/80 blur-[2vw] md:hidden
+              max-md:fixed max-md:-z-10"></div>
 
 
   <div class="relative z-10 w-full h-full flex flex-col md:flex-row items-center pt-[25vw] md:pt-[5vw]">
@@ -26,19 +31,24 @@
         Donaciones y Eventos
       </h1>
 
-      <p class="text-green-600 text-[5vw] min-h-[30vw] md:text-[2vw] font-medium md:max-w-[50vw] md:min-h-[14vw]">
+      <p class="text-green-600 text-[5vw] md:text-[2vw] font-medium md:max-w-[50vw] md:min-h-[14vw]">
         {{ texto }}
       </p>
 
-      <div class="flex gap-[3vw] pt-[1vw]
-                  max-md:flex-col max-md:gap-[6vw] max-md:w-full max-md:mt-[4vw]">
+      <div class="flex gap-[3vw]
+                  max-md:flex-col max-md:gap-[4vw] max-md:w-full max-md:mt-[3vw]">
         
         <button
           (click)="goToEventos()"
           class="bg-green-600 text-white font-bold transition-all
                 text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
                 hover:bg-green-700
-                max-md:w-full max-md:text-[7vw] max-md:py-[5vw] max-md:rounded-[3vw] max-md:shadow-lg">
+                
+                max-md:w-full 
+                max-md:text-[5vw] 
+                max-md:py-[3vw] 
+                max-md:rounded-[2.5vw] 
+                max-md:shadow-md">
           Eventos
         </button>
 
@@ -47,7 +57,12 @@
           class="bg-green-600 text-white font-bold transition-all
                 text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
                 hover:bg-green-700
-                max-md:w-full max-md:text-[7vw] max-md:py-[5vw] max-md:rounded-[3vw] max-md:shadow-lg">
+                
+                max-md:w-full 
+                max-md:text-[5vw] 
+                max-md:py-[3vw] 
+                max-md:rounded-[2.5vw] 
+                max-md:shadow-md">
           Donar
         </button>
 
