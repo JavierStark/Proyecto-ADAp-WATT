@@ -441,4 +441,7 @@ export class EventosComponent implements OnInit {
   goToHome(): void {
     this.router.navigate(['/']);
   }
+
+  
 }
+
