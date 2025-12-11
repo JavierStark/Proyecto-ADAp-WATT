@@ -184,180 +184,156 @@ static class AdminEndpoints
 {
     try
     {
-        var parsed = Guid.Parse(eventId);
+        var parsedId = Guid.Parse(eventId);
 
-        // 1. Obtener el evento actual (para tener los datos viejos y la URL de imagen vieja)
-        var evento = await client
+        // Validaciones
+        if (string.IsNullOrWhiteSpace(dto.Nombre))
+            return Results.BadRequest(new { error = "El nombre del evento es obligatorio." });
+
+        if (!dto.Fecha.HasValue)
+            return Results.BadRequest(new { error = "La fecha es obligatoria." });
+            
+        if (dto.Fecha < DateTime.UtcNow)
+            return Results.BadRequest(new { error = "La fecha del evento no puede ser en el pasado." });
+
+        if ((dto.PrecioGeneral ?? 0) < 0 || (dto.PrecioVip ?? 0) < 0)
+            return Results.BadRequest(new { error = "Los precios no pueden ser negativos." });
+
+        if ((dto.CantidadGeneral ?? 0) < 0 || (dto.CantidadVip ?? 0) < 0)
+            return Results.BadRequest(new { error = "Las cantidades no pueden ser negativas." });
+
+
+        // Obtener datos actuales
+        var eventoModel = await client
             .From<Evento>()
-            .Where(e => e.Id == parsed)
+            .Where(e => e.Id == parsedId)
             .Single();
 
-        if (evento == null)
-            return Results.NotFound(new { error = $"No se encontró ningún evento con el ID {eventId}." });
-        
-        var updateQuery = client.From<Evento>().Where(x => x.Id == parsed);
-        bool hayCambiosEnEvento = false;
+        if (eventoModel == null)
+            return Results.NotFound(new { error = "Evento no encontrado." });
 
-        // Gestión de la imagen
-        if (dto.Imagen != null && dto.Imagen.Length > 0)
-        {
-            // Borrar foto antigua si existe
-            if (!string.IsNullOrEmpty(evento.ImagenUrl))
-            {
-                var nombreArchivoViejo = GetFileNameFromUrl(evento.ImagenUrl);
-                if (nombreArchivoViejo != null)
-                {
-                    _ = client.Storage.From("eventos").Remove(new List<string> { nombreArchivoViejo });
-                }
-            }
-
-            // Subir nueva foto
-            var extension = Path.GetExtension(dto.Imagen.FileName);
-            var fileName = $"{Guid.NewGuid()}{extension}";
-
-            using var memoryStream = new MemoryStream();
-            await dto.Imagen.CopyToAsync(memoryStream);
-            var fileBytes = memoryStream.ToArray();
-
-            await client.Storage
-                .From("eventos")
-                .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
-
-            // Obtener URL y preparar actualización
-            var nuevaUrl = client.Storage.From("eventos").GetPublicUrl(fileName);
-            
-            evento.ImagenUrl = nuevaUrl;
-            updateQuery = updateQuery.Set(x => x.ImagenUrl, nuevaUrl);
-            hayCambiosEnEvento = true;
-        }
-        
-        if (!string.IsNullOrWhiteSpace(dto.Nombre))
-        {
-            evento.Nombre = dto.Nombre;
-            updateQuery = updateQuery.Set(x => x.Nombre, dto.Nombre);
-            hayCambiosEnEvento = true;
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.Descripcion))
-        {
-            evento.Descripcion = dto.Descripcion;
-            updateQuery = updateQuery.Set(x => x.Descripcion, dto.Descripcion);
-            hayCambiosEnEvento = true;
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.Ubicacion))
-        {
-            evento.Ubicacion = dto.Ubicacion;
-            updateQuery = updateQuery.Set(x => x.Ubicacion, dto.Ubicacion);
-            hayCambiosEnEvento = true;
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.ObjetoRecaudacion))
-        {
-            evento.ObjetoRecaudacion = dto.ObjetoRecaudacion;
-            updateQuery = updateQuery.Set(x => x.ObjetoRecaudacion, dto.ObjetoRecaudacion);
-            hayCambiosEnEvento = true;
-        }
-        
-        if (dto.Fecha.HasValue)
-        {
-            if (dto.Fecha.Value < DateTime.UtcNow) 
-                return Results.BadRequest(new { error = "Fecha inválida (es anterior a hoy)." });
-
-            evento.FechaEvento = dto.Fecha.Value;
-            updateQuery = updateQuery.Set(x => x.FechaEvento, dto.Fecha.Value);
-            hayCambiosEnEvento = true;
-        }
-
-        if (dto.EventoVisible.HasValue)
-        {
-            evento.EventoVisible = dto.EventoVisible.Value;
-            updateQuery = updateQuery.Set(x => x.EventoVisible, dto.EventoVisible.Value);
-            hayCambiosEnEvento = true;
-        }
-
-        // Tickets y aforo
         var ticketsResponse = await client
             .From<EntradaEvento>()
             .Filter("fk_evento", Constants.Operator.Equals, eventId)
             .Get();
-
+        
         var ticketsDb = ticketsResponse.Models;
-        var general = ticketsDb.FirstOrDefault(t => t.Tipo == "General");
-        var vip = ticketsDb.FirstOrDefault(t => t.Tipo == "VIP");
+        var ticketGeneral = ticketsDb.FirstOrDefault(t => t.Tipo == "General");
+        var ticketVip = ticketsDb.FirstOrDefault(t => t.Tipo == "VIP");
 
-        // Actualizar Entrada GENERAL
-        if (general != null)
-        {
-            bool cambioG = false;
-            if (dto.PrecioGeneral.HasValue) { general.Precio = dto.PrecioGeneral.Value; cambioG = true; }
-            if (dto.CantidadGeneral.HasValue) { general.Cantidad = dto.CantidadGeneral.Value; cambioG = true; }
-            
-            // Aquí usamos Update directo porque EntradaEvento es otro objeto
-            if (cambioG) await client.From<EntradaEvento>().Update(general);
-        }
 
-        // Actualizar Entrada VIP
-        if (vip != null)
+        // Imagen
+        if (dto.Imagen != null && dto.Imagen.Length > 0)
         {
-            bool cambioV = false;
-            if (dto.PrecioVip.HasValue) { vip.Precio = dto.PrecioVip.Value; cambioV = true; }
-            if (dto.CantidadVip.HasValue) { vip.Cantidad = dto.CantidadVip.Value; cambioV = true; }
+            var extension = Path.GetExtension(dto.Imagen.FileName);
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var bucket = client.Storage.From("eventos");
             
-            if (cambioV) await client.From<EntradaEvento>().Update(vip);
-        }
-        else if (dto.PrecioVip.HasValue && dto.CantidadVip.HasValue) // Crear VIP si no existe
-        {
-            var nuevaVip = new EntradaEvento
+            var urlAntigua = eventoModel.ImagenUrl;
+            
+            using var memoryStream = new MemoryStream();
+            await dto.Imagen.CopyToAsync(memoryStream);
+            var fileBytes = memoryStream.ToArray();
+            
+            _ = Task.Run(async () =>
             {
-                FkEvento = evento.Id,
-                Tipo = "VIP",
-                Precio = dto.PrecioVip.Value,
-                Cantidad = dto.CantidadVip.Value
+                try
+                {
+                    // Subir la nueva imagen
+                    await bucket.Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = false });
+
+                    // Borrar la antigua si existía
+                    if (!string.IsNullOrEmpty(urlAntigua))
+                    {
+                        var nombreViejo = GetFileNameFromUrl(urlAntigua);
+                        if (nombreViejo != null)
+                        {
+                            await bucket.Remove(new List<string> { nombreViejo });
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error subiendo imagen en background: {ex.Message}");
+                }
+            });
+
+            // Asignar la nueva URL
+            eventoModel.ImagenUrl = bucket.GetPublicUrl(fileName);
+        }
+
+
+        // Update
+        eventoModel.Nombre = dto.Nombre;
+        eventoModel.FechaEvento = dto.Fecha.Value;
+        eventoModel.Descripcion = dto.Descripcion ?? eventoModel.Descripcion;
+        eventoModel.Ubicacion = dto.Ubicacion ?? eventoModel.Ubicacion;
+        eventoModel.ObjetoRecaudacion = dto.ObjetoRecaudacion ?? eventoModel.ObjetoRecaudacion;
+        
+        if (dto.EventoVisible.HasValue) 
+            eventoModel.EventoVisible = dto.EventoVisible.Value;
+
+        // Entradas generales
+        if (ticketGeneral != null)
+        {
+            ticketGeneral.Precio = dto.PrecioGeneral ?? ticketGeneral.Precio;
+            ticketGeneral.Cantidad = dto.CantidadGeneral ?? ticketGeneral.Cantidad;
+            await client.From<EntradaEvento>().Update(ticketGeneral);
+        }
+        else if (dto.CantidadGeneral.HasValue && dto.PrecioGeneral.HasValue)
+        {
+            ticketGeneral = new EntradaEvento 
+            { 
+                FkEvento = parsedId, Tipo = "General", 
+                Precio = dto.PrecioGeneral.Value, Cantidad = dto.CantidadGeneral.Value 
             };
-            await client.From<EntradaEvento>().Insert(nuevaVip);
-            vip = nuevaVip;
+            await client.From<EntradaEvento>().Insert(ticketGeneral);
         }
 
-        // Recalcular aforo
-        if (dto.CantidadGeneral.HasValue || dto.CantidadVip.HasValue)
+        // Entradas VIP
+        if (ticketVip != null)
         {
-            int nuevoGen = dto.CantidadGeneral ?? (general?.Cantidad ?? 0);
-            int nuevoVip = dto.CantidadVip ?? (vip?.Cantidad ?? 0);
-            
-            int nuevoAforo = nuevoGen + nuevoVip + evento.EntradasVendidas;
-
-            evento.Aforo = nuevoAforo;
-            updateQuery = updateQuery.Set(x => x.Aforo, nuevoAforo);
-            hayCambiosEnEvento = true;
+            ticketVip.Precio = dto.PrecioVip ?? ticketVip.Precio;
+            ticketVip.Cantidad = dto.CantidadVip ?? ticketVip.Cantidad;
+            await client.From<EntradaEvento>().Update(ticketVip);
         }
-
-        // Ejecución de la actualización
-        if (hayCambiosEnEvento)
+        else if (dto.PrecioVip.HasValue && dto.CantidadVip.HasValue && dto.CantidadVip > 0)
         {
-            await updateQuery.Update();
+            ticketVip = new EntradaEvento 
+            { 
+                FkEvento = parsedId, Tipo = "VIP", 
+                Precio = dto.PrecioVip.Value, Cantidad = dto.CantidadVip.Value 
+            };
+            await client.From<EntradaEvento>().Insert(ticketVip);
         }
 
-        // Devolver respuesta con los datos actualizados
+        // Aforo
+        int stockGeneral = dto.CantidadGeneral ?? (ticketGeneral?.Cantidad ?? 0);
+        int stockVip = dto.CantidadVip ?? (ticketVip?.Cantidad ?? 0);
+        eventoModel.Aforo = stockGeneral + stockVip + eventoModel.EntradasVendidas;
+
+        // Guardar evento
+        await client.From<Evento>().Update(eventoModel);
+
         return Results.Ok(new
         {
             status = "success",
             message = "Evento actualizado correctamente.",
             evento = new EventoAdminDto(
-                evento.Id,
-                evento.Nombre,
-                evento.Descripcion,
-                evento.FechaEvento,
-                evento.Ubicacion,
-                evento.Aforo ?? 0,
-                evento.EntradasVendidas,
-                evento.EventoVisible,
-                evento.ObjetoRecaudacion ?? "Sin especificar",
-                evento.ImagenUrl,
-                general?.Precio ?? 0,
-                general?.Cantidad ?? 0,
-                vip?.Precio,
-                vip?.Cantidad
+                eventoModel.Id,
+                eventoModel.Nombre,
+                eventoModel.Descripcion,
+                eventoModel.FechaEvento,
+                eventoModel.Ubicacion,
+                eventoModel.Aforo ?? 0,
+                eventoModel.EntradasVendidas,
+                eventoModel.EventoVisible,
+                eventoModel.ObjetoRecaudacion ?? "Sin especificar",
+                eventoModel.ImagenUrl,
+                ticketGeneral?.Precio ?? 0,
+                ticketGeneral?.Cantidad ?? 0,
+                ticketVip?.Precio,
+                ticketVip?.Cantidad
             )
         });
     }
