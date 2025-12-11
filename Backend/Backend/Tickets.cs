@@ -286,45 +286,68 @@ static class Tickets
                 descuento.Cantidad -= 1;
                 await client.From<ValeDescuento>().Update(descuento);
             }
-            
+
             var usuario = await client.From<Usuario>().Where(u => u.Id == userGuid).Single();
             var clienteRes = await client.From<Cliente>().Where(c => c.Id == userGuid).Get();
             var cliente = clienteRes.Models.FirstOrDefault() ?? new Cliente { Id = userGuid };
 
-            bool datosActualizados = false;
+            bool datosClienteActualizados = false;
+            bool datosUsuarioActualizados = false;
+            
+            // Actualizar datos de la tabla Usuario
+            if (string.IsNullOrEmpty(usuario!.Dni) && !string.IsNullOrEmpty(dto.Dni))
+            {
+                usuario.Dni = dto.Dni;
+                datosUsuarioActualizados = true;
+            }
+            
+            if (string.IsNullOrEmpty(usuario.Nombre) && !string.IsNullOrEmpty(dto.Nombre))
+            {
+                usuario.Nombre = dto.Nombre;
+                datosUsuarioActualizados = true;
+            }
+            
+            if (string.IsNullOrEmpty(usuario.Apellidos) && !string.IsNullOrEmpty(dto.Apellidos))
+            {
+                usuario.Apellidos = dto.Apellidos;
+                datosUsuarioActualizados = true;
+            }
+            
+            if (string.IsNullOrEmpty(usuario.Telefono) && !string.IsNullOrEmpty(dto.Telefono))
+            {
+                usuario.Telefono = dto.Telefono;
+                datosUsuarioActualizados = true;
+            }
+
+            // Actualizar dirección de la tabla Cliente
+            // Solo actualizamos si el campo en BD está vacío y nos llega un dato nuevo
+            if (string.IsNullOrEmpty(cliente.Calle) && !string.IsNullOrEmpty(dto.Calle)) { cliente.Calle = dto.Calle; datosClienteActualizados = true; }
+            if (string.IsNullOrEmpty(cliente.Numero) && !string.IsNullOrEmpty(dto.Numero)) { cliente.Numero = dto.Numero; datosClienteActualizados = true; }
+            if (string.IsNullOrEmpty(cliente.PisoPuerta) && !string.IsNullOrEmpty(dto.PisoPuerta)) { cliente.PisoPuerta = dto.PisoPuerta; datosClienteActualizados = true; }
+            if (string.IsNullOrEmpty(cliente.CodigoPostal) && !string.IsNullOrEmpty(dto.CodigoPostal)) { cliente.CodigoPostal = dto.CodigoPostal; datosClienteActualizados = true; }
+            if (string.IsNullOrEmpty(cliente.Ciudad) && !string.IsNullOrEmpty(dto.Ciudad)) { cliente.Ciudad = dto.Ciudad; datosClienteActualizados = true; }
+            if (string.IsNullOrEmpty(cliente.Provincia) && !string.IsNullOrEmpty(dto.Provincia)) { cliente.Provincia = dto.Provincia; datosClienteActualizados = true; }
+            if (string.IsNullOrEmpty(cliente.Pais) && !string.IsNullOrEmpty(dto.Pais)) { cliente.Pais = dto.Pais; datosClienteActualizados = true; }
+
+            // Validar campos obligatorios mínimos para la factura/recibo
             var camposFaltantes = new List<string>();
-
-            if (string.IsNullOrEmpty(usuario!.Dni))
-            {
-                if (!string.IsNullOrEmpty(dto.Dni))
-                {
-                    usuario.Dni = dto.Dni;
-                    datosActualizados = true;
-                }
-                else camposFaltantes.Add("DNI");
-            }
-
-            if (string.IsNullOrEmpty(cliente.Calle))
-            {
-                if (!string.IsNullOrEmpty(dto.Direccion))
-                {
-                    cliente.Calle = dto.Direccion;
-                    datosActualizados = true;
-                }
-                else camposFaltantes.Add("Dirección");
-            }
+            if (string.IsNullOrEmpty(usuario.Dni) && string.IsNullOrEmpty(dto.Dni)) camposFaltantes.Add("DNI");
+            if ((string.IsNullOrEmpty(cliente.Calle) && string.IsNullOrEmpty(dto.Calle)) || 
+                (string.IsNullOrEmpty(cliente.Numero) && string.IsNullOrEmpty(dto.Numero))) camposFaltantes.Add("Dirección completa");
 
             if (camposFaltantes.Count != 0)
             {
                 return Results.BadRequest(new
                 {
-                    error = "Faltan datos fiscales necesarios.",
+                    error = "Faltan datos fiscales necesarios para generar la entrada.",
                     missing_fields = camposFaltantes,
                     code = "MISSING_DATA"
                 });
             }
 
-            if (datosActualizados) await client.From<Cliente>().Upsert(cliente);
+            // Guardar cambios en BD
+            if (datosUsuarioActualizados) await client.From<Usuario>().Update(usuario);
+            if (datosClienteActualizados) await client.From<Cliente>().Upsert(cliente);
 
             // Procesar pago
             if (totalPagar > 0)
@@ -469,6 +492,7 @@ static class Tickets
                     codigo = descuento.Codigo,
                     descuento = descuento.Descuento,
                     porcentaje = descuento.Descuento * 100,
+                    tipo = "porcentaje",
                     usosRestantes = descuento.Cantidad,
                     fechaExpiracion = descuento.FechaExpiracion,
                     valido = true
@@ -542,11 +566,15 @@ static class Tickets
         string? DiscountCode,
         string? Dni,
         string? Nombre,
+        string? Telefono,
         string? Apellidos,
-        string? Direccion,
-        string? Ciudad,
+        string? Calle,
+        string? Numero,
+        string? PisoPuerta,
         string? CodigoPostal,
-        string? Provincia
+        string? Ciudad,
+        string? Provincia,
+        string? Pais
     );
 
     public record DiscountCheckDto(string Code);
