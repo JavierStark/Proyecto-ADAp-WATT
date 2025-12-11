@@ -294,46 +294,87 @@ static class Tickets
             bool datosClienteActualizados = false;
             bool datosUsuarioActualizados = false;
             
-            // Actualizar datos de la tabla Usuario
-            if (string.IsNullOrEmpty(usuario!.Dni) && !string.IsNullOrEmpty(dto.Dni))
+            // Actualizar datos de Usuaio
+            // DNI
+            if (!string.IsNullOrEmpty(dto.Dni) && usuario.Dni != dto.Dni)
             {
                 usuario.Dni = dto.Dni;
                 datosUsuarioActualizados = true;
             }
             
-            if (string.IsNullOrEmpty(usuario.Nombre) && !string.IsNullOrEmpty(dto.Nombre))
+            // Nombre
+            if (!string.IsNullOrEmpty(dto.Nombre) && usuario.Nombre != dto.Nombre)
             {
                 usuario.Nombre = dto.Nombre;
                 datosUsuarioActualizados = true;
             }
             
-            if (string.IsNullOrEmpty(usuario.Apellidos) && !string.IsNullOrEmpty(dto.Apellidos))
+            // Apellidos
+            if (!string.IsNullOrEmpty(dto.Apellidos) && usuario.Apellidos != dto.Apellidos)
             {
                 usuario.Apellidos = dto.Apellidos;
                 datosUsuarioActualizados = true;
             }
             
-            if (string.IsNullOrEmpty(usuario.Telefono) && !string.IsNullOrEmpty(dto.Telefono))
+            // Teléfono
+            if (!string.IsNullOrEmpty(dto.Telefono) && usuario.Telefono != dto.Telefono)
             {
                 usuario.Telefono = dto.Telefono;
                 datosUsuarioActualizados = true;
             }
+            
+            // Actualizar dirección de cliente
+            if (!string.IsNullOrEmpty(dto.Calle) && cliente.Calle != dto.Calle) 
+            { 
+                cliente.Calle = dto.Calle; 
+                datosClienteActualizados = true; 
+            }
 
-            // Actualizar dirección de la tabla Cliente
-            // Solo actualizamos si el campo en BD está vacío y nos llega un dato nuevo
-            if (string.IsNullOrEmpty(cliente.Calle) && !string.IsNullOrEmpty(dto.Calle)) { cliente.Calle = dto.Calle; datosClienteActualizados = true; }
-            if (string.IsNullOrEmpty(cliente.Numero) && !string.IsNullOrEmpty(dto.Numero)) { cliente.Numero = dto.Numero; datosClienteActualizados = true; }
-            if (string.IsNullOrEmpty(cliente.PisoPuerta) && !string.IsNullOrEmpty(dto.PisoPuerta)) { cliente.PisoPuerta = dto.PisoPuerta; datosClienteActualizados = true; }
-            if (string.IsNullOrEmpty(cliente.CodigoPostal) && !string.IsNullOrEmpty(dto.CodigoPostal)) { cliente.CodigoPostal = dto.CodigoPostal; datosClienteActualizados = true; }
-            if (string.IsNullOrEmpty(cliente.Ciudad) && !string.IsNullOrEmpty(dto.Ciudad)) { cliente.Ciudad = dto.Ciudad; datosClienteActualizados = true; }
-            if (string.IsNullOrEmpty(cliente.Provincia) && !string.IsNullOrEmpty(dto.Provincia)) { cliente.Provincia = dto.Provincia; datosClienteActualizados = true; }
-            if (string.IsNullOrEmpty(cliente.Pais) && !string.IsNullOrEmpty(dto.Pais)) { cliente.Pais = dto.Pais; datosClienteActualizados = true; }
+            if (!string.IsNullOrEmpty(dto.Numero) && cliente.Numero != dto.Numero) 
+            { 
+                cliente.Numero = dto.Numero; 
+                datosClienteActualizados = true; 
+            }
 
-            // Validar campos obligatorios mínimos para la factura/recibo
+            if (!string.IsNullOrEmpty(dto.PisoPuerta) && cliente.PisoPuerta != dto.PisoPuerta) 
+            { 
+                cliente.PisoPuerta = dto.PisoPuerta; 
+                datosClienteActualizados = true; 
+            }
+
+            if (!string.IsNullOrEmpty(dto.CodigoPostal) && cliente.CodigoPostal != dto.CodigoPostal) 
+            { 
+                cliente.CodigoPostal = dto.CodigoPostal; 
+                datosClienteActualizados = true; 
+            }
+
+            if (!string.IsNullOrEmpty(dto.Ciudad) && cliente.Ciudad != dto.Ciudad) 
+            { 
+                cliente.Ciudad = dto.Ciudad; 
+                datosClienteActualizados = true; 
+            }
+
+            if (!string.IsNullOrEmpty(dto.Provincia) && cliente.Provincia != dto.Provincia) 
+            { 
+                cliente.Provincia = dto.Provincia; 
+                datosClienteActualizados = true; 
+            }
+
+            if (!string.IsNullOrEmpty(dto.Pais) && cliente.Pais != dto.Pais) 
+            { 
+                cliente.Pais = dto.Pais; 
+                datosClienteActualizados = true; 
+            }
+            
+            // Revisamos si, tras la actualización, seguimos sin tener los datos críticos
             var camposFaltantes = new List<string>();
-            if (string.IsNullOrEmpty(usuario.Dni) && string.IsNullOrEmpty(dto.Dni)) camposFaltantes.Add("DNI");
-            if ((string.IsNullOrEmpty(cliente.Calle) && string.IsNullOrEmpty(dto.Calle)) || 
-                (string.IsNullOrEmpty(cliente.Numero) && string.IsNullOrEmpty(dto.Numero))) camposFaltantes.Add("Dirección completa");
+            
+            // Verificamos el objeto 'usuario' (que ya tiene los datos nuevos si se enviaron)
+            if (string.IsNullOrEmpty(usuario.Dni)) camposFaltantes.Add("DNI");
+            
+            // Verificamos el objeto 'cliente'
+            if (string.IsNullOrEmpty(cliente.Calle) || string.IsNullOrEmpty(cliente.Numero)) 
+                camposFaltantes.Add("Dirección completa");
 
             if (camposFaltantes.Count != 0)
             {
@@ -345,9 +386,13 @@ static class Tickets
                 });
             }
 
-            // Guardar cambios en BD
-            if (datosUsuarioActualizados) await client.From<Usuario>().Update(usuario);
-            if (datosClienteActualizados) await client.From<Cliente>().Upsert(cliente);
+
+            // Guardar en BD
+            if (datosUsuarioActualizados) 
+                await client.From<Usuario>().Update(usuario);
+            
+            if (datosClienteActualizados) 
+                await client.From<Cliente>().Upsert(cliente);
 
             // Procesar pago
             if (totalPagar > 0)
