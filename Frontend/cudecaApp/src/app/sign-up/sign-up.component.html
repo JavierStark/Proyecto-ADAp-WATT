@@ -37,7 +37,12 @@
                  class="w-full rounded-[1.6vw] md:rounded-[0.8vw] p-[3vw] md:p-[0.9vw] mt-[1.6vw] md:mt-[0.6vw] border border-gray-300 focus:ring-2 focus:ring-green-500 focus:outline-none text-[4vw] md:text-[0.95vw]">
         </div>
 
-       <!-- Botón de Registrarse -->
+        <!-- Confirmar Contraseña -->
+        <div class="mb-[2.5vw] md:mb-[1.2vw]">
+          <label for="confirmPassword" class="block text-[4.5vw] md:text-[1vw] font-medium text-gray-700">Confirmar contraseña</label>
+          <input type="password" id="confirmPassword" [(ngModel)]="confirmPassword" name="confirmPassword" required
+                 class="w-full rounded-[1.6vw] md:rounded-[0.8vw] p-[3vw] md:p-[0.9vw] mt-[1.6vw] md:mt-[0.6vw] border border-gray-300 focus:ring-2 focus:ring-green-500 focus:outline-none text-[4vw] md:text-[0.95vw]">
+        </div>
 
         <button 
           type="submit"
