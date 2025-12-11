@@ -44,9 +44,9 @@
     <div *ngIf="!isLoading" class="flex flex-col gap-[2vw] max-w-[90vw] mx-auto">
       
        <div *ngFor="let evento of eventos" 
-         class="evento-card bg-white rounded-[1vw] shadow-lg border border-green-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row h-auto md:min-h-[16vw]">
+         class="evento-card bg-white rounded-[1vw] shadow-lg border border-green-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row h-auto md:h-[16vw]">
         
-        <div class="relative w-full md:w-[28%] h-[40vw] md:h-auto bg-gray-200 shrink-0">
+        <div class="relative w-full md:w-[28%] h-[40vw] md:h-[16vw] bg-gray-200 shrink-0 overflow-hidden">
           <img 
             [src]="evento.imagen" 
             alt="Ilustración decorativa"
@@ -67,9 +67,9 @@
 
         </div>
 
-        <div class="p-[1.5vw] flex-1 flex flex-col justify-between">
+        <div class="p-[1.5vw] flex-1 flex flex-col justify-between overflow-hidden">
           
-          <div>
+          <div class="overflow-hidden flex-1 flex flex-col">
             <div class="flex justify-between items-start mb-[0.5vw]">
                <h3 class="text-[2vw] md:text-[1.8vw] font-bold text-green-900 leading-tight">
                 {{ evento.titulo }}
@@ -85,24 +85,24 @@
               </div>
             </div>
 
-            <p class="text-[1.2vw] md:text-[1vw] text-gray-600 mb-[1vw]">
+            <p class="text-[1.2vw] md:text-[1vw] text-gray-600 mb-[0.8vw] line-clamp-2">
                 {{ (evento.descripcion.length > 110) ? (evento.descripcion | slice:0:110) + ' ...' : evento.descripcion }}
             </p>
 
-            <div *ngIf="evento.ubicacion" class="flex items-center text-[1vw] text-gray-500 mb-[1vw]">
-              <svg class="w-[1.2vw] h-[1.2vw] mr-[0.5vw] text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <div *ngIf="evento.ubicacion" class="flex items-center text-[1vw] text-gray-500 mb-[0.6vw]">
+              <svg class="w-[1.2vw] h-[1.2vw] mr-[0.5vw] text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
               </svg>
-              {{ evento.ubicacion }}
+              <span class="truncate">{{ evento.ubicacion }}</span>
             </div>
 
-            <div *ngIf="evento.objetoRecaudacion" class="flex items-center text-[1vw] text-gray-500 mb-[1vw]">
-              <svg class="w-[1.2vw] h-[1.2vw] mr-[0.5vw] text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <div *ngIf="evento.objetoRecaudacion" class="flex items-center text-[1vw] text-gray-500 mb-[0.6vw] min-h-0">
+              <svg class="w-[1.2vw] h-[1.2vw] mr-[0.5vw] text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
               </svg>
-              <span class="font-medium text-green-700">Objetivo: </span>
-              <span class="ml-[0.3vw]">{{ evento.objetoRecaudacion }}</span>
+              <span class="font-medium text-green-700 flex-shrink-0">Objetivo: </span>
+              <span class="ml-[0.3vw] truncate">{{ evento.objetoRecaudacion }}</span>
             </div>
           </div>
 
