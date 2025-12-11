@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompraService, EventoCompra } from '../services/compra.service';
+import { AuthService } from '../services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 interface PaymentMethod {
   id: string;
@@ -20,6 +22,8 @@ export class PagosComponent implements OnInit {
   selectedPaymentMethod: string | null = null;
   eventoCompra: EventoCompra | null = null;
   eventoId: string | null = null;
+  isProcessing: boolean = false;
+  errorMessage: string = '';
 
   // Métodos de pago disponibles
   paymentMethods: PaymentMethod[] = [
@@ -30,8 +34,12 @@ export class PagosComponent implements OnInit {
     { id: 'google_pay', name: 'Google Pay' }
   ];
 
+  private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
+
   constructor(
     private compraService: CompraService, 
+    private authService: AuthService,
+    private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -49,18 +57,75 @@ export class PagosComponent implements OnInit {
 
   processPayment(): void {
     if (!this.selectedPaymentMethod) {
-      alert('Por favor selecciona un método de pago');
+      this.errorMessage = 'Por favor selecciona un método de pago';
       return;
     }
-    
-    console.log('Procesando pago con:', this.selectedPaymentMethod);
-    console.log('Evento compra:', this.eventoCompra);
-    // Aquí se integraría la lógica de pago real
-    // Simulamos éxito y redirigimos a la página de compra finalizada
-    
-    // Limpiar los datos de compra del sessionStorage después del pago exitoso
-    this.compraService.limpiarEventoCompra();
-    
-    this.router.navigate(['/compra-finalizada']);
+
+    if (!this.eventoCompra) {
+      this.errorMessage = 'No se encontraron datos de compra. Por favor, intenta de nuevo desde el principio.';
+      return;
+    }
+
+    if (!this.eventoCompra.generalTicketEventId && this.eventoCompra.numeroEntradasGeneral > 0) {
+      this.errorMessage = 'No se encontraron datos de tipos de entrada. Por favor, intenta de nuevo.';
+      return;
+    }
+
+    this.isProcessing = true;
+    this.errorMessage = '';
+
+    // Construir el payload de la compra
+    const items: any[] = [];
+
+    if (this.eventoCompra.numeroEntradasGeneral > 0 && this.eventoCompra.generalTicketEventId) {
+      items.push({
+        ticketEventId: this.eventoCompra.generalTicketEventId,
+        quantity: this.eventoCompra.numeroEntradasGeneral
+      });
+    }
+
+    if (this.eventoCompra.numeroEntradasVip > 0 && this.eventoCompra.vipTicketEventId) {
+      items.push({
+        ticketEventId: this.eventoCompra.vipTicketEventId,
+        quantity: this.eventoCompra.numeroEntradasVip
+      });
+    }
+
+    const purchasePayload = {
+      eventId: this.eventoCompra.id,
+      items: items,
+      paymentToken: 'sim_ok', // Simulación de token de pago
+      paymentMethod: this.selectedPaymentMethod,
+      discountCode: this.eventoCompra.codigoDescuento || null,
+      dni: this.eventoCompra.dniCliente,
+      nombre: this.eventoCompra.nombreCliente,
+      apellidos: this.eventoCompra.apellidosCliente,
+      direccion: this.eventoCompra.direccion,
+      ciudad: this.eventoCompra.ciudad,
+      codigoPostal: this.eventoCompra.codigoPostal,
+      provincia: this.eventoCompra.provincia
+    };
+
+    console.log('📤 Enviando compra:', purchasePayload);
+
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    this.http.post(`${this.apiUrl}/tickets/purchase`, purchasePayload, { headers }).subscribe({
+      next: (response: any) => {
+        console.log('✅ Compra exitosa:', response);
+        // Limpiar los datos de compra del sessionStorage después del pago exitoso
+        this.compraService.limpiarEventoCompra();
+        this.router.navigate(['/compra-finalizada']);
+      },
+      error: (err) => {
+        console.error('❌ Error procesando la compra:', err);
+        const errorMsg = err.error?.error || err.error?.message || 'Error al procesar el pago. Por favor, intenta de nuevo.';
+        this.errorMessage = errorMsg;
+        this.isProcessing = false;
+      }
+    });
   }
 }

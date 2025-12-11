@@ -46,6 +46,8 @@ export class CompraEntradasComponent implements OnInit {
   precioVip: number = 0;
   cantidadVipDisponible: number = 0;
   tieneEntradasVip: boolean = false;
+  generalTicketEventId: string | null = null;
+  vipTicketEventId: string | null = null;
   
   // Datos personales
   nombre: string = '';
@@ -105,6 +107,7 @@ export class CompraEntradasComponent implements OnInit {
         this.cantidadGeneralDisponible = item.cantidadGeneral || (item.aforo || 50);
         this.cantidadVipDisponible = item.cantidadVip || 0;
         this.tieneEntradasVip = this.cantidadVipDisponible > 0;
+        this.cargarTiposEntrada(id);
         console.log(`✅ Evento público cargado: ${this.evento?.titulo}`);
         this.isLoading = false;
       },
@@ -112,6 +115,45 @@ export class CompraEntradasComponent implements OnInit {
         console.error(`❌ Error cargando evento público:`, err);
         this.isLoading = false;
         this.errorMessage = 'Error cargando el evento';
+      }
+    });
+  }
+
+  private cargarTiposEntrada(eventId: string): void {
+    this.http.get<any>(`${this.apiUrl}/tickets/type/event/${eventId}`).subscribe({
+      next: (res) => {
+        const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+        if (!data.length) {
+          console.warn(`⚠️ No se encontraron tipos de entrada para el evento ${eventId}`);
+          return;
+        }
+
+        const normalizados = data.map((t: any) => ({
+          id: t.TicketEventId || t.ticketEventId || t.id || null,
+          nombre: (t.Nombre || t.nombre || t.Tipo || '').toString().toLowerCase(),
+          precio: t.Precio ?? t.precio ?? t.price ?? null,
+          stock: t.Stock ?? t.stock ?? t.cantidad ?? t.Cantidad ?? null
+        }));
+
+        const general = normalizados.find((t: any) => t.nombre.includes('general'));
+        const vip = normalizados.find((t: any) => t.nombre.includes('vip'));
+
+        if (general) {
+          this.generalTicketEventId = general.id ? String(general.id) : this.generalTicketEventId;
+          this.precioGeneral = general.precio ?? this.precioGeneral;
+          this.cantidadGeneralDisponible = general.stock ?? this.cantidadGeneralDisponible;
+        }
+
+        if (vip) {
+          this.vipTicketEventId = vip.id ? String(vip.id) : this.vipTicketEventId;
+          this.precioVip = vip.precio ?? this.precioVip;
+          this.cantidadVipDisponible = vip.stock ?? this.cantidadVipDisponible;
+        }
+
+        this.tieneEntradasVip = !!this.vipTicketEventId && (this.cantidadVipDisponible ?? 0) > 0;
+      },
+      error: (err) => {
+        console.error(`❌ Error cargando tipos de entrada para el evento ${eventId}:`, err);
       }
     });
   }
@@ -140,6 +182,7 @@ export class CompraEntradasComponent implements OnInit {
         this.cantidadGeneralDisponible = item.cantidadGeneral ?? item.CantidadGeneral ?? item.aforo ?? 50;
         this.cantidadVipDisponible = item.cantidadVip ?? item.CantidadVip ?? 0;
         this.tieneEntradasVip = (this.precioVip ?? 0) > 0 && this.cantidadVipDisponible > 0;
+        this.cargarTiposEntrada(id);
         console.log(`✅ Evento admin cargado: ${this.evento?.titulo}`);
         this.isLoading = false;
       },
@@ -250,6 +293,16 @@ export class CompraEntradasComponent implements OnInit {
       return;
     }
 
+    if (this.numeroEntradasGeneral > 0 && !this.generalTicketEventId) {
+      this.errorMessage = 'No se pudieron cargar las entradas General. Recarga la página e inténtalo de nuevo.';
+      return;
+    }
+
+    if (this.numeroEntradasVip > 0 && this.tieneEntradasVip && !this.vipTicketEventId) {
+      this.errorMessage = 'No se pudieron cargar las entradas VIP. Recarga la página e inténtalo de nuevo.';
+      return;
+    }
+
     this.isProcessing = true;
 
     // Guardar los datos de la compra en el servicio
@@ -268,7 +321,14 @@ export class CompraEntradasComponent implements OnInit {
         dniCliente: this.dni,
         ubicacion: this.evento.ubicacion || (this.evento as any).ubicacion || '',
         fecha: this.evento.fecha ? (this.evento.fecha instanceof Date ? this.evento.fecha.toLocaleDateString() : String(this.evento.fecha)) : '',
-        imagen: this.evento.imagen || 'assets/images/fondoCudeca.png'
+        imagen: this.evento.imagen || 'assets/images/fondoCudeca.png',
+        generalTicketEventId: this.generalTicketEventId || undefined,
+        vipTicketEventId: this.vipTicketEventId || undefined,
+        direccion: this.direccion,
+        codigoPostal: this.codigoPostal,
+        ciudad: this.ciudad,
+        provincia: this.pais,
+        codigoDescuento: this.codigoDescuento || undefined
       });
 
       // Navegar a la página de pagos con el ID del evento
