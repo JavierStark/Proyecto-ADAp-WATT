@@ -32,3 +32,20 @@
     transform: translateY(-0.5vw);
   }
 }
+
+/* Animación suave para aparición secuencial */
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(1vw);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-event {
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out forwards;
+}

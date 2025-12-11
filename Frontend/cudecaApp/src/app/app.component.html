@@ -1,4 +1,17 @@
 
+<!-- PANTALLA DE TRANSICIÓN INICIAL -->
+<div
+    *ngIf="!loaded"
+    class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-700"
+    [class.opacity-0]="fadeOut"
+>
+    <img 
+        src="assets/images/logo-cudeca.jpg"
+        class="w-[35vw] md:w-[15vw] animate-fade-zoom"
+    />
+</div>
+
+
 <!-- ========================================================= -->
 <!-- ======================= HEADER — PC =================== -->
 <!-- ========================================================= -->
@@ -90,7 +103,7 @@
 
 
 <!-- Router Outlet: donde se renderizan los componentes -->
-<main class="">
+<main class="opacity-0 transition-opacity duration-700" [class.opacity-100]="loaded">
   <router-outlet></router-outlet>
 </main>
 
@@ -99,7 +112,7 @@
 <!-- ========================================================= -->
 
 <footer *ngIf="!isAuthRoute" class="relative  bg-green-800 text-white py-[1vw] text-center w-full text-[1.2vw]">
-  <p>&copy; 2025 Cudeca - Todos los derechos reservados</p>
+  <p>&copy; 2025 Cudeca - Todos los derechos reservados - Esta web no pretende suplantar a la web original https://www.cudeca.org/</p>
 </footer>
 
 <!-- Help Modal -->
