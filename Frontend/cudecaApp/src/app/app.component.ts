@@ -44,7 +44,7 @@ export class AppComponent implements OnInit {
     setTimeout(() => {
         this.loaded = true;
     }, 1600);
-    
+
     // Verificar cada 30 segundos si el token ha expirado
     this.tokenCheckInterval = setInterval(() => {
       if (this.authService.isLoggedIn() && this.authService.isTokenExpired()) {
