@@ -244,27 +244,41 @@
                   type="text" 
                   [(ngModel)]="codigoDescuento"
                   placeholder="Ej: DESCUENTO2025"
-                  class="flex-grow border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw] uppercase focus:outline-none focus:border-green-600 transition-colors"
-                  (keyup.enter)="validarCodigo()"
-                  [disabled]="validandoCodigo"
+                  [disabled]="codigoValido || validandoCodigo"
+                  class="flex-grow border rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw] uppercase focus:outline-none transition-all duration-300"
+                  [class.border-gray-300]="!codigoValido && !mensajeDescuento"
+                  [class.border-green-500]="codigoValido"
+                  [class.border-red-500]="!codigoValido && mensajeDescuento"
+                  [class.text-green-700]="codigoValido"
+                  [class.font-bold]="codigoValido"
+                  (keyup.enter)="!codigoValido ? validarCodigo() : null"
                 />
                 
                 <button 
+                  *ngIf="!codigoValido"
                   (click)="validarCodigo()"
                   [disabled]="validandoCodigo || !codigoDescuento"
-                  class="bg-gray-800 text-white font-semibold rounded-[0.8vw] px-[1.5vw] hover:bg-gray-900 transition-colors text-[0.95vw] flex items-center gap-[0.5vw] disabled:opacity-50">
+                  class="bg-gray-800 text-white font-semibold rounded-[0.8vw] px-[1.5vw] hover:bg-gray-900 transition-colors text-[0.95vw] flex items-center gap-[0.5vw] disabled:opacity-50 disabled:cursor-not-allowed">
                   
                   <span *ngIf="validandoCodigo" class="animate-spin h-[1vw] w-[1vw] border-2 border-white border-t-transparent rounded-full"></span>
                   <span>{{ validandoCodigo ? 'Verificando...' : 'Aplicar' }}</span>
-                
+                </button>
+
+                <button 
+                  *ngIf="codigoValido"
+                  (click)="quitarDescuento()"
+                  class="bg-red-100 text-red-600 border border-red-200 font-semibold rounded-[0.8vw] px-[1.5vw] hover:bg-red-200 transition-colors text-[0.95vw]">
+                  Quitar
                 </button>
             </div>
             
-            <p *ngIf="mensajeDescuento" 
-               class="mt-[0.5vw] text-[0.9vw] font-medium animate-fade-in"
-               [ngClass]="codigoValido ? 'text-green-600' : 'text-red-500'">
-               {{ mensajeDescuento }}
-            </p>
+            <div *ngIf="mensajeDescuento" 
+                 class="mt-[0.5vw] text-[0.9vw] font-medium flex items-center gap-[0.4vw] animate-fade-in"
+                 [ngClass]="codigoValido ? 'text-green-600' : 'text-red-500'">
+                 <span *ngIf="codigoValido">✅</span>
+                 <span *ngIf="!codigoValido">⚠️</span>
+                 {{ mensajeDescuento }}
+            </div>
           </div>
 
           <!-- Botón enviar -->
