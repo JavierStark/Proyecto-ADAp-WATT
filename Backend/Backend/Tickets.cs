@@ -211,13 +211,13 @@ static class Tickets
         }
     }
 
-    public static async Task<IResult> PurchaseTickets(BuyTicketDto dto, Supabase.Client client,
+    public static async Task<IResult> PurchaseTickets(BuyTicketDto dto, Client client,
         IPaymentService paymentService, HttpContext httpContext, IEmailService emailService, IConfiguration config)
     {
         try
         {
             // Validaciones
-            if (dto.Items == null || !dto.Items.Any())
+            if (dto.Items.Count == 0)
                 return Results.BadRequest(new { error = "El carrito está vacío." });
 
             if (dto.Items.Any(i => i.Quantity <= 0))
@@ -265,33 +265,28 @@ static class Tickets
         
             if (!string.IsNullOrEmpty(dto.DiscountCode))
             {
-                // Definir los códigos válidos
-                var codigosValidos = new Dictionary<string, decimal>
-                {
-                    { "DESCUENTO2025", 15m },
-                    { "PROMO50", 25m },
-                    { "NAVIDAD", 10m },
-                    { "VIP", 30m }
-                };
-
                 var codigoUpper = dto.DiscountCode.ToUpper();
 
-                if (codigosValidos.ContainsKey(codigoUpper))
-                {
-                    var porcentaje = codigosValidos[codigoUpper];
-                
-                    // Calcular la cantidad a descontar
-                    descuentoAplicado = totalPagar * (porcentaje / 100m);
-                
-                    // Aplicar al total
-                    totalPagar -= descuentoAplicado;
+                var now = DateTime.Now;
 
-                    // Seguridad: evitar precios negativos
-                    if (totalPagar < 0) totalPagar = 0;
+                var descuento = await client.From<ValeDescuento>()
+                    .Filter("codigo", Operator.Equals, codigoUpper)
+                    .Single();
+                
+                if (descuento == null ||
+                    (descuento.FechaExpiracion != null && descuento.FechaExpiracion < now) || 
+                    (descuento.Cantidad != null && descuento.Cantidad <= 0))
+                {
+                    return Results.BadRequest(new { error = "Código de descuento inválido o expirado." });
                 }
+
+                descuentoAplicado = descuento.Descuento * totalPagar;
+                totalPagar -= descuentoAplicado;
+
+                descuento.Cantidad -= 1;
+                await client.From<ValeDescuento>().Update(descuento);
             }
             
-            // Actualizar perfil de usuario si es necesario
             var usuario = await client.From<Usuario>().Where(u => u.Id == userGuid).Single();
             var clienteRes = await client.From<Cliente>().Where(c => c.Id == userGuid).Get();
             var cliente = clienteRes.Models.FirstOrDefault() ?? new Cliente { Id = userGuid };
@@ -299,7 +294,7 @@ static class Tickets
             bool datosActualizados = false;
             var camposFaltantes = new List<string>();
 
-            if (string.IsNullOrEmpty(usuario.Dni))
+            if (string.IsNullOrEmpty(usuario!.Dni))
             {
                 if (!string.IsNullOrEmpty(dto.Dni))
                 {
@@ -436,48 +431,52 @@ static class Tickets
         });
     }
 
-    public static async Task<IResult> ValidateDiscount(Tickets.DiscountCheckDto dto, Supabase.Client client)
+    public static async Task<IResult> ValidateDiscount(DiscountCheckDto dto, Client client)
     {
-        if (string.IsNullOrEmpty(dto.Code))
-            return Results.BadRequest(new { error = "El código de descuento no puede estar vacío." });
-
         try
         {
-            // Validación básica de formato (ej: DESCUENTO2025, PROMO50)
-            if (dto.Code.Length < 3 || dto.Code.Length > 20)
-                return Results.BadRequest(new { error = "El código debe tener entre 3 y 20 caracteres." });
-
-            // Simulación: descuentos válidos conocidos
-            var codigosValidos = new Dictionary<string, (decimal porcentaje, string descripcion)>
-            {
-                { "DESCUENTO2025", (15m, "15% de descuento") },
-                { "PROMO50", (25m, "25% de descuento especial") },
-                { "NAVIDAD", (10m, "10% Navidad") },
-                { "VIP", (30m, "30% VIP") }
-            };
+            if (string.IsNullOrEmpty(dto.Code))
+                return Results.BadRequest(new { error = "El código de descuento no puede estar vacío." });
 
             var codigoUpper = dto.Code.ToUpper();
+            var now = DateTime.Now;
+            
+            var descuento = await client.From<ValeDescuento>()
+                .Filter("codigo", Operator.Equals, codigoUpper)
+                .Single();
 
-            if (!codigosValidos.ContainsKey(codigoUpper))
-                return await Task.FromResult(Results.NotFound(new { error = "El código de descuento no es válido." }));
+            if (descuento == null)
+            {
+                return Results.NotFound(new { error = "Código de descuento no encontrado." });
+            }
 
-            var (porcentaje, descripcion) = codigosValidos[codigoUpper];
-            return await Task.FromResult(Results.Ok(new
+            if (descuento.FechaExpiracion != null && descuento.FechaExpiracion < now)
+            {
+                return Results.BadRequest(new { error = "El código de descuento ha expirado." });
+            }
+
+            if (descuento.Cantidad != null && descuento.Cantidad <= 0)
+            {
+                return Results.BadRequest(new { error = "El código de descuento ya no tiene usos disponibles." });
+            }
+
+            return Results.Ok(new
             {
                 status = "success",
-                message = "Código de descuento válido",
-                descuento = new
+                message = "Código de descuento válido.",
+                discount = new
                 {
-                    codigo = codigoUpper,
-                    porcentaje,
-                    descripcion,
-                    valido = true
+                    codigo = descuento.Codigo,
+                    descuento = descuento.Descuento,
+                    porcentaje = descuento.Descuento * 100,
+                    usosRestantes = descuento.Cantidad,
+                    fechaExpiracion = descuento.FechaExpiracion
                 }
-            }));
+            });
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(Results.Problem("Error validando descuento: " + ex.Message));
+            return Results.Problem("Error validando código de descuento: " + ex.Message);
         }
     }
 

@@ -98,7 +98,6 @@ static class AdminEndpoints
                         }
                         catch (Exception ex)
                         {
-                            // Log upload failure
                             Console.WriteLine(ex);
                         }
                     }
