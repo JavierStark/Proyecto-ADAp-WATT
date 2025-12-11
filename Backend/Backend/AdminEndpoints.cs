@@ -65,11 +65,6 @@ static class AdminEndpoints
             return Results.BadRequest(new { error = "La fecha del evento es obligatoria." });
         }
         
-        if (!dto.Fecha.HasValue)
-        {
-            return Results.BadRequest(new { error = "La fecha del evento es obligatoria." });
-        }
-        
         if (dto.Fecha < DateTime.UtcNow)
             return Results.BadRequest(new { error = "La fecha del evento no puede ser en el pasado." });
 
@@ -178,6 +173,11 @@ public static async Task<IResult> AdminUpdateEvent(string eventId, [FromForm] Ev
             return Results.BadRequest(new { error = "El nombre del evento no puede estar vacío." });
 
         // 2. Fecha obligatoria
+        if (!dto.Fecha.HasValue)
+        {
+            return Results.BadRequest(new { error = "La fecha del evento es obligatoria." });
+        }
+        
         if (dto.Fecha < DateTimeOffset.UtcNow)
             return Results.BadRequest(new { error = "La fecha debe ser posterior a hoy." });
 
