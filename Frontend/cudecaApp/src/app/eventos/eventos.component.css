@@ -49,3 +49,18 @@
   opacity: 0;
   animation: fadeSlideIn 0.6s ease-out forwards;
 }
+
+@keyframes popupFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(1vw) translateX(1vw);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) translateX(0);
+    }
+}
+
+.animate-popup {
+    animation: popupFadeIn 0.4s ease-out forwards;
+}

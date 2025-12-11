@@ -33,6 +33,11 @@ export class AppComponent implements OnInit {
   loaded = false;
   fadeOut = false;
 
+   promoEventId: string | null = null;
+    promoEventTitle: string | null = null;
+    promoEventImage: string | null = null;
+    showEventPopup: boolean = false;
+
   ngOnInit() {
 
     // Primero hacemos fade-out del logo
@@ -53,7 +58,54 @@ export class AppComponent implements OnInit {
         this.updateAuthStatus();
       }
     }, 30000); // Verificar cada 30 segundos
+
+    this.cargarEventoDestacado();
   }
+
+  private cargarEventoDestacado() {
+        const url = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/events';
+
+        fetch(url)
+            .then(r => r.json())
+            .then((items: any[]) => {
+                if (!items || items.length === 0) {
+                    return;
+                }
+
+                const evento = items[0];
+
+                this.promoEventId = evento.id || evento.Id || null;
+                this.promoEventTitle =
+                    evento.nombre ||
+                    evento.titulo ||
+                    evento.name ||
+                    'Nuevo evento solidario';
+                this.promoEventImage =
+                    evento.imageUrl ||
+                    evento.imagenUrl ||
+                    evento.ImagenUrl ||
+                    evento.imagenURL ||
+                    evento.imagen ||
+                    'assets/images/fondoCudeca.png';
+
+                setTimeout(() => {
+                    this.showEventPopup = true;
+                }, 3000);
+            })
+            .catch(err => {
+                console.error('Error cargando evento destacado', err);
+            });
+    }
+
+  cerrarPopupEvento() {
+        this.showEventPopup = false;
+    }
+
+  irACompraEntradasDestacada() {
+        if (this.promoEventId) {
+            this.router.navigate(['/compra-entradas', this.promoEventId]);
+        }
+    }
 
   ngOnDestroy() {
     // Limpiar el intervalo cuando se destruya el componente
