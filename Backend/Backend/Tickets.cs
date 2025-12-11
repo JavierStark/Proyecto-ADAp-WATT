@@ -185,7 +185,7 @@ static class Tickets
             // Consultar la tabla EntradaEvento filtrando por el evento
             var response = await client.From<EntradaEvento>()
                 .Filter("fk_evento", Operator.Equals, eventId)
-                .Order("precio", Ordering.Ascending) // Ordenar por precio (opcional)
+                .Order("precio", Ordering.Ascending)
                 .Get();
 
             var tiposEntrada = response.Models;
@@ -193,10 +193,10 @@ static class Tickets
             // Mapear a un objeto anónimo o DTO para el frontend
             var resultado = tiposEntrada.Select(t => new 
             {
-                TicketEventId = t.Id,       // <--- ESTE ES EL ID QUE NECESITAS PARA COMPRAR
-                Nombre = t.Tipo,            // Ej: "General", "VIP"
+                TicketEventId = t.Id,
+                Nombre = t.Tipo,
                 Precio = t.Precio,
-                Stock = t.Cantidad          // Para que el frontend sepa si quedan entradas
+                Stock = t.Cantidad
             });
 
             return Results.Ok(new
