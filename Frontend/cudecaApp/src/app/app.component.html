@@ -122,12 +122,13 @@
     *ngIf="showEventPopup && promoEventTitle"
     class="fixed bottom-[1.5vw] right-[1.5vw] z-[60] max-w-[26vw] bg-white rounded-[1vw] shadow-2xl border border-green-100 flex overflow-hidden animate-popup"
 >
-    <div class="hidden md:block w-[30%] h-full">
-        <img
-            [src]="promoEventImage || 'assets/images/fondoCudeca.png'"
-            class="w-full h-full object-cover"
+    <div class="hidden md:block w-[30%] overflow-hidden flex-shrink-0">
+    <img
+        [src]="promoEventImage || 'assets/images/fondoCudeca.png'"
+        class="w-full h-full object-cover"
         />
     </div>
+
 
     <div class="flex-1 p-[1vw] flex flex-col gap-[0.5vw]">
         <div class="flex justify-between items-start gap-[0.5vw]">
