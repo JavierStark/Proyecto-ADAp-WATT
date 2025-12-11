@@ -54,9 +54,12 @@ export class CompraEntradasComponent implements OnInit {
   apellidos: string = '';
   telefono: string = '';
   dni: string = '';
-  direccion: string = '';
+  calle: string = '';
+  numero: string = '';
+  pisoPuerta: string = '';
   codigoPostal: string = '';
   ciudad: string = '';
+  provincia: string = '';
   pais: string = '';
   
   esEmpresa: boolean = false;
@@ -80,7 +83,34 @@ export class CompraEntradasComponent implements OnInit {
     console.log(`🎫 Compra Entradas - Evento ID: ${id}`);
     if (id) {
       this.cargarEvento(id);
+      // Cargar datos del perfil si está logueado
+      if (this.authService.isLoggedIn()) {
+        this.cargarDatosUsuario();
+      }
     }
+  }
+
+  private cargarDatosUsuario(): void {
+    this.authService.getProfile().subscribe({
+      next: (perfil: any) => {
+        console.log('👤 Datos del perfil cargados:', perfil);
+        this.nombre = perfil.nombre || '';
+        this.apellidos = perfil.apellidos || '';
+        this.telefono = perfil.telefono || '';
+        this.dni = perfil.dni || '';
+        this.calle = perfil.calle || '';
+        this.numero = perfil.numero || '';
+        this.pisoPuerta = perfil.piso || '';
+        this.codigoPostal = perfil.cp || '';
+        this.ciudad = perfil.ciudad || '';
+        this.provincia = perfil.provincia || '';
+        this.pais = perfil.pais || '';
+      },
+      error: (err) => {
+        console.warn('⚠️ Error cargando datos del perfil:', err);
+        // No es crítico, continuamos sin prellenar
+      }
+    });
   }
 
   cargarEvento(id: string): void {
@@ -293,6 +323,11 @@ export class CompraEntradasComponent implements OnInit {
       return;
     }
 
+    if (!this.calle.trim() || !this.numero.trim() || !this.codigoPostal.trim() || !this.ciudad.trim()) {
+      this.errorMessage = 'La dirección completa es obligatoria (calle, número, código postal y ciudad).';
+      return;
+    }
+
     if (this.numeroEntradasGeneral > 0 && !this.generalTicketEventId) {
       this.errorMessage = 'No se pudieron cargar las entradas General. Recarga la página e inténtalo de nuevo.';
       return;
@@ -324,10 +359,13 @@ export class CompraEntradasComponent implements OnInit {
         imagen: this.evento.imagen || 'assets/images/fondoCudeca.png',
         generalTicketEventId: this.generalTicketEventId || undefined,
         vipTicketEventId: this.vipTicketEventId || undefined,
-        direccion: this.direccion,
+        calle: this.calle,
+        numero: this.numero,
+        pisoPuerta: this.pisoPuerta,
         codigoPostal: this.codigoPostal,
         ciudad: this.ciudad,
-        provincia: this.pais,
+        provincia: this.provincia,
+        pais: this.pais,
         codigoDescuento: this.codigoDescuento || undefined
       });
 
