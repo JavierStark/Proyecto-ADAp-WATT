@@ -431,19 +431,20 @@ static class AdminEndpoints
         int? CantidadVip
     );
 
-    public record EventoCreateDto(
-        string Nombre,
-        string? Descripcion,
-        DateTime Fecha,
-        string? Ubicacion,
-        bool EventoVisible,
-        string ObjetoRecaudacion,
-        decimal PrecioGeneral,
-        int CantidadGeneral,
-        decimal? PrecioVip,
-        int? CantidadVip,
-        IFormFile? Imagen
-    );
+    public class EventoCreateDto
+    {
+        public string Nombre { get; set; } = string.Empty; 
+        public string? Descripcion { get; set; }
+        public DateTimeOffset? Fecha { get; set; } 
+        public string? Ubicacion { get; set; }
+        public bool EventoVisible { get; set; }
+        public string? ObjetoRecaudacion { get; set; }
+        public decimal PrecioGeneral { get; set; }
+        public int CantidadGeneral { get; set; }
+        public decimal? PrecioVip { get; set; }
+        public int? CantidadVip { get; set; }
+        public IFormFile? Imagen { get; set; }
+    }
 
     public class EventoModifyDto
     {
