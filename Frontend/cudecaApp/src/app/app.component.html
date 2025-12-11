@@ -64,40 +64,40 @@
 
 <header 
   *ngIf="!isAuthRoute"
-  class="md:hidden fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-md z-50 flex items-center justify-between"
-  style="padding:calc(1vw) calc(2vw); height:calc(10vw);">
+  class="md:hidden absolute w-full z-50 flex flex-col">
   
-  <!-- Logo -->
-  <img 
-    src="assets/images/cudeca-logo.png" 
-    class="w-auto"
-    (click)="goToHome()"
-    style="cursor:pointer; height:calc(6vw);"
-  />
+  <div class="w-full h-[40vw] bg-white shadow-md flex items-center justify-between relative z-50">
+      
+      <img 
+        src="assets/images/cudeca-logo.png" 
+        class="w-[50vw]"
+        (click)="goToHome()"
+      />
 
-  <!-- Botón hamburguesa -->
-  <button 
-    (click)="menuOpen = !menuOpen"
-    class="text-green-700 font-bold"
-    style="font-size:calc(5vw);">
-    ☰
-  </button>
+      <button 
+        (click)="menuOpen = !menuOpen"
+        class="text-green-700 font-bold text-[20vw] pr-[5vw] focus:outline-none">
+        <span *ngIf="!menuOpen">☰</span>
+        <span *ngIf="menuOpen">✕</span>
+      </button>
+  </div>
+
+  <nav 
+    *ngIf="menuOpen"
+    class="w-full bg-white shadow-lg border-t border-gray-100 flex flex-col text-green-700 font-semibold animate-slide-down relative z-40">
+    
+    <button (click)="goToHome(); menuOpen = false" class="text-left hover:bg-green-100 py-[4vw] px-[5vw] text-[6vw] border-b border-gray-50">Inicio</button>
+    <button (click)="goToEventos(); menuOpen = false" class="text-left hover:bg-green-100 py-[4vw] px-[5vw] text-[6vw] border-b border-gray-50">Eventos</button>
+    <button (click)="goToDonation(); menuOpen = false" class="text-left hover:bg-green-100 py-[4vw] px-[5vw] text-[6vw] border-b border-gray-50">Donar</button>
+    <button *ngIf="isLoggedIn" (click)="goToCuenta(); menuOpen = false" class="text-left hover:bg-green-100 py-[4vw] px-[5vw] text-[6vw] border-b border-gray-50">Cuenta</button>
+    <button *ngIf="!isLoggedIn" (click)="goToLogin(); menuOpen = false" class="text-left hover:bg-green-100 py-[4vw] px-[5vw] text-[6vw] border-b border-gray-50">Iniciar sesión</button>
+    <button (click)="openHelpModal(); menuOpen = false" class="text-left hover:bg-green-100 py-[4vw] text-[6vw] px-[5vw]">¿Necesitas ayuda?</button>
+
+  </nav>
+
 </header>
 
-<!-- MENÚ DESPLEGABLE MÓVIL -->
-<div 
-  *ngIf="menuOpen"
-  class="md:hidden fixed left-0 w-full bg-white shadow-lg z-40 flex flex-col text-green-700 font-semibold"
-  style="top:calc(10vw); font-size:calc(2vw);">
 
-  <button (click)="goToHome(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Inicio</button>
-  <button (click)="goToEventos(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Eventos</button>
-  <button (click)="goToDonation(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Donar</button>
-  <button *ngIf="isLoggedIn" (click)="goToCuenta(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Cuenta</button>
-  <button *ngIf="!isLoggedIn" (click)="goToLogin(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">Iniciar sesión</button>
-  <button (click)="openHelpModal(); menuOpen = false" class="text-left hover:bg-green-100" style="padding:calc(2vw);">¿Necesitas ayuda?</button>
-
-</div>
 
 <!-- ========================================================= -->
 
@@ -111,9 +111,12 @@
 <!-- ========================= FOOTER ======================== -->
 <!-- ========================================================= -->
 
-<footer *ngIf="!isAuthRoute" class="relative  bg-green-800 text-white py-[1vw] text-center w-full text-[1.2vw]">
-  <p>&copy;
-     2025 Cudeca - Todos los derechos reservados - Esta web no pretende suplantar a la web original 
+<footer 
+  *ngIf="!isAuthRoute" 
+  class="relative bg-green-800 text-white w-full text-center py-[4vw] text-[3.5vw] md:py-[1vw] md:text-[1.2vw]">
+  
+  <p>
+     &copy; 2025 Cudeca - Todos los derechos reservados - Esta web no pretende suplantar a la web original 
      <a href="https://www.cudeca.org/" target="_blank" class="text-green-300 hover:underline">https://www.cudeca.org/</a>
   </p>
   

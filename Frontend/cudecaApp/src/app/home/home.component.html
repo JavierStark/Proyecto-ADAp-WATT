@@ -9,10 +9,10 @@
 
   <div class="absolute inset-0 top-[-5%] bottom-[-5%] left-[-5%] w-[58%] bg-white/85 blur-[2vw] hidden md:block"></div>
   
-  <div class="absolute top-0 left-0 w-full h-[50%] bg-white/80 blur-[2vw] md:hidden"></div>
+  <div class="absolute top-0 left-0 w-full h-[125vw] bg-white/80 blur-[2vw] md:hidden"></div>
 
 
-  <div class="relative z-10 w-full h-full flex flex-col md:flex-row items-center pt-[5vw]">
+  <div class="relative z-10 w-full h-full flex flex-col md:flex-row items-center pt-[25vw] md:pt-[5vw]">
 
     <div class="flex flex-col justify-center
               w-[45vw] pl-[4vw] pt-[2vw] gap-[1vw]
@@ -26,20 +26,19 @@
         Donaciones y Eventos
       </h1>
 
-      <p class="text-green-600 text-[2vw] font-medium max-w-[50vw] min-h-[14vw] leading-snug
-                hidden md:block">
+      <p class="text-green-600 text-[5vw] min-h-[30vw] md:text-[2vw] font-medium md:max-w-[50vw] md:min-h-[14vw]">
         {{ texto }}
       </p>
 
-      <div class="flex gap-[3vw]
-                  max-md:flex-col max-md:gap-[5vw] max-md:w-full max-md:items-center">
+      <div class="flex gap-[3vw] pt-[1vw]
+                  max-md:flex-col max-md:gap-[6vw] max-md:w-full max-md:mt-[4vw]">
         
         <button
           (click)="goToEventos()"
           class="bg-green-600 text-white font-bold transition-all
                 text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
                 hover:bg-green-700
-                max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
+                max-md:w-full max-md:text-[7vw] max-md:py-[5vw] max-md:rounded-[3vw] max-md:shadow-lg">
           Eventos
         </button>
 
@@ -48,7 +47,7 @@
           class="bg-green-600 text-white font-bold transition-all
                 text-[3vw] py-[1.6vw] px-[4vw] rounded-[2vw]
                 hover:bg-green-700
-                max-md:text-[5vw] max-md:py-[4vw] max-md:px-[8vw] max-md:rounded-[4vw]">
+                max-md:w-full max-md:text-[7vw] max-md:py-[5vw] max-md:rounded-[3vw] max-md:shadow-lg">
           Donar
         </button>
 
