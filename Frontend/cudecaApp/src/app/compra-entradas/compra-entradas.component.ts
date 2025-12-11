@@ -257,6 +257,7 @@ export class CompraEntradasComponent implements OnInit {
     };
   }
 
+
   get totalGeneral(): number {
     return this.numeroEntradasGeneral * this.precioGeneral;
   }
@@ -269,14 +270,23 @@ export class CompraEntradasComponent implements OnInit {
     return this.numeroEntradasGeneral + this.numeroEntradasVip;
   }
 
-  get totalPrecio(): number {
+  // 1. Calculamos el Subtotal (Precio sin descuento)
+  get subtotalPrecio(): number {
     return this.totalGeneral + this.totalVip;
   }
 
+  // 2. Calculamos cuánto descontamos
   get importeDescuento(): number {
     if (!this.codigoValido) return 0;
-    // El backend aplica el porcentaje sobre el total
-    return (this.totalPrecio * this.valorDescuento) / 100;
+    
+    // Si el backend dice que es porcentaje (ej: 10), calculamos el 10% del subtotal
+    return (this.subtotalPrecio * this.valorDescuento) / 100;
+  }
+
+  // 3. Precio Final (Subtotal - Descuento)
+  get totalPrecio(): number {
+    // Math.max(0, ...) evita que el precio sea negativo
+    return Math.max(0, this.subtotalPrecio - this.importeDescuento);
   }
 
   procesarCompra(): void {

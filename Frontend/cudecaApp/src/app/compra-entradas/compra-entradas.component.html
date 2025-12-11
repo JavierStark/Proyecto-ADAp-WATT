@@ -48,14 +48,14 @@
               <div class="mb-[1vw]">
                 <div class="text-[0.85vw] text-gray-600 mb-[0.3vw]">Entradas General:</div>
                 <div class="text-[1.2vw] font-bold text-green-700">
-                  {{ numeroEntradasGeneral }} * {{ precioGeneral | number:'1.0-2' }}€ = {{ totalGeneral | number:'1.0-2' }}€
+                  {{ numeroEntradasGeneral }} × {{ precioGeneral | number:'1.0-2' }}€ = {{ totalGeneral | number:'1.0-2' }}€
                 </div>
               </div>
               
               <div *ngIf="tieneEntradasVip" class="mb-[1vw]">
                 <div class="text-[0.85vw] text-gray-600 mb-[0.3vw]">Entradas VIP:</div>
                 <div class="text-[1.2vw] font-bold text-amber-700">
-                  {{ numeroEntradasVip }} * {{ precioVip | number:'1.0-2' }}€ = {{ totalVip | number:'1.0-2' }}€
+                  {{ numeroEntradasVip }} × {{ precioVip | number:'1.0-2' }}€ = {{ totalVip | number:'1.0-2' }}€
                 </div>
               </div>
 
