@@ -254,8 +254,8 @@ static class Donations
                 {
                     row.RelativeItem().Column(col =>
                     {
-                        col.Item().Text("FUNDACIÓN CUDECA").Bold().FontSize(20).FontColor(Colors.Blue.Medium);
-                        col.Item().Text("NIF: G-92193821"); 
+                        col.Item().Text("FUNDACIÓN CUDECA").Bold().FontSize(20).FontColor(Colors.Green.Medium);
+                        col.Item().Text("NIF: G-92182054"); 
                         col.Item().Text("Av. del Cosmos, s/n, 29631 Benalmádena (Málaga)");
                     });
                 });
