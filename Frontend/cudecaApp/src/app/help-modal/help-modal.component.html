@@ -1,45 +1,35 @@
-<!-- Modal Backdrop -->
 <div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-[1.5vw]">
-  <!-- Modal Content -->
   <div class="bg-white rounded-[1.5vw] shadow-2xl w-full max-w-[60vw] max-h-[85vh] overflow-y-auto p-[2vw] space-y-[1.5vw]">
     
-    <!-- Header -->
     <div class="flex justify-between items-center mb-[1vw]">
       <h1 class="text-[2vw] font-bold text-green-800">¿Necesitas ayuda?</h1>
       <button (click)="closeModal()" class="text-gray-500 hover:text-gray-700 text-[1.5vw] font-bold transition">✕</button>
     </div>
 
-    <!-- Contenido de ayuda -->
     <div class="space-y-[1.5vw] text-[1vw] text-gray-700">
 
-      <!-- Sección: Inicio -->
       <div class="border-l-4 border-green-600 pl-[1vw]">
         <h3 class="text-[1.3vw] font-bold text-green-800 mb-[0.5vw]">📍 Inicio</h3>
         <p>La página principal de Cudeca donde encontrarás información sobre la organización y acceso rápido a todas las secciones principales.</p>
       </div>
 
-      <!-- Sección: Eventos -->
       <div class="border-l-4 border-green-600 pl-[1vw]">
         <h3 class="text-[1.3vw] font-bold text-green-800 mb-[0.5vw]">🎉 Eventos</h3>
         <p>Explora todos los eventos solidarios organizados por Cudeca. Aquí puedes ver detalles, fechas, ubicaciones y precios. Haz clic en un evento para obtener más información e inscribirte.</p>
       </div>
 
-      <!-- Sección: Donar -->
       <div class="border-l-4 border-green-600 pl-[1vw]">
         <h3 class="text-[1.3vw] font-bold text-green-800 mb-[0.5vw]">💝 Donar</h3>
         <p>Realiza donaciones directas para apoyar las causas de Cudeca. Tus contribuciones son fundamentales para ayudar a las personas en situación de cuidados paliativos.</p>
       </div>
 
-      <!-- Sección: Cuenta -->
       <div class="border-l-4 border-green-600 pl-[1vw]">
         <h3 class="text-[1.3vw] font-bold text-green-800 mb-[0.5vw]">👤 Cuenta</h3>
         <p><strong>Solo disponible si has iniciado sesión.</strong> Accede a tu perfil personal, historial de entradas, donaciones realizadas y datos de tu cuenta.</p>
       </div>
 
-      <!-- Divider -->
       <div class="border-t-2 border-gray-200 my-[1vw]"></div>
 
-      <!-- Botones de Autenticación -->
       <div class="space-y-[1vw]">
         <h3 class="text-[1.3vw] font-bold text-green-800">🔐 Autenticación</h3>
         
@@ -54,32 +44,62 @@
         </div>
       </div>
 
-      <!-- Divider -->
       <div class="border-t-2 border-gray-200 my-[1vw]"></div>
 
-      <!-- Contacto -->
       <div class="bg-green-100 border-l-4 border-green-700 rounded-[0.8vw] p-[1.5vw]">
-        <h3 class="text-[1.3vw] font-bold text-green-800 mb-[1vw]">📞 Contacto</h3>
-        <div class="space-y-[0.8vw]">
-          <div class="flex items-center gap-[0.8vw]">
-            <span class="text-[1.2vw]">📧</span>
-            <div>
-              <p class="font-semibold text-green-800">Email:</p>
-              <p class="text-gray-700"><a href="mailto:info&#64;cudeca.org" class="text-green-600 hover:underline">info&#64;cudeca.org</a></p>
+        <h3 class="text-[1.3vw] font-bold text-green-800 mb-[1vw]">📞 Contacto y Ubicación</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-[2vw]">
+          
+          <div class="space-y-[0.8vw]">
+            <div class="flex items-center gap-[0.8vw]">
+              <span class="text-[1.2vw]">📧</span>
+              <div>
+                <p class="font-semibold text-green-800">Email:</p>
+                <p class="text-gray-700"><a href="mailto:info&#64;cudeca.org" class="text-green-600 hover:underline">info&#64;cudeca.org</a></p>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-[0.8vw]">
-            <span class="text-[1.2vw]">📱</span>
-            <div>
-              <p class="font-semibold text-green-800">Teléfono:</p>
-              <p class="text-gray-700"><a href="tel:+34952373456" class="text-green-600 hover:underline">+34 952 37 34 56</a></p>
+            
+            <div class="flex items-center gap-[0.8vw]">
+              <span class="text-[1.2vw]">📱</span>
+              <div>
+                <p class="font-semibold text-green-800">Teléfono:</p>
+                <p class="text-gray-700"><a href="tel:+34952373456" class="text-green-600 hover:underline">+34 952 37 34 56</a></p>
+              </div>
             </div>
+
+            <div class="flex items-center gap-[0.8vw]">
+              <span class="text-[1.2vw]">📍</span>
+              <div>
+                <p class="font-semibold text-green-800">Dirección:</p>
+                <p class="text-gray-700 text-[0.9vw]">Avda. del Cosmos, s/n, 29631<br>Benalmádena, Málaga</p>
+              </div>
+            </div>
+
+            <p class="text-[0.9vw] text-gray-600 pt-[0.5vw]">¿Tienes dudas? Estamos aquí para ayudarte.</p>
           </div>
-          <p class="text-[0.9vw] text-gray-600 pt-[0.5vw]">¿Tienes dudas o necesitas más información? No dudes en contactarnos. Estamos aquí para ayudarte.</p>
+
+          <div class="h-[12vw] min-h-[150px] bg-white rounded-[0.8vw] overflow-hidden border border-green-200 shadow-inner relative group">
+            
+            <iframe 
+              width="100%" 
+              height="100%" 
+              frameborder="0" 
+              scrolling="no" 
+              marginheight="0" 
+              marginwidth="0" 
+              src="https://maps.google.com/maps?q=Av.+del+Cosmos,+S%2FN,+29631+Benalm%C3%A1dena,+M%C3%A1laga,+Espa%C3%B1a&t=&z=12&ie=UTF8&iwloc=&output=embed">
+            </iframe>
+            
+            <a href="https://www.google.com/maps/search/?api=1&query=Av.+del+Cosmos,+S%2FN,+29631+Benalm%C3%A1dena,+M%C3%A1laga,+Espa%C3%B1a" target="_blank"
+               class="absolute bottom-2 right-2 bg-white/90 text-green-800 text-[0.8vw] px-[0.6vw] py-[0.3vw] rounded shadow font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+               Ver en Google Maps ↗
+            </a>
+
+          </div>
+
         </div>
       </div>
-
-      <!-- Tips -->
       <div class="bg-yellow-50 border border-yellow-200 rounded-[0.8vw] p-[1vw]">
         <h3 class="text-[1.2vw] font-bold text-yellow-800 mb-[0.8vw]">💡 Consejos útiles</h3>
         <ul class="list-disc list-inside space-y-[0.5vw] text-gray-700">
@@ -92,7 +112,6 @@
 
     </div>
 
-    <!-- Footer -->
     <div class="flex justify-end pt-[1vw] border-t border-gray-200">
       <button 
         (click)="closeModal()"
