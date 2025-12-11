@@ -216,7 +216,7 @@ static class Tickets
     {
         try
         {
-            // VALIDACIONES
+            // Validaciones
             if (dto.Items == null || !dto.Items.Any())
                 return Results.BadRequest(new { error = "El carrito está vacío." });
 
@@ -227,7 +227,7 @@ static class Tickets
             if (string.IsNullOrEmpty(userIdString)) return Results.Unauthorized();
             var userGuid = Guid.Parse(userIdString);
             
-            // OBTENER TIPOS DE ENTRADA Y VALIDAR STOCK
+            // Obtener tipos de entrada y validar stock
             var ticketTypeIds = dto.Items.Select(i => i.TicketEventId).ToList();
             
             var responseTipos = await client.From<EntradaEvento>()
@@ -265,7 +265,7 @@ static class Tickets
         
             if (!string.IsNullOrEmpty(dto.DiscountCode))
             {
-                // Definir los códigos válidos (Idealmente, sacar esto a una constante o base de datos compartida)
+                // Definir los códigos válidos
                 var codigosValidos = new Dictionary<string, decimal>
                 {
                     { "DESCUENTO2025", 15m },
@@ -291,7 +291,7 @@ static class Tickets
                 }
             }
             
-            // ACTUALIZAR PERFIL DE USUARIO (Si faltan datos)
+            // Actualizar perfil de usuario si es necesario
             var usuario = await client.From<Usuario>().Where(u => u.Id == userGuid).Single();
             var clienteRes = await client.From<Cliente>().Where(c => c.Id == userGuid).Get();
             var cliente = clienteRes.Models.FirstOrDefault() ?? new Cliente { Id = userGuid };
@@ -331,7 +331,7 @@ static class Tickets
 
             if (datosActualizados) await client.From<Cliente>().Upsert(cliente);
 
-            // PROCESAR PAGO
+            // Procesar pago
             if (totalPagar > 0)
             {
                 try
@@ -358,7 +358,7 @@ static class Tickets
 
             var ticketsGenerados = new List<Entrada>();
 
-            // Procesamiento de cada TIPO de entrada comprado
+            // Procesamiento de cada tipo de entrada comprado
             foreach (var item in dto.Items)
             {
                 var tipoDb = tiposDb.First(t => t.Id == item.TicketEventId);
