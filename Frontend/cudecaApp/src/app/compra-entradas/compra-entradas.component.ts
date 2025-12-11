@@ -32,14 +32,14 @@ interface Evento {
   styleUrls: ['./compra-entradas.component.css']
 })
 export class CompraEntradasComponent implements OnInit {
-  
+
   evento: Evento | null = null;
   isLoading: boolean = true;
-  
+
   // Datos del formulario
   numeroEntradasGeneral: number = 0;
   numeroEntradasVip: number = 0;
-  
+
   // Precios y cantidades disponibles (del backend)
   precioGeneral: number = 0;
   cantidadGeneralDisponible: number = 0;
@@ -48,7 +48,7 @@ export class CompraEntradasComponent implements OnInit {
   tieneEntradasVip: boolean = false;
   generalTicketEventId: string | null = null;
   vipTicketEventId: string | null = null;
-  
+
   // Datos personales
   nombre: string = '';
   apellidos: string = '';
@@ -61,7 +61,7 @@ export class CompraEntradasComponent implements OnInit {
   ciudad: string = '';
   provincia: string = '';
   pais: string = '';
-  
+
   esEmpresa: boolean = false;
 
   // --- VARIABLES PARA EL DESCUENTO ---
@@ -69,14 +69,14 @@ export class CompraEntradasComponent implements OnInit {
   codigoValido: boolean = false;      // Si el backend dice que es OK
   validandoCodigo: boolean = false;   // Para mostrar la ruedita de carga mientras comprueba
   mensajeDescuento: string = '';      // "¡Código válido!" o "Error..."
-  
+
   tipoDescuento: 'porcentaje' | 'fijo' | null = null; // Backend usa 'porcentaje' según Tickets.cs
   valorDescuento: number = 0;         // El número del porcentaje (ej: 15, 25, 10)
   // ------------------------------------
 
   isProcessing: boolean = false;
   errorMessage: string = '';
-  
+
   private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
 
   constructor(
@@ -124,7 +124,7 @@ export class CompraEntradasComponent implements OnInit {
 
   cargarEvento(id: string): void {
     this.isLoading = true;
-    
+
     // Primero intentamos cargar desde admin (si estamos logueados)
     if (this.authService.isLoggedIn()) {
       this.cargarEventoDesdeAdmin(id);
@@ -308,7 +308,7 @@ export class CompraEntradasComponent implements OnInit {
   // 2. Calculamos cuánto descontamos
   get importeDescuento(): number {
     if (!this.codigoValido) return 0;
-    
+
     // Si el backend dice que es porcentaje (ej: 10), calculamos el 10% del subtotal
     return (this.subtotalPrecio * this.valorDescuento) / 100;
   }
@@ -401,42 +401,47 @@ export class CompraEntradasComponent implements OnInit {
     this.isProcessing = false;
   }
 
+  // Limpiar descuento
+  quitarDescuento(): void {
+    this.codigoValido = false;
+    this.mensajeDescuento = '';
+    this.codigoDescuento = '';
+    this.tipoDescuento = null;
+    this.valorDescuento = 0;
+  }
+
   validarCodigo() {
     const codigo = this.codigoDescuento.trim().toUpperCase();
-    
+
     if (!codigo) {
-      this.codigoValido = false;
-      this.mensajeDescuento = '';
-      this.tipoDescuento = null;
-      this.valorDescuento = 0;
+      this.quitarDescuento();
       return;
     }
 
     this.validandoCodigo = true;
     this.mensajeDescuento = '';
 
-    const url = `${this.apiUrl}/discounts/validate`; 
+    const url = `${this.apiUrl}/discounts/validate`;
 
-    // El backend espera: DiscountCheckDto(string Code) -> JSON: { "code": "..." }
     this.http.post<any>(url, { code: codigo }).subscribe({
       next: (response) => {
-        console.log('Respuesta Descuento:', response); // <--- MIRA ESTO EN CONSOLA (F12)
-        
-        if (response.descuento && response.descuento.valido) {
+        console.log('Respuesta Descuento:', response);
+
+        const data = response.discount;
+
+        if (data && data.valido) {
           this.codigoValido = true;
           this.tipoDescuento = 'porcentaje';
-          // Asegúrate de que esta propiedad coincida con lo que ves en consola (puede ser 'Porcentaje' con mayúscula)
-          this.valorDescuento = response.descuento.porcentaje || response.descuento.Porcentaje || 0; 
-          
+          this.valorDescuento = data.porcentaje || data.descuento * 100;
+
           this.mensajeDescuento = `¡Éxito! Descuento del ${this.valorDescuento}% aplicado.`;
         }
-        
+
         this.validandoCodigo = false;
       },
       error: (error) => {
         console.error('Error descuento:', error);
         this.codigoValido = false;
-        // El backend devuelve errores 400/404 con { error: "mensaje" }
         this.mensajeDescuento = error.error?.error || 'El código no existe o ha expirado.';
         this.tipoDescuento = null;
         this.valorDescuento = 0;

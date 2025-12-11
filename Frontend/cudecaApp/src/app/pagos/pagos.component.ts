@@ -55,16 +55,6 @@ export class PagosComponent implements OnInit {
     this.selectedPaymentMethod = methodId;
   }
 
-  private construirDireccion(): string {
-    if (!this.eventoCompra) return '';
-    const partes = [
-      this.eventoCompra.calle || '',
-      this.eventoCompra.numero || '',
-      this.eventoCompra.pisoPuerta ? `${this.eventoCompra.pisoPuerta}` : ''
-    ];
-    return partes.filter(p => p).join(' ');
-  }
-
   processPayment(): void {
     if (!this.selectedPaymentMethod) {
       this.errorMessage = 'Por favor selecciona un método de pago';
@@ -110,10 +100,14 @@ export class PagosComponent implements OnInit {
       dni: this.eventoCompra.dniCliente,
       nombre: this.eventoCompra.nombreCliente,
       apellidos: this.eventoCompra.apellidosCliente,
-      direccion: this.construirDireccion(),
+      telefono: this.eventoCompra.telefonoCliente,
+      calle: this.eventoCompra.calle,
+      numero: this.eventoCompra.numero,
+      pisoPuerta: this.eventoCompra.pisoPuerta,
       ciudad: this.eventoCompra.ciudad,
       codigoPostal: this.eventoCompra.codigoPostal,
-      provincia: this.eventoCompra.provincia
+      provincia: this.eventoCompra.provincia,
+      pais: this.eventoCompra.pais
     };
 
     console.log('📤 Enviando compra:', purchasePayload);
