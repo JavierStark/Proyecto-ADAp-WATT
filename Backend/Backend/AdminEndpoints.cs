@@ -1,10 +1,10 @@
-﻿﻿using Backend.Models;
+﻿﻿﻿﻿using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Supabase.Postgrest;
 
 namespace Backend;
 
-static class AdminEndpoints
+public static class AdminEndpoints
 {
     public static async Task<IResult> AdminListEvents(Supabase.Client client)
     {
@@ -150,11 +150,10 @@ static class AdminEndpoints
 
             await client.From<EntradaEvento>().Insert(entradasAInsertar);
 
-            return Results.Created($"/events/{eventoCreado.Id}", new
-            {
-                status = "success",
-                message = "Evento y tickets creados correctamente.",
-                evento = new EventoAdminDto(
+            return Results.Created($"/events/{eventoCreado.Id}", new AdminEventCreateResponseDto(
+                "success",
+                "Evento y tickets creados correctamente.",
+                new EventoAdminDto(
                     eventoCreado.Id,
                     eventoCreado.Nombre,
                     eventoCreado.Descripcion,
@@ -164,14 +163,14 @@ static class AdminEndpoints
                     0,
                     eventoCreado.EventoVisible,
                     eventoCreado.ObjetoRecaudacion ?? "Sin especificar",
-                    eventoCreado.ImagenUrl,
+                    eventoCreado.ImagenUrl ?? "",
                     dto.PrecioGeneral,
                     dto.CantidadGeneral,
                     dto.PrecioVip,
                     dto.CantidadVip
                 ),
-                tickets_creados = entradasAInsertar.Select(t => new { t.Tipo, t.Precio, Stock = t.Cantidad })
-            });
+                entradasAInsertar.Select(t => new TicketTypeCreatedDto(t.Tipo!, t.Precio, t.Cantidad))
+            ));
         }
         catch (Exception ex)
         {
@@ -314,11 +313,10 @@ static class AdminEndpoints
         // Guardar evento
         await client.From<Evento>().Update(eventoModel);
 
-        return Results.Ok(new
-        {
-            status = "success",
-            message = "Evento actualizado correctamente.",
-            evento = new EventoAdminDto(
+        return Results.Ok(new AdminEventUpdateResponseDto(
+            "success",
+            "Evento actualizado correctamente.",
+            new EventoAdminDto(
                 eventoModel.Id,
                 eventoModel.Nombre,
                 eventoModel.Descripcion,
@@ -328,13 +326,13 @@ static class AdminEndpoints
                 eventoModel.EntradasVendidas,
                 eventoModel.EventoVisible,
                 eventoModel.ObjetoRecaudacion ?? "Sin especificar",
-                eventoModel.ImagenUrl,
+                eventoModel.ImagenUrl ?? "",
                 ticketGeneral?.Precio ?? 0,
                 ticketGeneral?.Cantidad ?? 0,
                 ticketVip?.Precio,
                 ticketVip?.Cantidad
             )
-        });
+        ));
     }
     catch (Exception ex)
     {
@@ -374,11 +372,10 @@ static class AdminEndpoints
                 .Where(e => e.Id == parse)
                 .Delete();
 
-            return Results.Ok(new
-            {
-                status = "success",
-                message = $"Evento '{eventoDb.Nombre}' eliminado correctamente."
-            });
+            return Results.Ok(new AdminEventDeleteResponseDto(
+                "success",
+                $"Evento '{eventoDb.Nombre}' eliminado correctamente."
+            ));
         }
         catch (Exception ex)
         {
@@ -400,7 +397,7 @@ static class AdminEndpoints
         }
     }
 
-    record EventoAdminDto(
+    public record EventoAdminDto(
         Guid Id,
         string? Nombre,
         string? Descripcion,

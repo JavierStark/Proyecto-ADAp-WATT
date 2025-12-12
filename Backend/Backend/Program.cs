@@ -5,6 +5,8 @@ using Backend.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using QuestPDF.Infrastructure;
 using Scalar.AspNetCore;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi.Models;
 
 QuestPDF.Settings.License = LicenseType.Community;
 
@@ -65,7 +67,25 @@ builder.Services.AddScoped<IPaymentService, SimulatedPaymentService>();
 
 builder.Services.AddScoped<IEmailService, MailGunService>();
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, _, _) =>
+    {
+        // Add Bearer authentication security scheme for Scalar UI
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
+        
+        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "JWT Authorization header using the Bearer scheme. Enter your token in the text input below. Example: 'eyJhbGc...'"
+        };
+
+        return Task.CompletedTask;
+    });
+});
 
 var app = builder.Build();
 

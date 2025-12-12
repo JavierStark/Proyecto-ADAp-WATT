@@ -191,19 +191,17 @@ static class Tickets
             var tiposEntrada = response.Models;
 
             // Mapear a un objeto anónimo o DTO para el frontend
-            var resultado = tiposEntrada.Select(t => new 
-            {
-                TicketEventId = t.Id,
-                Nombre = t.Tipo,
-                Precio = t.Precio,
-                Stock = t.Cantidad
-            });
+            var resultado = tiposEntrada.Select(t => new TicketTypeDto(
+                t.Id,
+                t.Tipo!,
+                t.Precio,
+                t.Cantidad
+            ));
 
-            return Results.Ok(new
-            {
-                status = "success",
-                data = resultado
-            });
+            return Results.Ok(new TicketTypesResponseDto(
+                "success",
+                resultado
+            ));
         }
         catch (Exception ex)
         {
@@ -341,32 +339,6 @@ static class Tickets
                 cliente.PisoPuerta = dto.PisoPuerta; 
                 datosClienteActualizados = true; 
             }
-
-            if (!string.IsNullOrEmpty(dto.CodigoPostal) && cliente.CodigoPostal != dto.CodigoPostal) 
-            { 
-                cliente.CodigoPostal = dto.CodigoPostal; 
-                datosClienteActualizados = true; 
-            }
-
-            if (!string.IsNullOrEmpty(dto.Ciudad) && cliente.Ciudad != dto.Ciudad) 
-            { 
-                cliente.Ciudad = dto.Ciudad; 
-                datosClienteActualizados = true; 
-            }
-
-            if (!string.IsNullOrEmpty(dto.Provincia) && cliente.Provincia != dto.Provincia) 
-            { 
-                cliente.Provincia = dto.Provincia; 
-                datosClienteActualizados = true; 
-            }
-
-            if (!string.IsNullOrEmpty(dto.Pais) && cliente.Pais != dto.Pais) 
-            { 
-                cliente.Pais = dto.Pais; 
-                datosClienteActualizados = true; 
-            }
-            
-            // Revisamos si, tras la actualización, seguimos sin tener los datos críticos
             var camposFaltantes = new List<string>();
             
             // Verificamos el objeto 'usuario' (que ya tiene los datos nuevos si se enviaron)
@@ -375,19 +347,17 @@ static class Tickets
             // Verificamos el objeto 'cliente'
             if (string.IsNullOrEmpty(cliente.Calle) || string.IsNullOrEmpty(cliente.Numero)) 
                 camposFaltantes.Add("Dirección completa");
-
+            
             if (camposFaltantes.Count != 0)
             {
                 return Results.BadRequest(new
                 {
-                    error = "Faltan datos fiscales necesarios para generar la entrada.",
+                    error = "Faltan datos fiscales necesarios.",
                     missing_fields = camposFaltantes,
                     code = "MISSING_DATA"
                 });
             }
 
-
-            // Guardar en BD
             if (datosUsuarioActualizados) 
                 await client.From<Usuario>().Update(usuario);
             
@@ -468,12 +438,11 @@ static class Tickets
                 await client.From<Evento>().Update(evento);
             }
 
-            return Results.Ok(new
-            {
-                status = "success",
-                message = $"Compra realizada. Se han generado {cantidadTotalEntradas} entradas.",
-                totalPagado = totalPagar
-            });
+            return Results.Ok(new PurchaseTicketsResponseDto(
+                "success",
+                $"Compra realizada. Se han generado {cantidadTotalEntradas} entradas.",
+                totalPagar
+            ));
         }
         catch (Exception ex)
         {
@@ -485,18 +454,17 @@ static class Tickets
     {
         var metodos = new[]
         {
-            new { id = 1, nombre = "Tarjeta de Crédito", codigo = "CARD" },
-            new { id = 2, nombre = "Tarjeta de Débito", codigo = "DEBIT" },
-            new { id = 3, nombre = "PayPal", codigo = "PAYPAL" },
-            new { id = 4, nombre = "Transferencia Bancaria", codigo = "BANK" }
+            new PaymentMethodDto(1, "Tarjeta de Crédito", "CARD"),
+            new PaymentMethodDto(2, "Tarjeta de Débito", "DEBIT"),
+            new PaymentMethodDto(3, "PayPal", "PAYPAL"),
+            new PaymentMethodDto(4, "Transferencia Bancaria", "BANK")
         };
 
-        return Results.Ok(new
-        {
-            status = "success",
-            message = "Métodos de pago disponibles",
-            metodos = metodos
-        });
+        return Results.Ok(new PaymentMethodsResponseDto(
+            "success",
+            "Métodos de pago disponibles",
+            metodos
+        ));
     }
 
     public static async Task<IResult> ValidateDiscount(DiscountCheckDto dto, Client client)
@@ -528,21 +496,19 @@ static class Tickets
                 return Results.BadRequest(new { error = "El código de descuento ya no tiene usos disponibles." });
             }
 
-            return Results.Ok(new
-            {
-                status = "success",
-                message = "Código de descuento válido.",
-                discount = new
-                {
-                    codigo = descuento.Codigo,
-                    descuento = descuento.Descuento,
-                    porcentaje = descuento.Descuento * 100,
-                    tipo = "porcentaje",
-                    usosRestantes = descuento.Cantidad,
-                    fechaExpiracion = descuento.FechaExpiracion,
-                    valido = true
-                }
-            });
+            return Results.Ok(new DiscountValidationResponseDto(
+                "success",
+                "Código de descuento válido.",
+                new DiscountDetailsDto(
+                    descuento.Codigo,
+                    descuento.Descuento,
+                    descuento.Descuento * 100,
+                    descuento.Cantidad,
+                    "porcentaje",  
+                    descuento.FechaExpiracion,
+                    true
+                )
+            ));
         }
         catch (Exception ex)
         {
@@ -567,19 +533,17 @@ static class Tickets
                 .Filter("id", Operator.Equals, ticket.FkEvento.ToString())
                 .Single();
 
-            return Results.Ok(new
-            {
-                status = "success",
-                message = "Código QR válido.",
-                ticket = new
-                {
+            return Results.Ok(new ValidateTicketQrResponseDto(
+                "success",
+                "Código QR válido.",
+                new TicketValidationDataDto(
                     ticket.Id,
-                    EventoNombre = evento?.Nombre,
+                    evento?.Nombre,
                     ticket.Precio,
                     ticket.FechaCompra,
                     ticket.Estado
-                }
-            });
+                )
+            ));
         }
         catch (Exception ex)
         {

@@ -103,12 +103,11 @@ static class Donations
                 .From<Donacion>()
                 .Insert(nuevaDonacion);
 
-            return Results.Ok(new
-            {
-                status = "success",
-                message = $"¡Gracias! Donación de {dto.Amount}€ realizada correctamente.",
-                id_donacion = pagoCreado.Id
-            });
+            return Results.Ok(new DonationCreatedResponseDto(
+                "success",
+                $"¡Gracias! Donación de {dto.Amount}€ realizada correctamente.",
+                pagoCreado.Id
+            ));
         }
         catch (Exception ex)
         {
@@ -362,7 +361,7 @@ static class Donations
     }
 }
 
-    record DonationHistoryDto(
+    public record DonationHistoryDto(
         Guid IdDonacion,
         decimal Monto,
         DateTime Fecha,
@@ -382,7 +381,7 @@ static class Donations
         string? Pais
     );
 
-    record DonationSummaryDto(decimal TotalDonado);
+    public record DonationSummaryDto(decimal TotalDonado);
 
     public record DonationDto(decimal Amount, String PaymentMethod); // Ej: "Tarjeta", "PayPal", "Bizum"
 }

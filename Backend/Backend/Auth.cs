@@ -1,4 +1,4 @@
-﻿using Backend.Models;
+﻿﻿using Backend.Models;
 using Supabase.Gotrue;
 using static Supabase.Postgrest.Constants;
 
@@ -90,24 +90,21 @@ public static class Auth
                 return Results.Unauthorized();
             }
 
-            return Results.Ok(new
-            {
-                status = "success",
-                message = "Inicio de sesión exitoso",
-                user = new
-                {
-                    id = authResponse.User.Id,
-                    email = authResponse.User.Email,
-                    emailConfirmedAt = authResponse.User.ConfirmedAt
-                },
-                session = new
-                {
-                    access_token = authResponse.AccessToken,
-                    refresh_token = authResponse.RefreshToken,
-                    expires_in = authResponse.ExpiresIn,
-                    token_type = "Bearer"
-                }
-            });
+            return Results.Ok(new SignInResponseDto(
+                "success",
+                "Inicio de sesión exitoso",
+                new AuthUserDto(
+                    authResponse.User.Id,
+                    authResponse.User.Email!,
+                    authResponse.User.ConfirmedAt
+                ),
+                new AuthSessionDto(
+                    authResponse.AccessToken!,
+                    authResponse.RefreshToken!,
+                    authResponse.ExpiresIn,
+                    "Bearer"
+                )
+            ));
         }
         catch (Exception ex)
         {
@@ -135,11 +132,10 @@ public static class Auth
 
             await client.Auth.SignOut();
 
-            return Results.Ok(new
-            {
-                status = "success",
-                message = "Sesión cerrada correctamente"
-            });
+            return Results.Ok(new SignOutResponseDto(
+                "success",
+                "Sesión cerrada correctamente"
+            ));
         }
         catch (Exception ex)
         {
@@ -166,7 +162,7 @@ public static class Auth
             // Si la lista tiene elementos (> 0) es administrador.
             bool esAdmin = response.Models.Count > 0;
 
-            return Results.Ok(new { isAdmin = esAdmin });
+            return Results.Ok(new IsAdminResponseDto(esAdmin));
         }
         catch (Exception ex)
         {
@@ -191,10 +187,7 @@ public static class Auth
             // Es socio si existe Y la fecha de fin es mayor que hoy
             bool esSocioActivo = socio != null && socio.FechaFin > DateTime.UtcNow;
 
-            return Results.Ok(new 
-            { 
-                isSocio = esSocioActivo,
-            });
+            return Results.Ok(new IsPartnerResponseDto(esSocioActivo));
         }
         catch (Exception ex)
         {
@@ -216,10 +209,7 @@ public static class Auth
             
             bool esCorporativo = response.Models.Any();
 
-            return Results.Ok(new 
-            { 
-                isCorporate = esCorporativo,
-            });
+            return Results.Ok(new IsCorporateResponseDto(esCorporativo));
         }
         catch (Exception ex)
         {
