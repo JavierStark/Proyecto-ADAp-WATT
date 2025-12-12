@@ -61,117 +61,132 @@ export class PagosComponent implements OnInit {
     this.selectedPaymentMethod = methodId;
   }
 
-  procesarPagoSocio() {
-    if (!this.selectedPaymentMethod || !this.socioCompra) {
+processPayment(): void {
+    if (!this.selectedPaymentMethod) {
       this.errorMessage = 'Selecciona un método de pago';
       return;
     }
 
-    this.isProcessing = true;
+    if (this.socioCompra) {
+      this.procesarPagoSocio();
+    } else {
+      this.procesarPagoEvento();
+    }
+  }
 
-    const payload = {
-      tipo: this.socioCompra.tipo,
-      precio: this.socioCompra.precio,
-      paymentMethod: this.selectedPaymentMethod,
-      nombre: this.socioCompra.nombre,
-      apellidos: this.socioCompra.apellidos,
-      telefono: this.socioCompra.telefono,
-      dni: this.socioCompra.dni
-    };
+private procesarPagoEvento(): void {
+  if (!this.eventoCompra) {
+    this.errorMessage = 'No se encontraron datos de compra';
+    return;
+  }
 
-    this.http.post(`${this.apiUrl}/partners/subscribe`, payload).subscribe({
-      next: () => {
+  this.isProcessing = true;
+  this.errorMessage = '';
+
+  const items: any[] = [];
+
+  if (this.eventoCompra.numeroEntradasGeneral > 0 && this.eventoCompra.generalTicketEventId) {
+    items.push({
+      ticketEventId: this.eventoCompra.generalTicketEventId,
+      quantity: this.eventoCompra.numeroEntradasGeneral
+    });
+  }
+
+  if (this.eventoCompra.numeroEntradasVip > 0 && this.eventoCompra.vipTicketEventId) {
+    items.push({
+      ticketEventId: this.eventoCompra.vipTicketEventId,
+      quantity: this.eventoCompra.numeroEntradasVip
+    });
+  }
+
+  const payload = {
+    eventId: this.eventoCompra.id,
+    items,
+    paymentToken: 'sim_ok',
+    paymentMethod: this.selectedPaymentMethod,
+    discountCode: this.eventoCompra.codigoDescuento || null,
+    dni: this.eventoCompra.dniCliente,
+    nombre: this.eventoCompra.nombreCliente,
+    apellidos: this.eventoCompra.apellidosCliente,
+    telefono: this.eventoCompra.telefonoCliente,
+    calle: this.eventoCompra.calle,
+    numero: this.eventoCompra.numero,
+    pisoPuerta: this.eventoCompra.pisoPuerta,
+    ciudad: this.eventoCompra.ciudad,
+    codigoPostal: this.eventoCompra.codigoPostal,
+    provincia: this.eventoCompra.provincia,
+    pais: this.eventoCompra.pais
+  };
+
+  this.http.post(`${this.apiUrl}/tickets/purchase`, payload).subscribe({
+    next: () => {
+      this.compraService.limpiarEventoCompra();
+      this.router.navigate(['/compra-finalizada']);
+    },
+    error: () => {
+      this.errorMessage = 'Error al procesar el pago';
+      this.isProcessing = false;
+    }
+  });
+}
+
+private procesarPagoSocio(): void {
+  if (!this.socioCompra) {
+    this.errorMessage = 'No se encontraron datos de la suscripción';
+    return;
+  }
+
+  if (!this.selectedPaymentMethod) {
+    this.errorMessage = 'Selecciona un método de pago';
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+
+  this.isProcessing = true;
+  this.errorMessage = '';
+
+  const payload = {
+    plan: this.socioCompra.plan,
+    importe: this.socioCompra.importe,
+    paymentToken: 'sim_ok',              // obligatorio y NO vacío
+    metodoPago: this.selectedPaymentMethod
+  };
+
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  this.http
+    .post(`${this.apiUrl}/partners/subscribe`, payload, {headers})
+    .subscribe({
+      next: (res: any) => {
+
+        // 1️⃣ Guardar resumen para la pantalla final
+        sessionStorage.setItem(
+          'socioResumen',
+          JSON.stringify({
+            mensaje: res.mensaje,
+            vence: res.vence,
+            pagoRef: res.pagoRef
+          })
+        );
+
+        // 2️⃣ Limpiar estado
         this.compraService.limpiarSocioCompra();
+
+        // 3️⃣ Navegar a compra finalizada
         this.router.navigate(['/compra-finalizada']);
       },
-      error: () => {
+
+      error: (err) => {
+        console.error('❌ Error backend socio:', err);
         this.errorMessage = 'Error al procesar la suscripción';
         this.isProcessing = false;
       }
     });
 }
 
-
-  processPayment(): void {
-
-    if (this.socioCompra) {
-      this.procesarPagoSocio();
-      return;
-    }
-    if (!this.selectedPaymentMethod) {
-      this.errorMessage = 'Por favor selecciona un método de pago';
-      return;
-    }
-
-    if (!this.eventoCompra) {
-      this.errorMessage = 'No se encontraron datos de compra. Por favor, intenta de nuevo desde el principio.';
-      return;
-    }
-
-    if (!this.eventoCompra.generalTicketEventId && this.eventoCompra.numeroEntradasGeneral > 0) {
-      this.errorMessage = 'No se encontraron datos de tipos de entrada. Por favor, intenta de nuevo.';
-      return;
-    }
-
-    this.isProcessing = true;
-    this.errorMessage = '';
-
-    // Construir el payload de la compra
-    const items: any[] = [];
-
-    if (this.eventoCompra.numeroEntradasGeneral > 0 && this.eventoCompra.generalTicketEventId) {
-      items.push({
-        ticketEventId: this.eventoCompra.generalTicketEventId,
-        quantity: this.eventoCompra.numeroEntradasGeneral
-      });
-    }
-
-    if (this.eventoCompra.numeroEntradasVip > 0 && this.eventoCompra.vipTicketEventId) {
-      items.push({
-        ticketEventId: this.eventoCompra.vipTicketEventId,
-        quantity: this.eventoCompra.numeroEntradasVip
-      });
-    }
-
-    const purchasePayload = {
-      eventId: this.eventoCompra.id,
-      items: items,
-      paymentToken: 'sim_ok', // En un caso real, aquí iría el token generado por el gateway de pago
-      paymentMethod: this.selectedPaymentMethod,
-      discountCode: this.eventoCompra.codigoDescuento || null,
-      dni: this.eventoCompra.dniCliente,
-      nombre: this.eventoCompra.nombreCliente,
-      apellidos: this.eventoCompra.apellidosCliente,
-      telefono: this.eventoCompra.telefonoCliente,
-      calle: this.eventoCompra.calle,
-      numero: this.eventoCompra.numero,
-      pisoPuerta: this.eventoCompra.pisoPuerta,
-      ciudad: this.eventoCompra.ciudad,
-      codigoPostal: this.eventoCompra.codigoPostal,
-      provincia: this.eventoCompra.provincia,
-      pais: this.eventoCompra.pais
-    };
-
-    console.log('📤 Enviando compra:', purchasePayload);
-
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    this.http.post(`${this.apiUrl}/tickets/purchase`, purchasePayload, { headers }).subscribe({
-      next: (response: any) => {
-        console.log('✅ Compra exitosa:', response);
-        // Limpiar los datos de compra del sessionStorage después del pago exitoso
-        this.compraService.limpiarEventoCompra();
-        this.router.navigate(['/compra-finalizada']);
-      },
-      error: (err) => {
-        console.error('❌ Error procesando la compra:', err);
-        const errorMsg = err.error?.error || err.error?.message || 'Error al procesar el pago. Por favor, intenta de nuevo.';
-        this.errorMessage = errorMsg;
-        this.isProcessing = false;
-      }
-    });
-  }
 }
+
+

@@ -84,40 +84,29 @@ export class CompraService {
     }
   }
 
-  private recuperarSocio(): void {
-    try {
-      const raw = sessionStorage.getItem(this.SOCIO_KEY);
-      if (raw) {
-        this.socioCompra = JSON.parse(raw);
-      }
-    } catch (e) {
-      console.error('Error recuperando socio:', e);
-    }
-  }
+private socioCompraSubject = new BehaviorSubject<SocioCompra | null>(null);
 
-  guardarSocioCompra(data: SocioCompra): void {
-    this.socioCompra = data;
-    sessionStorage.setItem(this.SOCIO_KEY, JSON.stringify(data));
-  }
+guardarSocioCompra(data: SocioCompra): void {
+  this.socioCompraSubject.next(data);
+  sessionStorage.setItem('socioCompra', JSON.stringify(data));
+}
 
-  obtenerSocioCompra(): SocioCompra | null {
-    return this.socioCompra;
-  }
+obtenerSocioCompra(): SocioCompra | null {
+  return this.socioCompraSubject.value;
+}
 
-  limpiarSocioCompra(): void {
-    this.socioCompra = null;
-    sessionStorage.removeItem(this.SOCIO_KEY);
-  }
+limpiarSocioCompra(): void {
+  this.socioCompraSubject.next(null);
+  sessionStorage.removeItem('socioCompra');
+}
+
 
 }
 
   
 export interface SocioCompra {
-  tipo: 'mensual' | 'trimestral' | 'anual';
-  precio: number;
-  nombre: string;
-  apellidos: string;
-  telefono: string;
-  dni: string;
+  plan: string;
+  importe: number;
 }
+
 

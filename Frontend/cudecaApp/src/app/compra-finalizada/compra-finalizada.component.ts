@@ -11,4 +11,21 @@ import { RouterLink } from '@angular/router';
 })
 export class CompraFinalizadaComponent {
   constructor() {}
+
+
+   socioResumen: {
+    mensaje: string;
+    vence: string;
+    pagoRef: string;
+  } | null = null;
+
+  ngOnInit(): void {
+    const raw = sessionStorage.getItem('socioResumen');
+    if (raw) {
+      this.socioResumen = JSON.parse(raw);
+      sessionStorage.removeItem('socioResumen');
+    }
+  }
+
+  
 }

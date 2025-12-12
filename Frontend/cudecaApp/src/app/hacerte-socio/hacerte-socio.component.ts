@@ -51,18 +51,17 @@ export class HacerteSocioComponent implements OnInit {
   }
 
   continuarPago() {
-  if (!this.nombre || !this.apellidos || !this.telefono) {
-    alert('Completa los datos obligatorios');
+  if (!this.plan) {
+    alert('Selecciona un plan');
     return;
   }
 
+  // ⚠️ NO validamos nombre/apellidos/teléfono
+  // porque NO son necesarios para la suscripción
+
   this.compraService.guardarSocioCompra({
-    tipo: this.plan as any,
-    precio: this.precioSocio,
-    nombre: this.nombre,
-    apellidos: this.apellidos,
-    telefono: this.telefono,
-    dni: this.dni
+    plan: this.plan,
+    importe: this.precioSocio
   });
 
   // 👉 reutilizamos el mismo componente de pagos
@@ -70,3 +69,4 @@ export class HacerteSocioComponent implements OnInit {
 }
 
 }
+
