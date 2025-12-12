@@ -1,0 +1,101 @@
+<section class="w-full min-h-screen pt-[10vw] pb-[4vw] overflow-hidden font-sans bg-green-50 relative">
+
+  <!-- Fondo -->
+  <img src="assets/images/fondoCudeca.png"
+       class="absolute inset-0 w-full h-full object-cover -z-10" />
+  <div class="absolute inset-0 bg-green-400 opacity-30 -z-5"></div>
+
+  <div class="max-w-[95vw] mx-auto relative z-10">
+
+    <div class="bg-white rounded-[2vw] shadow-2xl overflow-hidden p-[2vw]">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-[2.5vw]">
+
+        <!-- IZQUIERDA: Resumen -->
+        <div class="lg:col-span-1">
+          <h1 class="text-[1.6vw] font-bold text-green-700 mb-[1.5vw]">
+            Te haces socio de CUDECA
+          </h1>
+
+          <div class="bg-green-50 border border-green-200 rounded-[1.5vw] p-[1.5vw] shadow-sm">
+
+            <h3 class="text-[1.3vw] font-bold text-green-800 mb-[1vw]">
+              Socio {{ esEmpresa ? 'Empresa' : 'Individual' }}
+            </h3>
+
+            <ul class="text-[0.95vw] text-gray-700 mb-[1.5vw] list-disc pl-[1.2vw]">
+              <li>Apoyo continuo a la fundación</li>
+              <li>Certificado de colaboración</li>
+              <li>Deducción fiscal</li>
+            </ul>
+
+            <div class="bg-white rounded-[1vw] p-[1.2vw] mb-[1.5vw]">
+              <div class="text-[0.9vw] text-gray-600 mb-[0.3vw]">
+                Cuota anual
+              </div>
+              <div class="text-[1.6vw] font-bold text-green-900">
+                {{ precioSocio }} €
+              </div>
+            </div>
+
+            <button
+              (click)="goBack()"
+              class="w-full bg-gray-400 text-white text-[1vw] font-semibold py-[0.8vw] rounded-[0.8vw] hover:bg-gray-500 transition-colors">
+              Volver
+            </button>
+          </div>
+        </div>
+
+        <!-- DERECHA: Formulario -->
+        <div class="lg:col-span-2">
+          <h1 class="text-[1.6vw] font-bold text-green-700 mb-[1.5vw]">
+            Completa tus datos
+          </h1>
+
+          <!-- Tipo socio -->
+          <div class="mb-[2vw] grid grid-cols-2 gap-[1.5vw]">
+            <button
+              (click)="setTipo(false)"
+              [class.bg-green-600]="!esEmpresa"
+              [class.text-white]="!esEmpresa"
+              class="py-[0.8vw] rounded-[0.8vw] text-[1vw] font-semibold">
+              Persona
+            </button>
+
+            <button
+              (click)="setTipo(true)"
+              [class.bg-green-600]="esEmpresa"
+              [class.text-white]="esEmpresa"
+              class="py-[0.8vw] rounded-[0.8vw] text-[1vw] font-semibold">
+              Empresa
+            </button>
+          </div>
+
+          <!-- Datos personales (COPIADOS de compra-entradas) -->
+          <div class="bg-gray-50 rounded-[1.5vw] p-[1.5vw] mb-[1.5vw]">
+            <h3 class="text-[1.2vw] font-bold text-gray-800 mb-[1vw]">
+              Datos personales
+            </h3>
+
+            <div class="grid grid-cols-2 gap-[1vw] mb-[1vw]">
+              <input [(ngModel)]="nombre" placeholder="Nombre" class="input" />
+              <input [(ngModel)]="apellidos" placeholder="Apellidos" class="input" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-[1vw]">
+              <input [(ngModel)]="telefono" placeholder="Teléfono" class="input" />
+              <input [(ngModel)]="dni" placeholder="DNI / CIF" class="input" />
+            </div>
+          </div>
+
+          <!-- Botón -->
+          <button
+            (click)="continuarPago()"
+            class="w-full bg-green-600 text-white text-[1.2vw] font-bold py-[1vw] rounded-[1vw] hover:bg-green-700 transition-colors shadow-lg">
+            Continuar al pago
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>

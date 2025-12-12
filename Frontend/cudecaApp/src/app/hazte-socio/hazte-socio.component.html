@@ -57,15 +57,16 @@
 
     <!-- BOTÓN HACERSE SOCIO -->
     <button
-      (click)="hacerseSocio()"
-      [disabled]="!planSeleccionado || isProcessing"
-      class="w-full bg-green-600 text-white font-bold py-[1vw] rounded-[1vw]
-             hover:bg-green-700 transition-colors
-             disabled:opacity-50 disabled:cursor-not-allowed">
+    (click)="hacerseSocio()"
+    [disabled]="!planSeleccionado || isProcessing"
+    class="w-full bg-green-600 text-white font-bold py-[1vw] rounded-[1vw]
+            hover:bg-green-700 transition-colors
+            disabled:opacity-50 disabled:cursor-not-allowed">
 
-      {{ isProcessing ? 'Procesando...' : 'Hacerme socio' }}
+    {{ isProcessing ? 'Procesando...' : 'Hacerme socio' }}
 
-    </button>
+</button>
+
 
     <!-- ERROR -->
     <p *ngIf="errorMessage" class="text-red-600 mt-[1vw]">
