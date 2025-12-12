@@ -18,7 +18,8 @@ export class HacerteSocioComponent implements OnInit {
 
   plan: Plan | null = null;
   isCheckingSuscripcion = true;
-  
+  modoRenovacion = false;
+  view: 'suscrito' | 'planes' = 'planes';
 
   isSuscrito = false;
 
@@ -40,65 +41,21 @@ export class HacerteSocioComponent implements OnInit {
     private http: HttpClient
   ) {}
 
-  ngOnInit(): void {
+ ngOnInit(): void {
 
-    this.http.get<any>(`${this.apiUrl}/partners/data`).subscribe({
-    next: (data) => {
-      if (data?.isActivo) {
-        this.isSuscrito = true;
-        this.suscripcion = {
-          tipo: data.plan,
-          vence: data.fechaFin,
-          pagoRef: data.pagoRef ?? ''
-        };
-      } else {
-        this.isSuscrito = false;
-      }
+  const planGuardado = sessionStorage.getItem('socioPlan');
+  const precioGuardado = sessionStorage.getItem('socioPrecio');
 
-      this.isCheckingSuscripcion = false;
-    },
-    error: () => {
-      // ❗ Cualquier error → no es socio
-      this.isSuscrito = false;
-      this.isCheckingSuscripcion = false;
-    }
-  });
-
-    if (this.forzarVistaNoSuscrito) {
-        this.isSuscrito = false;
-        return;
-      }
-    const token = localStorage.getItem('token');
-
-    // 🔒 Si no está logueado, no puede ser socio
-    if (!token) {
-      this.isSuscrito = false;
-      return;
-    }
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    this.http.get<any>(`${this.apiUrl}/partners/data`, { headers }).subscribe({
-      next: (data) => {
-        if (data?.isActivo) {
-          this.isSuscrito = true;
-          this.suscripcion = {
-            tipo: data.plan,
-            vence: data.fechaFin,
-            pagoRef: data.pagoRef ?? ''
-          };
-        } else {
-          this.isSuscrito = false;
-        }
-      },
-      error: () => {
-        // 401 / 404 → no es socio
-        this.isSuscrito = false;
-      }
-    });
+  if (planGuardado && precioGuardado) {
+    this.plan = planGuardado as Plan;
+    this.precioSocio = Number(precioGuardado);
   }
+
+}
+
+
+
+
 
   setTipo(empresa: boolean): void {
     this.esEmpresa = empresa;
@@ -119,10 +76,8 @@ export class HacerteSocioComponent implements OnInit {
     this.router.navigate(['/pagos', 'socio']);
   }
 
-  renovar(): void {
-  this.forzarVistaNoSuscrito = true;
-  this.isSuscrito = false;
-  this.suscripcion = null;
+ renovar(): void {
+  this.view = 'planes';   // 👈 solo UI
 }
 
 

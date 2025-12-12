@@ -183,6 +183,14 @@
       <!-- VISTA ENTRADAS -->
       <div *ngIf="vistaActual === 'tickets'" class="max-w-[70vw] pt-[3vw] mx-auto">
         <h1 class="text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mis Entradas</h1>
+
+        <div class="flex justify-center mb-[2vw]">
+          <button 
+            (click)="cambiarVista('menu')"
+            class="text-green-700 font-bold hover:underline text-[1vw]">
+            ← Volver al menú
+          </button>
+        </div>
         
         <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-[5vw]">
           <div class="animate-spin rounded-full h-[3vw] w-[3vw] border-b-[0.4vw] border-green-600 mb-[1vw]"></div>
@@ -225,19 +233,20 @@
 
         </div>
 
-        <div class="flex justify-center mt-[2vw]">
-          <button 
-            (click)="cambiarVista('menu')"
-            class="text-green-700 font-bold hover:underline text-[1vw]">
-            ← Volver al menú
-          </button>
-        </div>
       </div>
 
       <!-- VISTA DONACIONES -->
       <div *ngIf="vistaActual === 'donaciones'" class="max-w-[70vw] pt-[4vw] mx-auto">
         <h1 class="text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mi Historial Solidario</h1>
         
+        <div class="flex justify-center mb-[2vw]">
+          <button 
+            (click)="cambiarVista('menu')"
+            class="text-green-700 font-bold hover:underline text-[1vw]">
+            ← Volver al menú
+          </button>
+        </div>
+
         <!-- Card de total -->
         <div class="bg-green-600 text-white p-[2vw] rounded-[1.5vw] shadow-lg mb-[2vw] text-center">
           <p class="text-[1.2vw] font-medium opacity-90">Total Donado</p>
@@ -267,13 +276,6 @@
           </table>
         </div>
 
-        <div class="flex justify-center mt-[2vw]">
-          <button 
-            (click)="cambiarVista('menu')"
-            class="text-green-700 font-bold hover:underline text-[1vw]">
-            ← Volver al menú
-          </button>
-        </div>
       </div>
 
     </div>

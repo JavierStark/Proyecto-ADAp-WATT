@@ -80,6 +80,11 @@ private procesarPagoEvento(): void {
     return;
   }
 
+  if (!this.selectedPaymentMethod) {
+    this.errorMessage = 'Selecciona un método de pago';
+    return;
+  }
+
   this.isProcessing = true;
   this.errorMessage = '';
 
@@ -118,17 +123,26 @@ private procesarPagoEvento(): void {
     pais: this.eventoCompra.pais
   };
 
-  this.http.post(`${this.apiUrl}/tickets/purchase`, payload).subscribe({
+
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  this.http.post(`${this.apiUrl}/tickets/purchase`, payload, { headers }).subscribe({
     next: () => {
       this.compraService.limpiarEventoCompra();
       this.router.navigate(['/compra-finalizada']);
     },
-    error: () => {
-      this.errorMessage = 'Error al procesar el pago';
+    error: (err) => {
+      console.error('❌ Error compra evento:', err);
+      this.errorMessage =
+        err.error?.message || 'Error al procesar el pago';
       this.isProcessing = false;
     }
   });
 }
+
 
 private procesarPagoSocio(): void {
   if (!this.socioCompra) {
