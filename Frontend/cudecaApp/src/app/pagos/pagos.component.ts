@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CompraService, EventoCompra } from '../services/compra.service';
+import { CompraService, EventoCompra, SocioCompra  } from '../services/compra.service';
 import { AuthService } from '../services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -43,18 +43,61 @@ export class PagosComponent implements OnInit {
     private route: ActivatedRoute
   ) {}
 
+  socioCompra: SocioCompra | null = null;
+
   ngOnInit(): void {
-    // Capturar el ID del evento desde la ruta
-    this.eventoId = this.route.snapshot.paramMap.get('id');
-    // Obtener los datos de la compra del servicio
+  this.eventoId = this.route.snapshot.paramMap.get('id');
+
+  if (this.eventoId === 'socio') {
+    this.socioCompra = this.compraService.obtenerSocioCompra();
+  } else {
     this.eventoCompra = this.compraService.obtenerEventoCompra();
   }
+  }
+
+  
 
   selectPaymentMethod(methodId: string): void {
     this.selectedPaymentMethod = methodId;
   }
 
+  procesarPagoSocio() {
+    if (!this.selectedPaymentMethod || !this.socioCompra) {
+      this.errorMessage = 'Selecciona un método de pago';
+      return;
+    }
+
+    this.isProcessing = true;
+
+    const payload = {
+      tipo: this.socioCompra.tipo,
+      precio: this.socioCompra.precio,
+      paymentMethod: this.selectedPaymentMethod,
+      nombre: this.socioCompra.nombre,
+      apellidos: this.socioCompra.apellidos,
+      telefono: this.socioCompra.telefono,
+      dni: this.socioCompra.dni
+    };
+
+    this.http.post(`${this.apiUrl}/partners/subscribe`, payload).subscribe({
+      next: () => {
+        this.compraService.limpiarSocioCompra();
+        this.router.navigate(['/compra-finalizada']);
+      },
+      error: () => {
+        this.errorMessage = 'Error al procesar la suscripción';
+        this.isProcessing = false;
+      }
+    });
+}
+
+
   processPayment(): void {
+
+    if (this.socioCompra) {
+      this.procesarPagoSocio();
+      return;
+    }
     if (!this.selectedPaymentMethod) {
       this.errorMessage = 'Por favor selecciona un método de pago';
       return;

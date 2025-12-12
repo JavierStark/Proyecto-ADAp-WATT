@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CompraService } from '../services/compra.service';
 
 @Component({
   selector: 'app-hacerte-socio',
@@ -24,7 +25,10 @@ export class HacerteSocioComponent implements OnInit {
   telefono = '';
   dni = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private compraService: CompraService
+  ) {}
 
   ngOnInit() {
     const plan = sessionStorage.getItem('socioPlan');
@@ -41,17 +45,28 @@ export class HacerteSocioComponent implements OnInit {
     this.precioSocio = empresa ? 150 : this.precioSocio;
   }
 
-  continuarPago() {
-    if (!this.nombre || !this.apellidos || !this.telefono) {
-      alert('Completa los datos obligatorios');
-      return;
-    }
-
-    // Aquí luego podrás guardar los datos en un service
-    this.router.navigate(['/pagos-socio']);
-  }
 
   goBack() {
     this.router.navigate(['/']);
   }
+
+  continuarPago() {
+  if (!this.nombre || !this.apellidos || !this.telefono) {
+    alert('Completa los datos obligatorios');
+    return;
+  }
+
+  this.compraService.guardarSocioCompra({
+    tipo: this.plan as any,
+    precio: this.precioSocio,
+    nombre: this.nombre,
+    apellidos: this.apellidos,
+    telefono: this.telefono,
+    dni: this.dni
+  });
+
+  // 👉 reutilizamos el mismo componente de pagos
+  this.router.navigate(['/pagos', 'socio']);
+}
+
 }

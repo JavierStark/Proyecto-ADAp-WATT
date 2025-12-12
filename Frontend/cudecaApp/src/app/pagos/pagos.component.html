@@ -30,6 +30,24 @@
         </div>
       </div>
 
+      <!-- SOCIO -->
+      <div *ngIf="socioCompra" class="left-event-info w-full text-left text-gray-700">
+        <img 
+          src="assets/images/fondoCudeca.png"
+          alt="Socio CUDECA"
+          class="w-full h-auto object-cover shadow-md rounded-[1.2vw]"
+          style="aspect-ratio:16/9;"
+        >
+
+        <p class="font-semibold mt-[0.8vw]">
+          Alta como socio ({{ socioCompra.tipo | titlecase }})
+        </p>
+
+        <p class="font-bold text-green-700">
+          Total: €{{ socioCompra.precio }}
+        </p>
+      </div>
+
       <!-- Formulario -->
       <div class="w-full flex flex-col items-center justify-center sm:basis-[40vw]">
 

@@ -28,6 +28,8 @@ export interface EventoCompra {
   codigoDescuento?: string;
 }
 
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -35,6 +37,11 @@ export class CompraService {
   private eventoCompraSubject = new BehaviorSubject<EventoCompra | null>(null);
   public eventoCompra$ = this.eventoCompraSubject.asObservable();
   private readonly STORAGE_KEY = 'eventoCompra';
+
+  //Socio
+
+  private readonly SOCIO_KEY = 'socioCompra';
+  private socioCompra: SocioCompra | null = null;
 
   constructor() {
     // Recuperar datos del sessionStorage al inicializar el servicio
@@ -76,4 +83,41 @@ export class CompraService {
       console.error('Error al limpiar datos de compra:', error);
     }
   }
+
+  private recuperarSocio(): void {
+    try {
+      const raw = sessionStorage.getItem(this.SOCIO_KEY);
+      if (raw) {
+        this.socioCompra = JSON.parse(raw);
+      }
+    } catch (e) {
+      console.error('Error recuperando socio:', e);
+    }
+  }
+
+  guardarSocioCompra(data: SocioCompra): void {
+    this.socioCompra = data;
+    sessionStorage.setItem(this.SOCIO_KEY, JSON.stringify(data));
+  }
+
+  obtenerSocioCompra(): SocioCompra | null {
+    return this.socioCompra;
+  }
+
+  limpiarSocioCompra(): void {
+    this.socioCompra = null;
+    sessionStorage.removeItem(this.SOCIO_KEY);
+  }
+
 }
+
+  
+export interface SocioCompra {
+  tipo: 'mensual' | 'trimestral' | 'anual';
+  precio: number;
+  nombre: string;
+  apellidos: string;
+  telefono: string;
+  dni: string;
+}
+
