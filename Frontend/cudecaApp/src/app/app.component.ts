@@ -30,6 +30,10 @@ export class AppComponent implements OnInit {
     this.updateAuthStatus();
   }
 
+  goToSocio() {
+  this.router.navigate(['/hazte-socio']);
+  }
+
   loaded = false;
   fadeOut = false;
 
@@ -49,6 +53,8 @@ export class AppComponent implements OnInit {
     setTimeout(() => {
         this.loaded = true;
     }, 1600);
+
+    
 
     // Verificar cada 30 segundos si el token ha expirado
     this.tokenCheckInterval = setInterval(() => {

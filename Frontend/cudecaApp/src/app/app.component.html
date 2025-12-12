@@ -28,7 +28,7 @@
       class="flex-shrink-0 w-[12vw] h-auto hover:opacity-80 transition-opacity" 
       (click)="goToHome()" 
       style="cursor:pointer;">
-
+    
     <nav class="flex items-center gap-[3vw]">
       <button (click)="goToHome()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-700 hover:text-white transition-all text-[2vw]">
         Inicio
@@ -41,6 +41,15 @@
       <button (click)="goToDonation()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-700 hover:text-white transition-all text-[2vw]">
         Donar
       </button>
+
+      <button
+        *ngIf="isLoggedIn"
+        (click)="goToSocio()"
+        class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-700 hover:text-white transition-all text-[2vw]"
+      >
+        Hazte socio
+      </button>
+
 
       <button *ngIf="isLoggedIn" (click)="goToCuenta()" class="bg-transparent font-bold text-green-700 py-[1.2vw] px-[2vw] rounded-full hover:bg-green-700 hover:text-white transition-all text-[2vw]">
         Cuenta

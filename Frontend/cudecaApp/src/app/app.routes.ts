@@ -14,6 +14,7 @@ import { PagosComponent } from './pagos/pagos.component';  // Importa el PagosCo
 import { publicGuard } from './guards/public.guard';
 import { authGuard } from './guards/auth.guard';
 import { QrValidateComponent } from './qr-validate/qr-validate.component';
+import {HazteSocioComponent} from './hazte-socio/hazte-socio.component'
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Ruta por defecto que carga el HomeComponent
@@ -27,6 +28,8 @@ export const routes: Routes = [
   { path: 'compra-entradas/:id', component: CompraEntradasComponent },
   { path: 'pagos/:id', component: PagosComponent }, // Ruta para pagos
   { path: 'validar-qr', component: QrValidateComponent },
+  {path: 'hazte-socio', component: HazteSocioComponent, canActivate: [authGuard] }
+
 ];
 
 @NgModule({

@@ -1,0 +1,76 @@
+<section class="min-h-screen flex items-center justify-center bg-green-50 px-[4vw]">
+  <div class="bg-white rounded-[2vw] shadow-2xl p-[3vw] max-w-[60vw] w-full">
+
+    <h1 class="text-[2.2vw] font-bold text-green-800 mb-[1vw]">
+      Hazte socio
+    </h1>
+
+    <p class="text-gray-600 text-[1.1vw] mb-[2vw]">
+      Apoya nuestra causa y disfruta de ventajas exclusivas
+    </p>
+
+    <!-- Ventajas -->
+    <div class="grid grid-cols-3 gap-[1.5vw] mb-[2.5vw]">
+      <div class="bg-green-50 rounded-[1vw] p-[1.5vw] text-center">
+        🎟️
+        <p class="font-semibold mt-[0.5vw]">Descuentos en eventos</p>
+      </div>
+      <div class="bg-green-50 rounded-[1vw] p-[1.5vw] text-center">
+        ⭐
+        <p class="font-semibold mt-[0.5vw]">Acceso prioritario</p>
+      </div>
+      <div class="bg-green-50 rounded-[1vw] p-[1.5vw] text-center">
+        💚
+        <p class="font-semibold mt-[0.5vw]">Apoyo directo a la fundación</p>
+      </div>
+    </div>
+
+    <!-- Planes -->
+    <div class="grid grid-cols-3 gap-[1.5vw] mb-[2vw]">
+      <button
+        (click)="seleccionarPlan('mensual', 10)"
+        [class.bg-green-600]="planSeleccionado === 'mensual'"
+        [class.text-white]="planSeleccionado === 'mensual'"
+        class="plan-card"
+      >
+        Mensual<br><b>10€</b>
+      </button>
+
+      <button
+        (click)="seleccionarPlan('trimestral', 25)"
+        [class.bg-green-600]="planSeleccionado === 'trimestral'"
+        [class.text-white]="planSeleccionado === 'trimestral'"
+        class="plan-card"
+      >
+        Trimestral<br><b>25€</b>
+      </button>
+
+      <button
+        (click)="seleccionarPlan('anual', 90)"
+        [class.bg-green-600]="planSeleccionado === 'anual'"
+        [class.text-white]="planSeleccionado === 'anual'"
+        class="plan-card"
+      >
+        Anual<br><b>90€</b>
+      </button>
+    </div>
+
+    <!-- BOTÓN HACERSE SOCIO -->
+    <button
+      (click)="hacerseSocio()"
+      [disabled]="!planSeleccionado || isProcessing"
+      class="w-full bg-green-600 text-white font-bold py-[1vw] rounded-[1vw]
+             hover:bg-green-700 transition-colors
+             disabled:opacity-50 disabled:cursor-not-allowed">
+
+      {{ isProcessing ? 'Procesando...' : 'Hacerme socio' }}
+
+    </button>
+
+    <!-- ERROR -->
+    <p *ngIf="errorMessage" class="text-red-600 mt-[1vw]">
+      {{ errorMessage }}
+    </p>
+
+  </div>
+</section>
