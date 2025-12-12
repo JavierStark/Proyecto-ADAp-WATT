@@ -28,7 +28,6 @@ export class PagosComponent implements OnInit {
   // Métodos de pago disponibles
   paymentMethods: PaymentMethod[] = [
     { id: 'bizum', name: 'Bizum' },
-    { id: 'bank_app', name: 'App del banco' },
     { id: 'debit_card', name: 'Tarjeta de débito/crédito' },
     { id: 'apple_pay', name: 'Apple Pay' },
     { id: 'google_pay', name: 'Google Pay' }
