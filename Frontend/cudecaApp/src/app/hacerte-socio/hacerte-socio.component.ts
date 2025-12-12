@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CompraService } from '../services/compra.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+type Plan = 'mensual' | 'trimestral' | 'anual';
 
 @Component({
   selector: 'app-hacerte-socio',
@@ -11,62 +14,119 @@ import { CompraService } from '../services/compra.service';
   templateUrl: './hacerte-socio.component.html'
 })
 export class HacerteSocioComponent implements OnInit {
+  forzarVistaNoSuscrito = false;
 
-  // Plan seleccionado
-  plan: 'mensual' | 'trimestral' | 'anual' | null = null;
+  plan: Plan | null = null;
+  isCheckingSuscripcion = true;
+  
 
-  // Tipo de socio
+  isSuscrito = false;
+
+  suscripcion: {
+    tipo: Plan | string;
+    vence: string;
+    pagoRef: string;
+  } | null = null;
+
   esEmpresa = false;
   precioSocio = 50;
 
-  // Datos personales
-  nombre = '';
-  apellidos = '';
-  telefono = '';
-  dni = '';
+  private apiUrl =
+    'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
 
   constructor(
     private router: Router,
-    private compraService: CompraService
+    private compraService: CompraService,
+    private http: HttpClient
   ) {}
 
-  ngOnInit() {
-    const plan = sessionStorage.getItem('socioPlan');
-    const precio = sessionStorage.getItem('socioPrecio');
+  ngOnInit(): void {
 
-    if (plan && precio) {
-      this.plan = plan as any;
-      this.precioSocio = +precio;
+    this.http.get<any>(`${this.apiUrl}/partners/data`).subscribe({
+    next: (data) => {
+      if (data?.isActivo) {
+        this.isSuscrito = true;
+        this.suscripcion = {
+          tipo: data.plan,
+          vence: data.fechaFin,
+          pagoRef: data.pagoRef ?? ''
+        };
+      } else {
+        this.isSuscrito = false;
+      }
+
+      this.isCheckingSuscripcion = false;
+    },
+    error: () => {
+      // ❗ Cualquier error → no es socio
+      this.isSuscrito = false;
+      this.isCheckingSuscripcion = false;
     }
+  });
+
+    if (this.forzarVistaNoSuscrito) {
+        this.isSuscrito = false;
+        return;
+      }
+    const token = localStorage.getItem('token');
+
+    // 🔒 Si no está logueado, no puede ser socio
+    if (!token) {
+      this.isSuscrito = false;
+      return;
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    this.http.get<any>(`${this.apiUrl}/partners/data`, { headers }).subscribe({
+      next: (data) => {
+        if (data?.isActivo) {
+          this.isSuscrito = true;
+          this.suscripcion = {
+            tipo: data.plan,
+            vence: data.fechaFin,
+            pagoRef: data.pagoRef ?? ''
+          };
+        } else {
+          this.isSuscrito = false;
+        }
+      },
+      error: () => {
+        // 401 / 404 → no es socio
+        this.isSuscrito = false;
+      }
+    });
   }
 
-  setTipo(empresa: boolean) {
+  setTipo(empresa: boolean): void {
     this.esEmpresa = empresa;
     this.precioSocio = empresa ? 150 : this.precioSocio;
   }
 
+  continuarPago(): void {
+    if (!this.plan) {
+      alert('Selecciona un plan');
+      return;
+    }
 
-  goBack() {
+    this.compraService.guardarSocioCompra({
+      plan: this.plan,
+      importe: this.precioSocio
+    });
+
+    this.router.navigate(['/pagos', 'socio']);
+  }
+
+  renovar(): void {
+  this.forzarVistaNoSuscrito = true;
+  this.isSuscrito = false;
+  this.suscripcion = null;
+}
+
+
+  goBack(): void {
     this.router.navigate(['/']);
   }
-
-  continuarPago() {
-  if (!this.plan) {
-    alert('Selecciona un plan');
-    return;
-  }
-
-  // ⚠️ NO validamos nombre/apellidos/teléfono
-  // porque NO son necesarios para la suscripción
-
-  this.compraService.guardarSocioCompra({
-    plan: this.plan,
-    importe: this.precioSocio
-  });
-
-  // 👉 reutilizamos el mismo componente de pagos
-  this.router.navigate(['/pagos', 'socio']);
 }
-
-}
-

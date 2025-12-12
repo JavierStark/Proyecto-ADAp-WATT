@@ -1,4 +1,59 @@
-<section class="w-full min-h-screen pt-[10vw] pb-[4vw] overflow-hidden font-sans bg-green-50 relative">
+<!-- VISTA: YA ES SOCIO -->
+<section *ngIf="isSuscrito"
+         class="min-h-screen flex items-center justify-center bg-green-50 px-[4vw]">
+
+  <div class="bg-white rounded-[2vw] shadow-2xl p-[3vw] max-w-[55vw] w-full
+              animate-fade-in-up text-center">
+
+    <h1 class="text-[2.2vw] font-bold text-green-800 mb-[1vw]">
+      💚 Ya eres socio
+    </h1>
+
+    <p class="text-gray-600 text-[1.1vw] mb-[2vw]">
+      Gracias por apoyar a CUDECA. Tu suscripción está activa.
+    </p>
+
+    <div class="bg-green-50 border border-green-200 rounded-[1.5vw]
+                p-[2vw] mb-[2vw] text-left">
+
+      <p class="text-green-800 font-semibold text-[1.1vw] mb-[0.8vw]">
+        Suscripción activa
+      </p>
+
+      <div class="text-gray-700 text-[1vw] flex flex-col gap-[0.4vw]">
+        <div *ngIf="suscripcion?.vence">
+          Válida hasta:
+          <span class="font-semibold text-green-800">
+            {{ suscripcion?.vence | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+
+        <div *ngIf="suscripcion?.pagoRef" class="text-gray-500 text-[0.95vw]">
+          Ref. pago: {{ suscripcion?.pagoRef }}
+        </div>
+      </div>
+    </div>
+
+    <button
+      (click)="renovar()"
+      class="w-full bg-green-600 hover:bg-green-800 text-white
+             font-bold py-[1vw] rounded-[1vw]
+             transition-transform hover:scale-[1.02]">
+      Renovar suscripción
+    </button>
+
+    <button
+      (click)="goBack()"
+      class="w-full mt-[1vw] bg-gray-200 hover:bg-gray-300 text-gray-800
+             font-semibold py-[0.9vw] rounded-[1vw]">
+      Volver
+    </button>
+
+  </div>
+</section>
+
+
+<section *ngIf="!isSuscrito" class="w-full min-h-screen pt-[10vw] pb-[4vw] overflow-hidden font-sans bg-green-50 relative">
 
   <!-- Fondo -->
   <img src="assets/images/fondoCudeca.png"
@@ -77,13 +132,13 @@
             </h3>
 
             <div class="grid grid-cols-2 gap-[1vw] mb-[1vw]">
-              <input [(ngModel)]="nombre" placeholder="Nombre" class="input" />
-              <input [(ngModel)]="apellidos" placeholder="Apellidos" class="input" />
+              <input  placeholder="Nombre" class="input" />
+              <input  placeholder="Apellidos" class="input" />
             </div>
 
             <div class="grid grid-cols-2 gap-[1vw]">
-              <input [(ngModel)]="telefono" placeholder="Teléfono" class="input" />
-              <input [(ngModel)]="dni" placeholder="DNI / CIF" class="input" />
+              <input placeholder="Teléfono" class="input" />
+              <input placeholder="DNI / CIF" class="input" />
             </div>
           </div>
 
