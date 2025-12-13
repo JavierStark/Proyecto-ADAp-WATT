@@ -257,20 +257,12 @@ public static class WebApplicationExtensions
     public static WebApplication MapDonationEndpoints(this WebApplication app)
     {
         var donations = app.MapGroup("/donations")
-            .WithTags("Donations")
-            .AddEndpointFilter<SupabaseAuthFilter>()
-            .WithOpenApi(op =>
-            {
-                op.Security = new List<Microsoft.OpenApi.Models.OpenApiSecurityRequirement>
-                {
-                    new() { [new() { Reference = new() { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" } }] = [] }
-                };
-                return op;
-            });
+            .WithTags("Donations");
             
         donations.MapPost("", Donations.CreateDonation)
-            .WithSummary("Make a donation")
-            .WithDescription("Create a new donation with specified amount and payment method. Processes payment immediately.")
+            .WithSummary("Make a donation (authenticated or anonymous)")
+            .WithDescription("Create a new donation with specified amount and payment method. Supports both authenticated users and completely anonymous donations. For authenticated users, uses their profile data. For anonymous donations, no personal data is required - only amount and payment method. Optional: can include email, name, and other data if donor wishes to provide them. Processes payment immediately.")
+            .AddEndpointFilter<OptionalAuthFilter>()
             .Produces<DonationCreatedResponseDto>(200)
             .ProducesProblem(400)
             .ProducesProblem(401)
@@ -279,6 +271,15 @@ public static class WebApplicationExtensions
         donations.MapPost("/certificate/annual", Donations.GetDonationCertificate)
             .WithSummary("Generate annual donation certificate")
             .WithDescription("Generate a PDF certificate for tax purposes with all donations made in a specific fiscal year. Validates and updates user's fiscal data if needed.")
+            .AddEndpointFilter<SupabaseAuthFilter>()
+            .WithOpenApi(op =>
+            {
+                op.Security = new List<Microsoft.OpenApi.Models.OpenApiSecurityRequirement>
+                {
+                    new() { [new() { Reference = new() { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" } }] = [] }
+                };
+                return op;
+            })
             .Produces<byte[]>(200, contentType: "application/pdf")
             .ProducesProblem(400)
             .ProducesProblem(401)

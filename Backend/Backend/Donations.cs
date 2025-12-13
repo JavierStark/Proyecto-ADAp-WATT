@@ -67,14 +67,29 @@ static class Donations
         }
     }
 
-    public static async Task<IResult> CreateDonation(DonationDto dto, HttpContext httpContext, Supabase.Client client)
+    // Main entry point - acts as a filter to route to authenticated or anonymous donation
+    public static async Task<IResult> CreateDonation(DonationDto dto, HttpContext httpContext, Supabase.Client client, Services.IPaymentService paymentService)
     {
         if (dto.Amount <= 0)
             return Results.BadRequest(new { error = "El monto debe ser mayor a 0." });
 
+        var userId = httpContext.Items["user_id"] as string;
+        
+        if (!string.IsNullOrEmpty(userId))
+        {
+            return await CreateDonationAuthenticated(dto, userId, client, paymentService);
+        }
+        else
+        {
+            return await CreateDonationAnonymous(dto, client, paymentService);
+        }
+    }
+
+    // Authenticated user donation
+    private static async Task<IResult> CreateDonationAuthenticated(DonationDto dto, string userId, Supabase.Client client, Services.IPaymentService paymentService)
+    {
         try
         {
-            var userId = (string)httpContext.Items["user_id"]!;
             var userGuid = Guid.Parse(userId);
 
             var usuario = await client
@@ -82,13 +97,30 @@ static class Donations
                 .Where(u => u.Id == userGuid)
                 .Single();
 
+            if (usuario == null)
+                return Results.NotFound(new { error = "Usuario no encontrado." });
+
+            // Procesar pago
+            if (dto.Amount > 0)
+            {
+                try
+                {
+                    await paymentService.ProcessPaymentAsync(dto.Amount, dto.PaymentToken);
+                }
+                catch (Exception ex)
+                {
+                    return Results.BadRequest(new { error = "Error en el pago: " + ex.Message });
+                }
+            }
+
             var nuevoPago = new Pago
             {
                 Monto = dto.Amount,
                 Fecha = DateTime.UtcNow,
-                Estado = "Pagado", // Asumimos que el pago es inmediato para simplificar
-                MetodoDePago = dto.PaymentMethod ?? "Tarjeta",
-                FkUsuario = usuario!.Id // Vinculamos el pago al usuario
+                Estado = "Pagado",
+                MetodoDePago = dto.PaymentMethod,
+                FkUsuario = usuario.Id,
+                FkUsuarioNoRegistrado = null
             };
 
             var pagoResponse = await client
@@ -111,7 +143,85 @@ static class Donations
         }
         catch (Exception ex)
         {
-            return Results.Problem("Error procesando la donación: " + ex.Message);
+            return Results.Problem("Error procesando la donación autenticada: " + ex.Message);
+        }
+    }
+
+    // Anonymous user donation - completely anonymous, no personal data required
+    private static async Task<IResult> CreateDonationAnonymous(DonationDto dto, Supabase.Client client, Services.IPaymentService paymentService)
+    {
+        try
+        {
+            // Si se proporcionan datos personales, crear usuario no registrado
+            UsuarioNoRegistrado? usuarioNoRegistrado = null;
+            
+            if (!string.IsNullOrEmpty(dto.Email) || !string.IsNullOrEmpty(dto.Nombre))
+            {
+                // Create or update unregistered user using upsert with OnConflict on email
+                var nuevoUsuarioNoRegistrado = new UsuarioNoRegistrado
+                {
+                    Email = dto.Email,
+                    Dni = dto.Dni,
+                    Nombre = dto.Nombre,
+                    Apellidos = dto.Apellidos,
+                    Telefono = dto.Telefono
+                };
+
+                var upsertOptions = new Supabase.Postgrest.QueryOptions
+                {
+                    OnConflict = "email"
+                };
+
+                var upsertRes = await client.From<UsuarioNoRegistrado>()
+                    .Upsert(nuevoUsuarioNoRegistrado, upsertOptions);
+                usuarioNoRegistrado = upsertRes.Models.First();
+            }
+
+            // Procesar pago
+            if (dto.Amount > 0)
+            {
+                try
+                {
+                    await paymentService.ProcessPaymentAsync(dto.Amount, dto.PaymentToken);
+                }
+                catch (Exception ex)
+                {
+                    return Results.BadRequest(new { error = "Error en el pago: " + ex.Message });
+                }
+            }
+
+            // Create payment - can be completely anonymous (both FKs null)
+            var nuevoPago = new Pago
+            {
+                Monto = dto.Amount,
+                Fecha = DateTime.UtcNow,
+                Estado = "Pagado",
+                MetodoDePago = dto.PaymentMethod,
+                FkUsuario = null,
+                FkUsuarioNoRegistrado = usuarioNoRegistrado?.Id
+            };
+
+            var pagoResponse = await client
+                .From<Pago>()
+                .Insert(nuevoPago);
+
+            var pagoCreado = pagoResponse.Models.First();
+
+            var nuevaDonacion = new Donacion { FkPago = pagoCreado.Id };
+
+            await client
+                .From<Donacion>()
+                .Insert(nuevaDonacion);
+
+            return Results.Ok(new DonationCreatedResponseDto(
+                "success",
+                $"¡Gracias! Donación de {dto.Amount}€ realizada correctamente.",
+                pagoCreado.Id
+            ));
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error procesando la donación anónima: " + ex.Message);
         }
     }
 
@@ -383,5 +493,14 @@ static class Donations
 
     public record DonationSummaryDto(decimal TotalDonado);
 
-    public record DonationDto(decimal Amount, String PaymentMethod); // Ej: "Tarjeta", "PayPal", "Bizum"
+    public record DonationDto(
+        decimal Amount, 
+        string PaymentToken,
+        string PaymentMethod,
+        string? Email,      // Optional for anonymous donations
+        string? Dni,
+        string? Nombre,
+        string? Apellidos,
+        string? Telefono
+    ); // Ej: "Tarjeta", "PayPal", "Bizum"
 }
