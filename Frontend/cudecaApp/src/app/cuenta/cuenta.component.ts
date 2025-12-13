@@ -121,7 +121,7 @@ export class CuentaComponent implements OnInit {
     this.authService.getMyDonations().subscribe({
       next: (data) => {
         this.donaciones = data;
-        this.totalDonado = data.reduce((acc: number, curr: any) => acc + (curr.amount || curr.cantidad || 0), 0);
+        this.totalDonado = data.reduce((acc: number, curr: any) => acc + (curr.monto || 0), 0);
         this.isLoading = false;
       },
       error: () => this.isLoading = false
