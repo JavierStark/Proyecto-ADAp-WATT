@@ -289,6 +289,11 @@
               </span>
             </button>
           </div>
+
+          <!-- Advertencia no intrusiva -->
+          <div *ngIf="certificadoWarning" class="mt-[1vw] p-[1vw] rounded-[0.8vw] bg-yellow-100 border border-yellow-300 text-yellow-900 text-[0.95vw]">
+            ⚠️ {{ certificadoWarning }}
+          </div>
         </div>
 
         <div *ngIf="donaciones.length === 0" class="text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">
@@ -300,15 +305,15 @@
             <thead class="bg-gray-100 text-gray-700 uppercase text-[0.9vw] font-bold">
               <tr>
                 <th class="p-[1.5vw]">Fecha</th>
-                <th class="p-[1.5vw]">Concepto</th>
+                <th class="p-[1.5vw]">Método</th>
                 <th class="p-[1.5vw] text-right">Cantidad</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
               <tr *ngFor="let donacion of donaciones" class="hover:bg-gray-50">
                 <td class="p-[1.5vw] text-[0.95vw] text-gray-600">{{ donacion.fecha | date:'dd/MM/yyyy' }}</td>
-                <td class="p-[1.5vw] text-[0.95vw] font-medium text-gray-800">{{ donacion.concepto || 'Donación puntual' }}</td>
-                <td class="p-[1.5vw] text-[0.95vw] text-right font-bold text-green-600">{{ donacion.amount || donacion.cantidad | currency:'EUR' }}</td>
+                <td class="p-[1.5vw] text-[0.95vw] font-medium text-gray-800">{{ donacion.metodoPago || 'Donación' }}</td>
+                <td class="p-[1.5vw] text-[0.95vw] text-right font-bold text-green-600">{{ donacion.monto | currency:'EUR' }}</td>
               </tr>
             </tbody>
           </table>

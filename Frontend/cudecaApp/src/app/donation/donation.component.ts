@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Necesario para el input con ngModel
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { DonacionState } from '../services/compra.service';
 
 @Component({
   selector: 'app-donation',
@@ -18,7 +21,7 @@ export class DonationComponent {
   isCustomAmountMode: boolean = false;
   customAmountValue: number | null = null;
 
-  constructor() {}
+    constructor(private router: Router) {}
 
   // Función para seleccionar una cantidad predefinida
   selectPreset(amount: number) {
@@ -42,8 +45,9 @@ export class DonationComponent {
       return;
     }
 
-    // Aquí iría la lógica de conexión con la pasarela de pago (Stripe, PayPal, etc.)
-    console.log('Procesando pago por valor de:', finalAmount + '€');
-    alert(`Iniciando pago de ${finalAmount}€. (Simulación)`);
+
+    // Guardar estado y redirigir a la pantalla de pagos unificada
+    DonacionState.guardar({ importe: finalAmount });
+    this.router.navigate(['/pagos', 'donacion']);
   }
 }
