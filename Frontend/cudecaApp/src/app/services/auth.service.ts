@@ -199,4 +199,14 @@ export class AuthService {
     );
   }
 
+  // 12. Crear donación (POST /donations)
+  createDonation(amount: number, paymentMethod: string): Observable<any> {
+    const body = {
+      Amount: amount,
+      PaymentMethod: paymentMethod
+    };
+
+    return this.http.post(`${this.apiUrl}/donations`, body, { headers: this.getHeaders() });
+  }
+
 }
