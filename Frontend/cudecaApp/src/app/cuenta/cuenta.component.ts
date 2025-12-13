@@ -32,7 +32,16 @@ export class CuentaComponent implements OnInit {
   descargandoCertificado: boolean = false;
   aniosDisponibles: number[] = [];
 
-  constructor(private authService: AuthService, private router: Router) {}
+  // 2. NUEVA VARIABLE PARA EL ESTADO DE SOCIO
+  isSocio: boolean = false;
+  private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
+
+  // 3. INYECTAR HTTPCLIENT
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    private http: HttpClient 
+  ) {}
 
   ngOnInit() {
     this.cargarDatosUsuario();
@@ -178,7 +187,6 @@ export class CuentaComponent implements OnInit {
     });
   }
 
-  // --- ACCIONES ---
   guardarCambios() {
     this.isLoading = true;
     const datosAEnviar = {
