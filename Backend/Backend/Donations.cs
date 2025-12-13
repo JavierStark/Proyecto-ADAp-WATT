@@ -421,7 +421,7 @@ static class Donations
                             var pago = donacion.Pago;
                             if (pago == null) continue;
 
-                            table.Cell().Element(CellStyle).Text(pago.Fecha.ToShortDateString());
+                            table.Cell().Element(CellStyle).Text(pago.Fecha.ToString("dd/MM/yyyy"));
                             table.Cell().Element(CellStyle).Text(pago.MetodoDePago ?? "Donación");
                             table.Cell().Element(CellStyle).AlignRight().Text($"{pago.Monto:N2} €");
 
