@@ -15,15 +15,31 @@ public static class AdminEndpoints
                 .Order(e => e.FechaEvento, Constants.Ordering.Descending)
                 .Get()).Models;
 
-            var entradas = (await client
+            var entradasTipos = (await client
                 .From<EntradaEvento>()
                 .Get()).Models;
+            
+            var ventasResponse = await client
+                .From<Entrada>()
+                .Select("fk_evento, fk_entrada_evento, precio") 
+                .Get();
+            
+            var todasLasVentas = ventasResponse.Models;
 
             var eventosDto = eventos.Select(e =>
             {
-                var entradasEvento = entradas.Where(en => en.FkEvento == e.Id).ToList();
-                var general = entradasEvento.FirstOrDefault(en => en.Tipo == "General");
-                var vip = entradasEvento.FirstOrDefault(en => en.Tipo == "VIP");
+                // Filtros en memoria para este evento
+                var tiposEvento = entradasTipos.Where(en => en.FkEvento == e.Id).ToList();
+                var ventasEvento = todasLasVentas.Where(v => v.FkEvento == e.Id).ToList();
+                
+                var general = tiposEvento.FirstOrDefault(en => en.Tipo == "General");
+                var vip = tiposEvento.FirstOrDefault(en => en.Tipo == "VIP");
+
+                // Cálculo de dinero real ingresado por entradas
+                decimal dineroEntradas = ventasEvento.Sum(v => v.Precio);
+
+                // Cálculo del TOTAL GLOBAL (Entradas + Extra)
+                decimal totalRecaudado = dineroEntradas + (e.RecaudacionExtra ?? 0);
 
                 return new EventoAdminDto(
                     e.Id,
@@ -34,7 +50,9 @@ public static class AdminEndpoints
                     e.Aforo ?? 0,
                     e.EntradasVendidas,
                     e.EventoVisible,
-                    e.ObjetoRecaudacion ?? "Sin especificar",
+                    e.ObjetivoRecaudacion ?? 0,
+                    e.RecaudacionExtra ?? 0,
+                    totalRecaudado, // <--- TOTAL CALCULADO
                     e.ImagenUrl,
                     general?.Precio ?? 0,
                     general?.Cantidad ?? 0,
@@ -117,7 +135,8 @@ public static class AdminEndpoints
                 Ubicacion = dto.Ubicacion,
                 Aforo = aforoTotal,
                 EventoVisible = dto.EventoVisible,
-                ObjetoRecaudacion = dto.ObjetoRecaudacion,
+                ObjetivoRecaudacion = dto.ObjetivoRecaudacion,
+                RecaudacionExtra = dto.RecaudacionExtra,
                 ImagenUrl = imagenUrlFinal
             };
 
@@ -149,6 +168,8 @@ public static class AdminEndpoints
             }
 
             await client.From<EntradaEvento>().Insert(entradasAInsertar);
+            
+            decimal totalInicial = eventoCreado.RecaudacionExtra ?? 0;
 
             return Results.Created($"/events/{eventoCreado.Id}", new AdminEventCreateResponseDto(
                 "success",
@@ -162,7 +183,9 @@ public static class AdminEndpoints
                     eventoCreado.Aforo ?? 0,
                     0,
                     eventoCreado.EventoVisible,
-                    eventoCreado.ObjetoRecaudacion ?? "Sin especificar",
+                    eventoCreado.ObjetivoRecaudacion ?? 0,
+                    eventoCreado.RecaudacionExtra ?? 0,
+                    totalInicial,
                     eventoCreado.ImagenUrl ?? "",
                     dto.PrecioGeneral,
                     dto.CantidadGeneral,
@@ -259,17 +282,21 @@ public static class AdminEndpoints
             // Asignar la nueva URL
             eventoModel.ImagenUrl = bucket.GetPublicUrl(fileName);
         }
-
-
+        
         // Update
         eventoModel.Nombre = dto.Nombre;
         eventoModel.FechaEvento = dto.Fecha.Value;
         eventoModel.Descripcion = dto.Descripcion ?? eventoModel.Descripcion;
         eventoModel.Ubicacion = dto.Ubicacion ?? eventoModel.Ubicacion;
-        eventoModel.ObjetoRecaudacion = dto.ObjetoRecaudacion ?? eventoModel.ObjetoRecaudacion;
+        eventoModel.ObjetivoRecaudacion = dto.ObjetivoRecaudacion ?? eventoModel.ObjetivoRecaudacion;
         
         if (dto.EventoVisible.HasValue) 
             eventoModel.EventoVisible = dto.EventoVisible.Value;
+        
+        if (dto.RecaudacionExtra.HasValue)
+        {
+            eventoModel.RecaudacionExtra = dto.RecaudacionExtra.Value;
+        }
 
         // Entradas generales
         if (ticketGeneral != null)
@@ -313,6 +340,14 @@ public static class AdminEndpoints
         // Guardar evento
         await client.From<Evento>().Update(eventoModel);
 
+        var ventasResponse = await client.From<Entrada>()
+            .Select("precio")
+            .Filter("fk_evento", Constants.Operator.Equals, eventId)
+            .Get();
+            
+        decimal dineroEntradas = ventasResponse.Models.Sum(v => v.Precio);
+        decimal totalRecaudado = dineroEntradas + (eventoModel.RecaudacionExtra ?? 0);
+
         return Results.Ok(new AdminEventUpdateResponseDto(
             "success",
             "Evento actualizado correctamente.",
@@ -325,7 +360,9 @@ public static class AdminEndpoints
                 eventoModel.Aforo ?? 0,
                 eventoModel.EntradasVendidas,
                 eventoModel.EventoVisible,
-                eventoModel.ObjetoRecaudacion ?? "Sin especificar",
+                eventoModel.ObjetivoRecaudacion ?? 0,
+                eventoModel.RecaudacionExtra ?? 0,
+                totalRecaudado,
                 eventoModel.ImagenUrl ?? "",
                 ticketGeneral?.Precio ?? 0,
                 ticketGeneral?.Cantidad ?? 0,
@@ -406,7 +443,9 @@ public static class AdminEndpoints
         int Aforo,
         int EntradasVendidas,
         bool? EventoVisible,
-        string ObjetoRecaudacion,
+        decimal ObjetivoRecaudacion,
+        decimal RecaudacionExtra,
+        decimal TotalRecaudado,
         string ImagenURL,
         decimal PrecioGeneral,
         int CantidadGeneral,
@@ -421,7 +460,8 @@ public static class AdminEndpoints
         public DateTimeOffset? Fecha { get; set; } 
         public string? Ubicacion { get; set; }
         public bool EventoVisible { get; set; }
-        public string? ObjetoRecaudacion { get; set; }
+        public decimal? ObjetivoRecaudacion { get; set; }
+        public decimal? RecaudacionExtra { get; set; }
         public decimal PrecioGeneral { get; set; }
         public int CantidadGeneral { get; set; }
         public decimal? PrecioVip { get; set; }
@@ -436,7 +476,8 @@ public static class AdminEndpoints
         public DateTimeOffset? Fecha { get; set; }
         public string? Ubicacion { get; set; }
         public bool? EventoVisible { get; set; }
-        public string? ObjetoRecaudacion { get; set; }
+        public decimal? ObjetivoRecaudacion { get; set; }
+        public decimal? RecaudacionExtra { get; set; }
         public decimal? PrecioGeneral { get; set; }
         public int? CantidadGeneral { get; set; }
         public decimal? PrecioVip { get; set; }
