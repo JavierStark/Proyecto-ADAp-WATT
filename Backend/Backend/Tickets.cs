@@ -212,29 +212,43 @@ static class Tickets
     public static async Task<IResult> PurchaseTickets(BuyTicketDto dto, Client client,
         IPaymentService paymentService, HttpContext httpContext, IEmailService emailService, IConfiguration config)
     {
+        // Router method: check if user is authenticated
+        var userIdString = httpContext.Items["user_id"]?.ToString();
+        
+        if (!string.IsNullOrEmpty(userIdString))
+        {
+            // Authenticated purchase
+            return await PurchaseTicketsAuthenticated(dto, client, paymentService, emailService, config, Guid.Parse(userIdString));
+        }
+        else
+        {
+            // Anonymous purchase
+            return await PurchaseTicketsAnonymous(dto, client, paymentService, emailService, config);
+        }
+    }
+
+    private static async Task<IResult> PurchaseTicketsAuthenticated(BuyTicketDto dto, Client client,
+        IPaymentService paymentService, IEmailService emailService, IConfiguration config, Guid userGuid)
+    {
         try
         {
-            // Validaciones
+            // Validaciones básicas
             if (dto.Items.Count == 0)
                 return Results.BadRequest(new { error = "El carrito está vacío." });
 
             if (dto.Items.Any(i => i.Quantity <= 0))
                 return Results.BadRequest(new { error = "La cantidad de cada entrada debe ser al menos 1." });
 
-            var userIdString = httpContext.Items["user_id"]?.ToString();
-            if (string.IsNullOrEmpty(userIdString)) return Results.Unauthorized();
-            var userGuid = Guid.Parse(userIdString);
-            
             // Obtener tipos de entrada y validar stock
             var ticketTypeIds = dto.Items.Select(i => i.TicketEventId).ToList();
             
             var responseTipos = await client.From<EntradaEvento>()
-                .Filter("id", Operator.In, ticketTypeIds) // Traemos todos los tipos requeridos
+                .Filter("id", Operator.In, ticketTypeIds)
                 .Get();
 
             var tiposDb = responseTipos.Models;
 
-            // Validaciones lógicas
+            // Validaciones lógicas y cálculo de total
             decimal totalPagar = 0;
             int cantidadTotalEntradas = 0;
 
@@ -254,17 +268,16 @@ static class Tickets
                     return Results.BadRequest(new
                         { error = $"Stock insuficiente para '{tipoDb.Tipo}'. Quedan {tipoDb.Cantidad}." });
 
-                // Sumar al total
                 totalPagar += tipoDb.Precio * item.Quantity;
                 cantidadTotalEntradas += item.Quantity;
             }
             
+            // Aplicar descuento si existe
             decimal descuentoAplicado = 0;
         
             if (!string.IsNullOrEmpty(dto.DiscountCode))
             {
                 var codigoUpper = dto.DiscountCode.ToUpper();
-
                 var now = DateTime.Now;
 
                 var descuento = await client.From<ValeDescuento>()
@@ -285,6 +298,7 @@ static class Tickets
                 await client.From<ValeDescuento>().Update(descuento);
             }
 
+            // Obtener y actualizar datos del usuario
             var usuario = await client.From<Usuario>().Where(u => u.Id == userGuid).Single();
             var clienteRes = await client.From<Cliente>().Where(c => c.Id == userGuid).Get();
             var cliente = clienteRes.Models.FirstOrDefault() ?? new Cliente { Id = userGuid };
@@ -292,29 +306,25 @@ static class Tickets
             bool datosClienteActualizados = false;
             bool datosUsuarioActualizados = false;
             
-            // Actualizar datos de Usuaio
-            // DNI
+            // Actualizar datos de Usuario
             if (!string.IsNullOrEmpty(dto.Dni) && usuario.Dni != dto.Dni)
             {
                 usuario.Dni = dto.Dni;
                 datosUsuarioActualizados = true;
             }
             
-            // Nombre
             if (!string.IsNullOrEmpty(dto.Nombre) && usuario.Nombre != dto.Nombre)
             {
                 usuario.Nombre = dto.Nombre;
                 datosUsuarioActualizados = true;
             }
             
-            // Apellidos
             if (!string.IsNullOrEmpty(dto.Apellidos) && usuario.Apellidos != dto.Apellidos)
             {
                 usuario.Apellidos = dto.Apellidos;
                 datosUsuarioActualizados = true;
             }
             
-            // Teléfono
             if (!string.IsNullOrEmpty(dto.Telefono) && usuario.Telefono != dto.Telefono)
             {
                 usuario.Telefono = dto.Telefono;
@@ -339,12 +349,12 @@ static class Tickets
                 cliente.PisoPuerta = dto.PisoPuerta; 
                 datosClienteActualizados = true; 
             }
+            
+            // Validar datos fiscales requeridos
             var camposFaltantes = new List<string>();
             
-            // Verificamos el objeto 'usuario' (que ya tiene los datos nuevos si se enviaron)
             if (string.IsNullOrEmpty(usuario.Dni)) camposFaltantes.Add("DNI");
             
-            // Verificamos el objeto 'cliente'
             if (string.IsNullOrEmpty(cliente.Calle) || string.IsNullOrEmpty(cliente.Numero)) 
                 camposFaltantes.Add("Dirección completa");
             
@@ -377,7 +387,7 @@ static class Tickets
                 }
             }
             
-            // Crear Pago 
+            // Crear registro de pago
             var nuevoPago = new Pago
             {
                 Monto = totalPagar,
@@ -391,12 +401,19 @@ static class Tickets
 
             var ticketsGenerados = new List<Entrada>();
 
-            // Procesamiento de cada tipo de entrada comprado
+            // Obtener nombre del evento para email
+            var evento = await client.From<Evento>()
+                .Filter("id", Operator.Equals, dto.EventId.ToString())
+                .Single();
+            
+            var nombreEvento = evento?.Nombre ?? "Evento";
+
+            // Generar entradas y enviar emails
             foreach (var item in dto.Items)
             {
                 var tipoDb = tiposDb.First(t => t.Id == item.TicketEventId);
 
-                // Descontar Stock
+                // Descontar stock
                 tipoDb.Cantidad -= item.Quantity;
                 await client.From<EntradaEvento>().Update(tipoDb);
 
@@ -415,11 +432,10 @@ static class Tickets
                     };
                     ticketsGenerados.Add(nuevaEntrada);
 
-                    // Enviar Email Individual
+                    // Enviar email individual
                     await emailService.SendEmailAsync(
                         usuario.Email!,
-                        $"Tu Entrada ({tipoDb.Tipo}) - " + (await client.From<Evento>()
-                            .Filter("id", Operator.Equals, dto.EventId.ToString()).Single())?.Nombre,
+                        $"Tu Entrada ({tipoDb.Tipo}) - {nombreEvento}",
                         GetTicketEmailHtml(nuevaEntrada.CodigoQr),
                         GenerateQr(nuevaEntrada.CodigoQr),
                         config
@@ -427,11 +443,10 @@ static class Tickets
                 }
             }
 
-            // Insertar todas las entradas de golpe
+            // Insertar todas las entradas
             await client.From<Entrada>().Insert(ticketsGenerados);
 
-            // Actualizar estadísticas del evento (Total vendido)
-            var evento = await client.From<Evento>().Filter("id", Operator.Equals, dto.EventId.ToString()).Single();
+            // Actualizar estadísticas del evento
             if (evento != null)
             {
                 evento.EntradasVendidas += cantidadTotalEntradas;
@@ -441,6 +456,195 @@ static class Tickets
             return Results.Ok(new PurchaseTicketsResponseDto(
                 "success",
                 $"Compra realizada. Se han generado {cantidadTotalEntradas} entradas.",
+                totalPagar
+            ));
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem("Error procesando la compra: " + ex.Message);
+        }
+    }
+
+    private static async Task<IResult> PurchaseTicketsAnonymous(BuyTicketDto dto, Client client,
+        IPaymentService paymentService, IEmailService emailService, IConfiguration config)
+    {
+        try
+        {
+            // Validaciones básicas
+            if (dto.Items.Count == 0)
+                return Results.BadRequest(new { error = "El carrito está vacío." });
+
+            if (dto.Items.Any(i => i.Quantity <= 0))
+                return Results.BadRequest(new { error = "La cantidad de cada entrada debe ser al menos 1." });
+
+            // Validar email para compra anónima
+            if (string.IsNullOrEmpty(dto.Email))
+                return Results.BadRequest(new { error = "El email es obligatorio para compras sin cuenta." });
+
+            // Validar datos fiscales requeridos para compra anónima
+            var camposFaltantes = new List<string>();
+            
+            if (string.IsNullOrEmpty(dto.Email)) camposFaltantes.Add("Email");
+            if (string.IsNullOrEmpty(dto.Dni)) camposFaltantes.Add("DNI");
+            if (string.IsNullOrEmpty(dto.Nombre)) camposFaltantes.Add("Nombre");
+            if (string.IsNullOrEmpty(dto.Apellidos)) camposFaltantes.Add("Apellidos");
+            if (string.IsNullOrEmpty(dto.Calle)) camposFaltantes.Add("Calle");
+            if (string.IsNullOrEmpty(dto.Numero)) camposFaltantes.Add("Número");
+            
+            if (camposFaltantes.Count != 0)
+            {
+                return Results.BadRequest(new
+                {
+                    error = "Faltan datos necesarios para la compra.",
+                    missing_fields = camposFaltantes,
+                    code = "MISSING_DATA"
+                });
+            }
+
+            // Obtener tipos de entrada y validar stock
+            var ticketTypeIds = dto.Items.Select(i => i.TicketEventId).ToList();
+            
+            var responseTipos = await client.From<EntradaEvento>()
+                .Filter("id", Operator.In, ticketTypeIds)
+                .Get();
+
+            var tiposDb = responseTipos.Models;
+
+            // Validaciones lógicas y cálculo de total
+            decimal totalPagar = 0;
+            int cantidadTotalEntradas = 0;
+
+            foreach (var item in dto.Items)
+            {
+                var tipoDb = tiposDb.FirstOrDefault(t => t.Id == item.TicketEventId);
+
+                if (tipoDb == null)
+                    return Results.NotFound(
+                        new { error = $"El tipo de entrada con ID {item.TicketEventId} no existe." });
+
+                if (tipoDb.FkEvento != dto.EventId)
+                    return Results.BadRequest(new
+                        { error = $"La entrada '{tipoDb.Tipo}' no pertenece al evento solicitado." });
+
+                if (tipoDb.Cantidad < item.Quantity)
+                    return Results.BadRequest(new
+                        { error = $"Stock insuficiente para '{tipoDb.Tipo}'. Quedan {tipoDb.Cantidad}." });
+
+                totalPagar += tipoDb.Precio * item.Quantity;
+                cantidadTotalEntradas += item.Quantity;
+            }
+            
+            // Aplicar descuento si existe
+            decimal descuentoAplicado = 0;
+        
+            if (!string.IsNullOrEmpty(dto.DiscountCode))
+            {
+                var codigoUpper = dto.DiscountCode.ToUpper();
+                var now = DateTime.Now;
+
+                var descuento = await client.From<ValeDescuento>()
+                    .Filter("codigo", Operator.Equals, codigoUpper)
+                    .Single();
+                
+                if (descuento == null ||
+                    (descuento.FechaExpiracion != null && descuento.FechaExpiracion < now) || 
+                    (descuento.Cantidad != null && descuento.Cantidad <= 0))
+                {
+                    return Results.BadRequest(new { error = "Código de descuento inválido o expirado." });
+                }
+
+                descuentoAplicado = descuento.Descuento * totalPagar;
+                totalPagar -= descuentoAplicado;
+
+                descuento.Cantidad -= 1;
+                await client.From<ValeDescuento>().Update(descuento);
+            }
+
+            // Procesar pago
+            if (totalPagar > 0)
+            {
+                try
+                {
+                    await paymentService.ProcessPaymentAsync(totalPagar, dto.PaymentToken);
+                }
+                catch (Exception ex)
+                {
+                    return Results.BadRequest(new { error = "Error en el pago: " + ex.Message });
+                }
+            }
+            
+            // Para compras anónimas, usar null como usuario (no tiene cuenta)
+            Guid? guestUserId = null;
+            
+            // Crear registro de pago (sin FkCliente para anónimos)
+            var nuevoPago = new Pago
+            {
+                Monto = totalPagar,
+                Fecha = DateTime.UtcNow,
+                Estado = "Pagado",
+                MetodoDePago = dto.PaymentMethod,
+                FkCliente = guestUserId
+            };
+            var pagoRes = await client.From<Pago>().Insert(nuevoPago);
+            var pagoCreado = pagoRes.Models.First();
+
+            var ticketsGenerados = new List<Entrada>();
+
+            // Obtener nombre del evento para email
+            var evento = await client.From<Evento>()
+                .Filter("id", Operator.Equals, dto.EventId.ToString())
+                .Single();
+            
+            var nombreEvento = evento?.Nombre ?? "Evento";
+
+            // Generar entradas y enviar emails
+            foreach (var item in dto.Items)
+            {
+                var tipoDb = tiposDb.First(t => t.Id == item.TicketEventId);
+
+                // Descontar stock
+                tipoDb.Cantidad -= item.Quantity;
+                await client.From<EntradaEvento>().Update(tipoDb);
+
+                // Generar N entradas individuales
+                for (int i = 0; i < item.Quantity; i++)
+                {
+                    var nuevaEntrada = new Entrada
+                    {
+                        FkUsuario = guestUserId,
+                        FkEvento = dto.EventId,
+                        FkPago = pagoCreado.Id,
+                        FechaCompra = DateTime.UtcNow,
+                        Precio = tipoDb.Precio,
+                        FkEntradaEvento = tipoDb.Id,
+                        CodigoQr = Guid.NewGuid().ToString()
+                    };
+                    ticketsGenerados.Add(nuevaEntrada);
+
+                    // Enviar email individual al email proporcionado
+                    await emailService.SendEmailAsync(
+                        dto.Email!,
+                        $"Tu Entrada ({tipoDb.Tipo}) - {nombreEvento}",
+                        GetTicketEmailHtml(nuevaEntrada.CodigoQr),
+                        GenerateQr(nuevaEntrada.CodigoQr),
+                        config
+                    );
+                }
+            }
+
+            // Insertar todas las entradas
+            await client.From<Entrada>().Insert(ticketsGenerados);
+
+            // Actualizar estadísticas del evento
+            if (evento != null)
+            {
+                evento.EntradasVendidas += cantidadTotalEntradas;
+                await client.From<Evento>().Update(evento);
+            }
+
+            return Results.Ok(new PurchaseTicketsResponseDto(
+                "success",
+                $"Compra realizada. Se han enviado {cantidadTotalEntradas} entradas a {dto.Email}.",
                 totalPagar
             ));
         }
@@ -573,6 +777,7 @@ static class Tickets
         string PaymentToken,
         string PaymentMethod,
         string? DiscountCode,
+        string? Email,           // Required for anonymous purchases
         string? Dni,
         string? Nombre,
         string? Telefono,

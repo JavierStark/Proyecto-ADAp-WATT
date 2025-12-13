@@ -1,4 +1,4 @@
-﻿using Supabase.Postgrest.Attributes;
+﻿﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
 namespace Backend.Models;
@@ -17,7 +17,7 @@ class Pago : BaseModel
 
     [Column("metodo_pago")] public string? MetodoDePago { get; set; }
 
-    [Column("fk_cliente")] public Guid FkCliente { get; set; }
+    [Column("fk_cliente")] public Guid? FkCliente { get; set; }
 
     [Reference(typeof(Cliente))] public Cliente? Cliente { get; set; }
 }

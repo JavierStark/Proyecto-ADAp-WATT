@@ -9,7 +9,7 @@ public class Entrada : BaseModel
     [PrimaryKey("id", shouldInsert: false)]
     public Guid Id { get; set; }
 
-    [Column("fk_usuario")] public Guid FkUsuario { get; set; }
+    [Column("fk_usuario")] public Guid? FkUsuario { get; set; }
 
     [Column("fk_evento")] public Guid FkEvento { get; set; }
 

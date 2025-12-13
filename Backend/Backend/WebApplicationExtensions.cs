@@ -1,4 +1,4 @@
-﻿﻿using Backend.Filters;
+﻿using Backend.Filters;
 
 namespace Backend;
 
@@ -235,22 +235,14 @@ public static class WebApplicationExtensions
             .ProducesProblem(500);
             
         tickets.MapPost("/purchase", Tickets.PurchaseTickets)
-            .WithSummary("Purchase event tickets")
-            .WithDescription("Process ticket purchase for one or more ticket types. Validates stock, applies discount codes, processes payment, generates QR codes, and sends tickets via email. Requires authentication.")
-            .AddEndpointFilter<SupabaseAuthFilter>()
+            .WithSummary("Purchase event tickets (authenticated or anonymous)")
+            .WithDescription("Process ticket purchase for one or more ticket types. Supports both authenticated users and anonymous purchases. For authenticated users, updates user profile data. For anonymous purchases, requires email and full fiscal data in the request. Validates stock, applies discount codes, processes payment, generates QR codes, and sends tickets via email.")
+            .AddEndpointFilter<OptionalAuthFilter>()
             .Produces<PurchaseTicketsResponseDto>(200)
             .ProducesProblem(400)
             .ProducesProblem(401)
             .ProducesProblem(404)
-            .ProducesProblem(500)
-            .WithOpenApi(op =>
-            {
-                op.Security = new List<Microsoft.OpenApi.Models.OpenApiSecurityRequirement>
-                {
-                    new() { [new() { Reference = new() { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" } }] = [] }
-                };
-                return op;
-            });
+            .ProducesProblem(500);
             
         tickets.MapGet("/validate", Tickets.ValidateTicketQr)
             .WithSummary("Validate ticket QR code")
