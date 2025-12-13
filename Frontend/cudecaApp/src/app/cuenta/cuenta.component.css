@@ -1,0 +1,315 @@
+/* Base tweaks using viewport units for consistent scaling */
+.cuenta-page {
+  padding: 6vw 4vw 8vw 4vw;
+  min-height: 120vw;
+}
+
+/* Mobile-first adjustments */
+@media (max-width: 768px) {
+  .cuenta-page {
+    padding: 14vw 6vw 16vw 6vw;
+    min-height: 150vw;
+  }
+
+  .cuenta-menu {
+    max-width: 92vw;
+    gap: 4vw;
+  }
+
+  .cuenta-menu h1 {
+    font-size: 7.4vw;
+    line-height: 8.2vw;
+  }
+
+  .cuenta-menu button {
+    font-size: 4.6vw;
+    padding: 4vw 5vw;
+    border-radius: 4vw;
+  }
+
+  .cuenta-perfil {
+    padding-top: 6vw;
+  }
+
+  .cuenta-perfil-card {
+    max-width: 94vw;
+    border-radius: 3.2vw;
+    padding: 5vw;
+    gap: 4vw;
+  }
+
+  .cuenta-perfil-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4.5vw;
+    margin-bottom: 3.5vw;
+  }
+
+  .cuenta-foto-box {
+    width: 46vw;
+    height: 46vw;
+    border-radius: 4vw;
+    border-width: 0.8vw;
+  }
+
+  .cuenta-foto span {
+    font-size: 7vw;
+  }
+
+  .cuenta-datos {
+    font-size: 3.8vw;
+    gap: 2vw;
+  }
+
+  .cuenta-datos p {
+    margin: 1vw 0;
+    line-height: 4.6vw;
+  }
+
+  .cuenta-boton-editar button {
+    font-size: 4vw;
+    padding: 2.8vw 8vw;
+    border-radius: 5vw;
+  }
+
+  .cuenta-edicion {
+    margin-top: 4vw;
+    padding-top: 4vw;
+    border-top-width: 0.5vw;
+  }
+
+  .cuenta-edicion h3 {
+    font-size: 4.8vw;
+    margin-bottom: 3vw;
+  }
+
+  .cuenta-edicion label {
+    font-size: 3.4vw;
+    margin-bottom: 1vw;
+  }
+
+  .cuenta-edicion input,
+  .cuenta-edicion select {
+    font-size: 3.4vw;
+    padding: 2.4vw;
+    border-radius: 2vw;
+    border-width: 0.5vw;
+  }
+
+  .cuenta-edicion .grid {
+    gap: 2.4vw;
+  }
+
+  .cuenta-edicion .flex {
+    gap: 2vw;
+  }
+
+  .cuenta-edicion button {
+    font-size: 3.4vw;
+    padding: 2.4vw;
+    border-radius: 2vw;
+  }
+
+  .cuenta-volver button {
+    font-size: 3.2vw;
+  }
+
+  .loading-spinner {
+    width: 10vw !important;
+    height: 10vw !important;
+    border-width: 1vw !important;
+  }
+
+  .loading-text {
+    font-size: 4vw !important;
+  }
+
+  .cuenta-tickets,
+  .cuenta-donaciones {
+    max-width: 96vw;
+    padding-top: 6vw;
+  }
+
+  .cuenta-tickets h1 {
+    font-size: 7vw;
+    margin-bottom: 4vw;
+  }
+
+  .tickets-title {
+    font-size: 7vw !important;
+    line-height: 8vw;
+  }
+
+  .tickets-spinner {
+    width: 8vw;
+    height: 8vw;
+    border-width: 0.8vw;
+  }
+
+  .tickets-loading-text {
+    font-size: 3.4vw !important;
+    margin-top: 1.2vw;
+  }
+
+  .tickets-volver {
+    font-size: 3.4vw !important;
+  }
+
+  .cuenta-tickets .animate-spin {
+    width: 8vw;
+    height: 8vw;
+    border-width: 0.8vw;
+  }
+
+  .cuenta-tickets .ticket-card {
+    padding: 4vw;
+    border-radius: 3.4vw;
+    gap: 2vw;
+  }
+
+  .cuenta-tickets .ticket-title {
+    font-size: 5vw;
+  }
+
+  .cuenta-tickets .ticket-badge {
+    font-size: 3.4vw;
+    padding: 2vw 3vw;
+    border-radius: 3vw;
+    gap: 1.2vw;
+  }
+
+  .cuenta-tickets .ticket-meta {
+    font-size: 3.4vw;
+    line-height: 4.6vw;
+    margin: 0.4vw 0;
+  }
+
+  .cuenta-tickets .ticket-state {
+    font-size: 3.2vw;
+    padding: 1.8vw 2.8vw;
+    border-radius: 3vw;
+  }
+
+  .cuenta-tickets .ticket-qr {
+    font-size: 3.4vw;
+    gap: 1vw;
+    margin-top: 1.2vw;
+  }
+
+  .donaciones-title {
+    font-size: 7vw;
+    margin-bottom: 4vw;
+  }
+
+  .donaciones-volver {
+    font-size: 3.4vw !important;
+  }
+  .cuenta-tickets .text-\[1\.2vw\],
+  .cuenta-donaciones .text-\[1\.2vw\] {
+    font-size: 3.6vw;
+  }
+
+  .cuenta-tickets .text-\[1vw\],
+  .cuenta-donaciones .text-\[1vw\] {
+    font-size: 3vw;
+  }
+
+  .donaciones-total-card {
+    padding: 4.2vw;
+    border-radius: 3.4vw;
+  }
+
+  .donaciones-total-card p:first-child {
+    font-size: 3.6vw;
+  }
+
+  .donaciones-total-card p:last-child {
+    font-size: 7vw;
+  }
+
+  .donaciones-cert {
+    padding: 4vw;
+    border-radius: 3.2vw;
+  }
+
+  .donaciones-cert h1 {
+    font-size: 4.6vw;
+    margin-bottom: 2.6vw;
+  }
+
+  .donaciones-cert p {
+    font-size: 3.4vw;
+    margin-bottom: 3vw;
+  }
+
+  .donaciones-cert label {
+    font-size: 3.2vw;
+  }
+
+  .donaciones-cert select {
+    font-size: 3.4vw;
+    padding: 2.2vw;
+    border-radius: 2vw;
+    border-width: 0.5vw;
+  }
+
+  .donaciones-cert button {
+    font-size: 3.4vw;
+    padding: 2.6vw 4vw;
+    border-radius: 2.4vw;
+  }
+
+  .donaciones-cert .animate-spin {
+    width: 4vw;
+    height: 4vw;
+    border-width: 0.6vw;
+  }
+
+  .donaciones-cert .mt-\[1vw\] {
+    margin-top: 2.4vw;
+  }
+
+  .donaciones-cert .p-\[1vw\] {
+    padding: 2.4vw;
+  }
+
+  .donaciones-cert .rounded-\[0\.8vw\] {
+    border-radius: 2.2vw;
+  }
+
+  .donaciones-cert .text-\[0\.95vw\] {
+    font-size: 3.2vw;
+  }
+
+  .donaciones-empty {
+    padding: 5vw;
+    border-radius: 3.4vw;
+    font-size: 3.8vw;
+  }
+
+  .donaciones-table {
+    border-radius: 3.4vw;
+    overflow-x: auto;
+  }
+
+  .donaciones-table table {
+    min-width: 100%;
+  }
+
+  .donaciones-table th,
+  .donaciones-table td {
+    padding: 3.2vw;
+    font-size: 3.4vw;
+  }
+
+  .cuenta-donaciones .bg-green-600 {
+    border-radius: 3.2vw;
+    padding: 4vw;
+  }
+
+  .cuenta-donaciones table th,
+  .cuenta-donaciones table td {
+    padding: 3vw;
+    font-size: 3.2vw;
+  }
+}

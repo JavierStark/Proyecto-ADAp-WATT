@@ -1,4 +1,4 @@
-<section class="relative w-full min-h-screen bg-green-50 overflow-hidden">
+<section class="cuenta-page relative w-full min-h-screen bg-green-50 overflow-hidden">
   
 
   <!-- Filtro verde semitransparente -->
@@ -9,15 +9,15 @@
     
     <!-- Spinner de carga -->
     <div *ngIf="loadingPerfil" class="flex flex-col items-center justify-center py-[10vh]">
-      <div class="animate-spin rounded-full h-[4vw] w-[4vw] border-b-4 border-green-900 mb-[2vh]"></div>
-      <p class="text-green-900 text-[1.2vw] font-bold">Cargando tu perfil...</p>
+      <div class="loading-spinner animate-spin rounded-full h-[4vw] w-[4vw] border-b-4 border-green-900 mb-[2vh]"></div>
+      <p class="loading-text text-green-900 text-[1.2vw] font-bold">Cargando tu perfil...</p>
     </div>
 
     <!-- Contenido cuando carga -->
     <div *ngIf="!loadingPerfil" class="w-full">
 
       <!-- MENÚ PRINCIPAL -->
-      <div *ngIf="vistaActual === 'menu'" class="flex flex-col items-center justify-center gap-[2vh] max-w-[35vw] mx-auto">
+      <div *ngIf="vistaActual === 'menu'" class="cuenta-menu flex flex-col items-center justify-center gap-[2vh] max-w-[35vw] mx-auto">
         
         <div class="flex flex-col items-center gap-[1vw] mb-[2vh]">
           <h1 class="text-green-900 text-[3vw] font-bold text-center leading-tight">
@@ -61,23 +61,23 @@
       </div>
 
       <!-- VISTA PERFIL -->
-      <div *ngIf="vistaActual === 'perfil'" class="flex flex-col pt-[4vw] items-center justify-center">
+      <div *ngIf="vistaActual === 'perfil'" class="cuenta-perfil flex flex-col pt-[4vw] items-center justify-center">
         
         <!-- Contenedor principal -->
-        <div class="bg-white rounded-[2vw] shadow-lg p-[3vw] max-w-[60vw] w-full">
+        <div class="cuenta-perfil-card bg-white rounded-[2vw] shadow-lg p-[3vw] max-w-[60vw] w-full">
           
           <!-- Grid: Foto + Datos -->
-          <div class="grid grid-cols-2 gap-[3vw] mb-[2vw]">
+          <div class="cuenta-perfil-grid grid grid-cols-2 gap-[3vw] mb-[2vw]">
             
             <!-- Foto (izquierda) -->
-            <div class="flex items-center justify-center">
-              <div class="w-[18vw] h-[18vw] rounded-[1.5vw] border-3 border-green-600 bg-green-100 flex items-center justify-center">
+            <div class="cuenta-foto flex items-center justify-center">
+              <div class="cuenta-foto-box w-[18vw] h-[18vw] rounded-[1.5vw] border-3 border-green-600 bg-green-100 flex items-center justify-center">
                 <span class="text-green-600 text-[3vw] font-light">FOTO</span>
               </div>
             </div>
 
             <!-- Datos (derecha) -->
-            <div class="space-y-[1vh] text-[1vw] text-gray-800 font-medium">
+            <div class="cuenta-datos space-y-[1vh] text-[1vw] text-gray-800 font-medium">
               <p><strong>Nombre:</strong> {{ usuario.nombre || '___________________' }}</p>
               <p><strong>Apellidos:</strong> {{ usuario.apellidos || '___________________' }}</p>
               <p><strong>Correo electrónico:</strong> {{ usuario.email || '___________________' }}</p>
@@ -94,7 +94,7 @@
           </div>
 
           <!-- Botón Editar Datos -->
-          <div class="flex justify-center">
+          <div class="cuenta-boton-editar flex justify-center">
             <button 
               (click)="entrarModoEdicion()"
               class="bg-green-600 text-white text-[1.2vw] font-bold py-[0.8vw] px-[3vw] rounded-full hover:bg-green-700 transition">
@@ -103,7 +103,7 @@
           </div>
 
           <!-- Modo Edición (oculto por defecto) -->
-          <div *ngIf="modoEdicion" class="mt-[2vw] pt-[2vw] border-t-2 border-gray-200">
+          <div *ngIf="modoEdicion" class="cuenta-edicion mt-[2vw] pt-[2vw] border-t-2 border-gray-200">
             <h3 class="text-[1.5vw] font-bold text-gray-800 mb-[1.5vw]">Editar Datos</h3>
             <form (ngSubmit)="guardarCambios()" class="space-y-[1vw]">
               
@@ -177,7 +177,7 @@
           </div>
 
           <!-- Botón volver -->
-          <div class="flex justify-center mt-[2vw]">
+          <div class="cuenta-volver flex justify-center mt-[2vw]">
             <button 
               (click)="cambiarVista('menu')"
               class="text-green-700 font-bold hover:underline text-[1vw]">
@@ -188,20 +188,20 @@
       </div>
 
       <!-- VISTA ENTRADAS -->
-      <div *ngIf="vistaActual === 'tickets'" class="max-w-[70vw] pt-[3vw] mx-auto">
-        <h1 class="text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mis Entradas</h1>
+      <div *ngIf="vistaActual === 'tickets'" class="cuenta-tickets max-w-[70vw] pt-[3vw] mx-auto">
+        <h1 class="tickets-title text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mis Entradas</h1>
 
         <div class="flex justify-center mb-[2vw]">
           <button 
             (click)="cambiarVista('menu')"
-            class="text-green-700 font-bold hover:underline text-[1vw]">
+            class="tickets-volver text-green-700 font-bold hover:underline text-[1vw]">
             ← Volver al menú
           </button>
         </div>
         
         <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-[5vw]">
-          <div class="animate-spin rounded-full h-[3vw] w-[3vw] border-b-[0.4vw] border-green-600 mb-[1vw]"></div>
-          <p class="text-green-800 text-[1vw] font-bold">Buscando tus entradas...</p>
+          <div class="tickets-spinner animate-spin rounded-full h-[3vw] w-[3vw] border-b-[0.4vw] border-green-600 mb-[1vw]"></div>
+          <p class="tickets-loading-text text-green-800 text-[1vw] font-bold">Buscando tus entradas...</p>
         </div>
 
         <div *ngIf="!isLoading" class="animate-fade-in">
@@ -211,27 +211,27 @@
             </div>
 
             <div *ngIf="tickets.length > 0" class="grid gap-[1.5vw]">
-              <div *ngFor="let ticket of tickets" class="bg-white p-[2vw] rounded-[1.5vw] shadow-lg border-l-4 border-green-600">
+              <div *ngFor="let ticket of tickets" class="ticket-card bg-white p-[2vw] rounded-[1.5vw] shadow-lg border-l-4 border-green-600">
                 <div class="flex flex-col gap-[0.4vw]">
                   <div class="flex items-center justify-between gap-[1vw] flex-wrap">
-                    <h3 class="font-bold text-[1.3vw] text-gray-800">{{ ticket.eventoNombre || 'Evento' }}</h3>
-                    <span class="inline-flex items-center gap-[0.5vw] bg-green-100 text-green-800 px-[1.2vw] py-[0.4vw] rounded-full text-[0.9vw] font-bold">
+                    <h3 class="ticket-title font-bold text-[1.3vw] text-gray-800">{{ ticket.eventoNombre || 'Evento' }}</h3>
+                    <span class="ticket-badge inline-flex items-center gap-[0.5vw] bg-green-100 text-green-800 px-[1.2vw] py-[0.4vw] rounded-full text-[0.9vw] font-bold">
                       {{ ticket.tipoEntrada || 'Entrada' }}
                     </span>
                   </div>
 
-                  <p class="text-gray-600 text-[1vw]">Fecha del evento: {{ ticket.fechaEvento | date:'dd/MM/yyyy' }}</p>
-                  <p class="text-gray-600 text-[1vw]">Ubicación: {{ ticket.ubicacion || 'Ubicación pendiente' }}</p>
-                  <p class="text-gray-600 text-[1vw]">Precio pagado: {{ ticket.precioPagado | currency:'EUR' }}</p>
+                  <p class="ticket-meta text-gray-600 text-[1vw]">Fecha del evento: {{ ticket.fechaEvento | date:'dd/MM/yyyy' }}</p>
+                  <p class="ticket-meta text-gray-600 text-[1vw]">Ubicación: {{ ticket.ubicacion || 'Ubicación pendiente' }}</p>
+                  <p class="ticket-meta text-gray-600 text-[1vw]">Precio pagado: {{ ticket.precioPagado | currency:'EUR' }}</p>
 
                   <div class="flex items-center justify-between flex-wrap gap-[1vw] mt-[0.6vw]">
-                    <span class="inline-flex items-center gap-[0.5vw] bg-green-50 text-green-700 px-[1.2vw] py-[0.5vw] rounded-full text-[0.9vw] font-semibold">
+                    <span class="ticket-state inline-flex items-center gap-[0.5vw] bg-green-50 text-green-700 px-[1.2vw] py-[0.5vw] rounded-full text-[0.9vw] font-semibold">
                       {{ ticket.estado || 'Activo' }}
                     </span>
                   </div>
 
                   <a *ngIf="ticket.codigoQrUrl" [href]="ticket.codigoQrUrl" target="_blank"
-                    class="text-green-700 text-[0.95vw] font-semibold hover:underline mt-[0.4vw] inline-flex items-center gap-[0.4vw]">
+                    class="ticket-qr text-green-700 text-[0.95vw] font-semibold hover:underline mt-[0.4vw] inline-flex items-center gap-[0.4vw]">
                     Ver QR
                   </a>
                 </div>
@@ -243,25 +243,25 @@
       </div>
 
       <!-- VISTA DONACIONES -->
-      <div *ngIf="vistaActual === 'donaciones'" class="max-w-[70vw] pt-[4vw] mx-auto">
-        <h1 class="text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mi Historial Solidario</h1>
+      <div *ngIf="vistaActual === 'donaciones'" class="cuenta-donaciones max-w-[70vw] pt-[4vw] mx-auto">
+        <h1 class="donaciones-title text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mi Historial Solidario</h1>
         
         <div class="flex justify-center mb-[2vw]">
           <button 
             (click)="cambiarVista('menu')"
-            class="text-green-700 font-bold hover:underline text-[1vw]">
+            class="donaciones-volver text-green-700 font-bold hover:underline text-[1vw]">
             ← Volver al menú
           </button>
         </div>
 
         <!-- Card de total -->
-        <div class="bg-green-600 text-white p-[2vw] rounded-[1.5vw] shadow-lg mb-[2vw] text-center">
+        <div class="donaciones-total-card bg-green-600 text-white p-[2vw] rounded-[1.5vw] shadow-lg mb-[2vw] text-center">
           <p class="text-[1.2vw] font-medium opacity-90">Total Donado</p>
           <p class="text-[3vw] font-bold">{{ totalDonado | currency:'EUR' }}</p>
         </div>
 
         <!-- Sección de Descarga de Certificado -->
-        <div *ngIf="donaciones.length > 0" class="bg-blue-50 border-2 border-blue-300 rounded-[1.5vw] p-[2vw] mb-[2vw] shadow-md">
+        <div *ngIf="donaciones.length > 0" class="donaciones-cert bg-blue-50 border-2 border-blue-300 rounded-[1.5vw] p-[2vw] mb-[2vw] shadow-md">
           <h1 class="text-[1.3vw] font-bold text-blue-900 mb-[1vw]">📄 Descargar Certificado de Donaciones</h1>
           <p class="text-[0.95vw] text-gray-700 mb-[1.5vw]">Obtén un certificado fiscal en PDF con tus donaciones anuales</p>
           
@@ -296,11 +296,11 @@
           </div>
         </div>
 
-        <div *ngIf="donaciones.length === 0" class="text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">
+        <div *ngIf="donaciones.length === 0" class="donaciones-empty text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">
           <p>Aún no has realizado donaciones.</p>
         </div>
 
-        <div class="bg-white rounded-[1.5vw] overflow-hidden shadow-lg">
+        <div class="donaciones-table bg-white rounded-[1.5vw] overflow-hidden shadow-lg">
           <table class="w-full text-left">
             <thead class="bg-gray-100 text-gray-700 uppercase text-[0.9vw] font-bold">
               <tr>

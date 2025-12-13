@@ -11,7 +11,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './cuenta.component.html',
-  styles: ``
+  styleUrls: ['./cuenta.component.css']
 })
 export class CuentaComponent implements OnInit {
 
