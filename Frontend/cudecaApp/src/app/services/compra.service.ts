@@ -109,4 +109,24 @@ export interface SocioCompra {
   importe: number;
 }
 
+// Donación
+export interface DonacionCompra {
+  importe: number;
+}
+
+// Añadimos almacenamiento de donación en el mismo servicio
+export class DonacionState {
+  private static readonly DONACION_KEY = 'donacionCompra';
+  static guardar(d: DonacionCompra) {
+    sessionStorage.setItem(DonacionState.DONACION_KEY, JSON.stringify(d));
+  }
+  static obtener(): DonacionCompra | null {
+    const raw = sessionStorage.getItem(DonacionState.DONACION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }
+  static limpiar() {
+    sessionStorage.removeItem(DonacionState.DONACION_KEY);
+  }
+}
+
 

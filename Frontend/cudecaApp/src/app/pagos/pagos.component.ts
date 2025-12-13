@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CompraService, EventoCompra, SocioCompra  } from '../services/compra.service';
+import { CompraService, EventoCompra, SocioCompra } from '../services/compra.service';
+import { DonacionState, DonacionCompra } from '../services/compra.service';
 import { AuthService } from '../services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -44,12 +45,15 @@ export class PagosComponent implements OnInit {
   ) {}
 
   socioCompra: SocioCompra | null = null;
+  donacionCompra: DonacionCompra | null = null;
 
   ngOnInit(): void {
   this.eventoId = this.route.snapshot.paramMap.get('id');
 
   if (this.eventoId === 'socio') {
     this.socioCompra = this.compraService.obtenerSocioCompra();
+  } else if (this.eventoId === 'donacion') {
+    this.donacionCompra = DonacionState.obtener();
   } else {
     this.eventoCompra = this.compraService.obtenerEventoCompra();
   }
@@ -69,6 +73,8 @@ processPayment(): void {
 
     if (this.socioCompra) {
       this.procesarPagoSocio();
+    } else if (this.donacionCompra) {
+      this.procesarPagoDonacion();
     } else {
       this.procesarPagoEvento();
     }
@@ -199,6 +205,53 @@ private procesarPagoSocio(): void {
         this.isProcessing = false;
       }
     });
+}
+
+private procesarPagoDonacion(): void {
+  if (!this.donacionCompra) {
+    this.errorMessage = 'No se encontraron datos de donación';
+    return;
+  }
+
+  if (!this.selectedPaymentMethod) {
+    this.errorMessage = 'Selecciona un método de pago';
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  this.isProcessing = true;
+  this.errorMessage = '';
+
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  const payload = {
+    Amount: this.donacionCompra.importe,
+    PaymentMethod: this.selectedPaymentMethod
+  };
+
+  this.http.post(`${this.apiUrl}/donations`, payload, { headers }).subscribe({
+    next: (res: any) => {
+      // Guardar resumen y limpiar estado de donación
+      sessionStorage.setItem(
+        'donacionResumen',
+        JSON.stringify({
+          mensaje: res?.message || `Donación de ${this.donacionCompra!.importe}€ realizada correctamente`,
+          pagoRef: res?.paymentId || null,
+          importe: this.donacionCompra!.importe
+        })
+      );
+
+      DonacionState.limpiar();
+      this.router.navigate(['/compra-finalizada']);
+    },
+    error: (err) => {
+      console.error('❌ Error backend donación:', err);
+      this.errorMessage = err.error?.error || err.error?.message || 'Error al procesar la donación';
+      this.isProcessing = false;
+    }
+  });
 }
 
 }
