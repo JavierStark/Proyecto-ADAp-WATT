@@ -1,14 +1,26 @@
 /* Base tweaks using viewport units for consistent scaling */
 .cuenta-page {
   padding: 6vw 4vw 8vw 4vw;
-  min-height: 120vw;
+}
+
+.cuenta-page-default {
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.cuenta-page-tickets {
+  min-height: 100vh;
+  overflow-y: auto;
 }
 
 /* Mobile-first adjustments */
 @media (max-width: 768px) {
   .cuenta-page {
     padding: 14vw 6vw 16vw 6vw;
-    min-height: 150vw;
+  }
+
+  .cuenta-page > div:first-of-type {
+    padding-top: 16vw !important;
   }
 
   .cuenta-menu {
