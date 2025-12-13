@@ -61,84 +61,84 @@
       </div>
 
       <!-- VISTA PERFIL -->
-      <div *ngIf="vistaActual === 'perfil'" class="cuenta-perfil flex flex-col pt-[2vw] items-center justify-center">
+<div *ngIf="vistaActual === 'perfil'" class="cuenta-perfil flex flex-col pt-[2vw] items-center justify-center">
         
-        <div class="cuenta-perfil-card bg-white rounded-[2vw] shadow-lg p-[3vw] max-w-[70vw] w-full">
+        <div class="cuenta-perfil-card bg-white rounded-[4vw] md:rounded-[2vw] shadow-lg p-[6vw] md:p-[3vw] w-[90vw] md:max-w-[70vw]">
           
-          <h2 class="text-green-900 text-[2.2vw] font-bold mb-[2.5vw] text-center border-b border-gray-100 pb-[1vw]">
+          <h2 class="text-green-900 text-[5.5vw] md:text-[2.2vw] font-bold mb-[6vw] md:mb-[2.5vw] text-center border-b border-gray-100 pb-[3vw] md:pb-[1vw]">
             Mi Información Personal
           </h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-[4vw] mb-[3vw]">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-[6vw] md:gap-[4vw] mb-[6vw] md:mb-[3vw]">
             
-            <div class="bg-gray-50 p-[2vw] rounded-[1.5vw]">
-              <h3 class="text-green-700 font-bold text-[1.2vw] mb-[1.5vw] uppercase tracking-wide border-b-2 border-green-200 pb-[0.5vw] inline-block">
+            <div class="bg-gray-50 p-[4vw] md:p-[2vw] rounded-[3vw] md:rounded-[1.5vw]">
+              <h3 class="text-green-700 font-bold text-[3.8vw] md:text-[1.2vw] mb-[4vw] md:mb-[1.5vw] uppercase tracking-wide border-b-2 border-green-200 pb-[1vw] md:pb-[0.5vw] inline-block">
                 Datos de Usuario
               </h3>
               
-              <div class="space-y-[1.2vw] text-[1.1vw] text-gray-700">
+              <div class="space-y-[3.5vw] md:space-y-[1.2vw] text-gray-700">
                 <div class="flex flex-col">
-                  <span class="text-[0.9vw] text-gray-400 font-bold uppercase">Nombre Completo</span>
-                  <span class="font-medium text-gray-900">
+                  <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">Nombre Completo</span>
+                  <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">
                     {{ usuario.nombre || '-' }} {{ usuario.apellidos || '' }}
                   </span>
                 </div>
 
                 <div class="flex flex-col">
-                  <span class="text-[0.9vw] text-gray-400 font-bold uppercase">DNI / Identificación</span>
-                  <span class="font-medium text-gray-900">{{ usuario.dni || '-' }}</span>
+                  <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">DNI / Identificación</span>
+                  <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">{{ usuario.dni || '-' }}</span>
                 </div>
 
                 <div class="flex flex-col">
-                  <span class="text-[0.9vw] text-gray-400 font-bold uppercase">Correo Electrónico</span>
-                  <span class="font-medium text-gray-900">{{ usuario.email || '-' }}</span>
+                  <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">Correo Electrónico</span>
+                  <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900 break-all">{{ usuario.email || '-' }}</span>
                 </div>
 
                 <div class="flex flex-col">
-                  <span class="text-[0.9vw] text-gray-400 font-bold uppercase">Teléfono</span>
-                  <span class="font-medium text-gray-900">{{ usuario.telefono || '-' }}</span>
+                  <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">Teléfono</span>
+                  <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">{{ usuario.telefono || '-' }}</span>
                 </div>
               </div>
             </div>
 
-            <div class="bg-gray-50 p-[2vw] rounded-[1.5vw]">
-              <h3 class="text-green-700 font-bold text-[1.2vw] mb-[1.5vw] uppercase tracking-wide border-b-2 border-green-200 pb-[0.5vw] inline-block">
+            <div class="bg-gray-50 p-[4vw] md:p-[2vw] rounded-[3vw] md:rounded-[1.5vw]">
+              <h3 class="text-green-700 font-bold text-[3.8vw] md:text-[1.2vw] mb-[4vw] md:mb-[1.5vw] uppercase tracking-wide border-b-2 border-green-200 pb-[1vw] md:pb-[0.5vw] inline-block">
                 Dirección Postal
               </h3>
 
-              <div class="space-y-[1.2vw] text-[1.1vw] text-gray-700">
-                <div class="grid grid-cols-3 gap-[1vw]">
+              <div class="space-y-[3.5vw] md:space-y-[1.2vw] text-gray-700">
+                <div class="grid grid-cols-3 gap-[2vw] md:gap-[1vw]">
                   <div class="col-span-2 flex flex-col">
-                    <span class="text-[0.9vw] text-gray-400 font-bold uppercase">Calle</span>
-                    <span class="font-medium text-gray-900">{{ usuario.calle || '-' }}</span>
+                    <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">Calle</span>
+                    <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">{{ usuario.calle || '-' }}</span>
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-[0.9vw] text-gray-400 font-bold uppercase">Número</span>
-                    <span class="font-medium text-gray-900">{{ usuario.numero || '-' }}</span>
+                    <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">Número</span>
+                    <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">{{ usuario.numero || '-' }}</span>
                   </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-[1vw]">
+                <div class="grid grid-cols-2 gap-[2vw] md:gap-[1vw]">
                   <div class="flex flex-col">
-                    <span class="text-[0.9vw] text-gray-400 font-bold uppercase">Piso / Puerta</span>
-                    <span class="font-medium text-gray-900">{{ usuario.pisoPuerta || '-' }}</span>
+                    <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">Piso / Puerta</span>
+                    <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">{{ usuario.pisoPuerta || '-' }}</span>
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-[0.9vw] text-gray-400 font-bold uppercase">Código Postal</span>
-                    <span class="font-medium text-gray-900">{{ usuario.codigoPostal || '-' }}</span>
+                    <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">CP</span>
+                    <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">{{ usuario.codigoPostal || '-' }}</span>
                   </div>
                 </div>
 
                 <div class="flex flex-col">
-                  <span class="text-[0.9vw] text-gray-400 font-bold uppercase">Ciudad y Provincia</span>
-                  <span class="font-medium text-gray-900">
+                  <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">Ciudad y Provincia</span>
+                  <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">
                     {{ usuario.ciudad || '-' }} <span *ngIf="usuario.provincia">({{ usuario.provincia }})</span>
                   </span>
                 </div>
 
                 <div class="flex flex-col">
-                  <span class="text-[0.9vw] text-gray-400 font-bold uppercase">País</span>
-                  <span class="font-medium text-gray-900">{{ usuario.pais || '-' }}</span>
+                  <span class="text-[3vw] md:text-[0.9vw] text-gray-400 font-bold uppercase">País</span>
+                  <span class="font-medium text-[3.8vw] md:text-[1.1vw] text-gray-900">{{ usuario.pais || '-' }}</span>
                 </div>
               </div>
             </div>
