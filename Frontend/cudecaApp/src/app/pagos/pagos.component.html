@@ -5,9 +5,11 @@
 
   <div class="relative z-10 flex-grow flex items-center justify-center pt-[10vw] pb-[2vw] px-[4vw]">
 
-    <div class="bg-white shadow-2xl w-full max-w-[76vw] flex flex-col md:flex-row p-[4vw] md:p-[2vw] gap-[3.2vw] md:gap-[2vw] rounded-[1.4vw]">
+    <div
+      class="bg-white shadow-2xl w-full flex flex-col md:flex-row gap-[3.2vw] md:gap-[2vw] rounded-[1.4vw]"
+      [ngClass]="donacionCompra ? 'max-w-[44vw] p-[3vw] md:p-[2vw]' : 'max-w-[76vw] p-[4vw] md:p-[2vw]'">
 
-      <div class="w-full sm:flex-shrink-0 sm:basis-[30vw]">
+      <div class="w-full sm:flex-shrink-0 sm:basis-[30vw]" *ngIf="!donacionCompra">
         
         <div *ngIf="eventoCompra" class="left-event-info w-full text-left text-[3.5vw] md:text-[0.9vw] text-gray-700">
           <img 
