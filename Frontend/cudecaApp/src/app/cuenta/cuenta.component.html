@@ -1,11 +1,11 @@
-<section class="cuenta-page relative w-full min-h-screen bg-green-50 overflow-hidden">
+<section [ngClass]="vistaActual === 'tickets' ? 'cuenta-page-tickets' : 'cuenta-page-default'" class="cuenta-page relative w-full bg-green-50">
   
 
   <!-- Filtro verde semitransparente -->
   <div class="absolute inset-0 bg-green-400 opacity-30 z-0"></div>
 
   <!-- Contenido principal -->
-  <div class="relative z-10 pb-[4vh] pt-[6vw] px-[4vw] flex flex-col items-center justify-center min-h-screen">
+  <div class="relative z-10 pb-[4vh] pt-[20vw] md:pt-[6vw] px-[4vw] flex flex-col items-center justify-center" [ngClass]="vistaActual === 'tickets' ? 'min-h-screen' : 'h-auto'">
     
     <!-- Spinner de carga -->
     <div *ngIf="loadingPerfil" class="flex flex-col items-center justify-center py-[10vh]">
@@ -188,7 +188,7 @@
       </div>
 
       <!-- VISTA ENTRADAS -->
-      <div *ngIf="vistaActual === 'tickets'" class="cuenta-tickets max-w-[70vw] pt-[3vw] mx-auto">
+      <div *ngIf="vistaActual === 'tickets'" class="cuenta-tickets max-w-[70vw] pt-[3vw] mx-auto min-h-screen">
         <h1 class="tickets-title text-green-900 text-[2.5vw] font-bold mb-[2vh] text-center">Mis Entradas</h1>
 
         <div class="flex justify-center mb-[2vw]">
