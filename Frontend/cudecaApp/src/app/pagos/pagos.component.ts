@@ -228,7 +228,8 @@ private procesarPagoDonacion(): void {
 
   const payload = {
     Amount: this.donacionCompra.importe,
-    PaymentMethod: this.selectedPaymentMethod
+    PaymentMethod: this.selectedPaymentMethod,
+    paymentToken: 'sim_ok'
   };
 
   this.http.post(`${this.apiUrl}/donations`, payload, { headers }).subscribe({
