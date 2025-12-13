@@ -53,8 +53,8 @@ static class Donations
 
             var response = await client
                 .From<Donacion>()
-                .Select("*, Pago:fk_don_pago!inner(*)")
-                .Filter("Pago.id_cliente", Operator.Equals, usuario!.Id.ToString())
+                .Select("*, Pago:fk_pago!inner(*)")
+                .Filter("Pago.fk_usuario", Operator.Equals, usuario!.Id.ToString())
                 .Get();
 
             decimal total = response.Models.Sum(d => d.Pago?.Monto ?? 0);
@@ -333,7 +333,7 @@ static class Donations
         var responseDonaciones = await client
             .From<Donacion>()
             .Select("*, Pago:fk_pago!inner(*)")
-            .Filter("Pago.fk_cliente", Operator.Equals, userGuid.ToString())
+            .Filter("Pago.fk_usuario", Operator.Equals, userGuid.ToString())
             .Filter("Pago.fecha", Operator.GreaterThanOrEqual, fechaInicio)
             .Filter("Pago.fecha", Operator.LessThanOrEqual, fechaFin)
             .Get();
