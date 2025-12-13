@@ -17,7 +17,9 @@ class Pago : BaseModel
 
     [Column("metodo_pago")] public string? MetodoDePago { get; set; }
 
-    [Column("fk_cliente")] public Guid? FkCliente { get; set; }
+    [Column("fk_usuario")] public Guid? FkUsuario { get; set; }
+    [Column("fk_usuario_no_registrado")] public Guid? FkUsuarioNoRegistrado { get; set; }
+
 
     [Reference(typeof(Cliente))] public Cliente? Cliente { get; set; }
 }

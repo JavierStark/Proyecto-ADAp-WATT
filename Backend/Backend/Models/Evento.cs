@@ -23,7 +23,7 @@ public class Evento : BaseModel
 
     [Column("evento_visible")] public bool? EventoVisible { get; set; }
 
-    [Column("objeto_recaudacion")] public string? ObjetoRecaudacion { get; set; }
+    [Column("objetivo_recaudacion")] public string? ObjetoRecaudacion { get; set; }
     
     [Column("imagen_url")] public string? ImagenUrl { get; set; }
 }

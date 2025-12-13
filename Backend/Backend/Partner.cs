@@ -39,7 +39,7 @@ public class Partner
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado",
                 MetodoDePago = dto.MetodoPago ?? "Tarjeta",
-                FkCliente = userIdGuid,
+                FkUsuario = userIdGuid,
             };
 
             var pagoResponse = await client.From<Pago>().Insert(nuevoPago);

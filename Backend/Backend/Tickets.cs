@@ -394,7 +394,8 @@ static class Tickets
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado",
                 MetodoDePago = dto.PaymentMethod,
-                FkCliente = userGuid
+                FkUsuario = userGuid,
+                FkUsuarioNoRegistrado = null
             };
             var pagoRes = await client.From<Pago>().Insert(nuevoPago);
             var pagoCreado = pagoRes.Models.First();
@@ -560,6 +561,25 @@ static class Tickets
                 await client.From<ValeDescuento>().Update(descuento);
             }
 
+            // Crear o actualizar usuario no registrado usando upsert con OnConflict en email
+            var nuevoUsuarioNoRegistrado = new UsuarioNoRegistrado
+            {
+                Email = dto.Email,
+                Dni = dto.Dni,
+                Nombre = dto.Nombre,
+                Apellidos = dto.Apellidos,
+                Telefono = dto.Telefono
+            };
+
+            var upsertOptions = new Supabase.Postgrest.QueryOptions
+            {
+                OnConflict = "email"
+            };
+
+            var upsertRes = await client.From<UsuarioNoRegistrado>()
+                .Upsert(nuevoUsuarioNoRegistrado, upsertOptions);
+            var usuarioNoRegistrado = upsertRes.Models.First();
+
             // Procesar pago
             if (totalPagar > 0)
             {
@@ -573,17 +593,15 @@ static class Tickets
                 }
             }
             
-            // Para compras anónimas, usar null como usuario (no tiene cuenta)
-            Guid? guestUserId = null;
-            
-            // Crear registro de pago (sin FkCliente para anónimos)
+            // Crear registro de pago vinculado al usuario no registrado
             var nuevoPago = new Pago
             {
                 Monto = totalPagar,
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado",
                 MetodoDePago = dto.PaymentMethod,
-                FkCliente = guestUserId
+                FkUsuario = null,
+                FkUsuarioNoRegistrado = usuarioNoRegistrado.Id
             };
             var pagoRes = await client.From<Pago>().Insert(nuevoPago);
             var pagoCreado = pagoRes.Models.First();
@@ -611,7 +629,8 @@ static class Tickets
                 {
                     var nuevaEntrada = new Entrada
                     {
-                        FkUsuario = guestUserId,
+                        FkUsuario = null,
+                        FkUsuarioNoRegistrado = usuarioNoRegistrado.Id,
                         FkEvento = dto.EventId,
                         FkPago = pagoCreado.Id,
                         FechaCompra = DateTime.UtcNow,

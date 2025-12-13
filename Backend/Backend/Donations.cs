@@ -88,7 +88,7 @@ static class Donations
                 Fecha = DateTime.UtcNow,
                 Estado = "Pagado", // Asumimos que el pago es inmediato para simplificar
                 MetodoDePago = dto.PaymentMethod ?? "Tarjeta",
-                FkCliente = usuario!.Id // Vinculamos el pago al usuario
+                FkUsuario = usuario!.Id // Vinculamos el pago al usuario
             };
 
             var pagoResponse = await client
