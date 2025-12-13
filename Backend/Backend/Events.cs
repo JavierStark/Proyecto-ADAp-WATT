@@ -19,19 +19,46 @@ static class Events
                 dbQuery = dbQuery.Filter("nombre", Operator.ILike, $"%{query}%");
 
             var response = await dbQuery.Get();
+            var eventosDb = response.Models;
+            
+            if (!eventosDb.Any()) 
+                return Results.Ok(new List<EventoListDto>());
+            
+            // Obtenemos solo los IDs de los eventos cargados
+            var eventIds = eventosDb.Select(e => e.Id.ToString()).ToList();
+            
+            // Traemos solo el precio y la FK de las entradas que pertenecen a estos eventos.
+            var entradasResponse = await client.From<Entrada>()
+                .Select("fk_evento, precio") 
+                .Filter("fk_evento", Operator.In, eventIds)
+                .Get();
+            
+            var todasLasEntradas = entradasResponse.Models;
 
+            // Mapeamos y calculamos
+            var eventos = eventosDb.Select(e =>
+            {
+                // Sumamos los precios de las entradas de este evento específico
+                decimal recaudadoEntradas = todasLasEntradas
+                    .Where(t => t.FkEvento == e.Id)
+                    .Sum(t => t.Precio);
 
-            var eventos = response.Models.Select(e => new EventoListDto(
-                e.Id,
-                e.Nombre,
-                e.Descripcion,
-                e.FechaEvento,
-                e.Ubicacion,
-                e.Aforo ?? 0,
-                e.EntradasVendidas,
-                e.ObjetoRecaudacion ?? "Sin especificar",
-                e.ImagenUrl
-            ));
+                // Sumamos lo recaudado por entradas + lo extra (ej. patrocinios)
+                decimal totalRecaudado = recaudadoEntradas + (e.RecaudacionExtra ?? 0);
+
+                return new EventoListDto(
+                    e.Id,
+                    e.Nombre,
+                    e.Descripcion,
+                    e.FechaEvento,
+                    e.Ubicacion,
+                    e.Aforo ?? 0,
+                    e.EntradasVendidas,
+                    e.ObjetivoRecaudacion ?? 0,
+                    totalRecaudado,
+                    e.ImagenUrl
+                );
+            });
 
             return Results.Ok(eventos);
         }
@@ -56,6 +83,15 @@ static class Events
 
             if (eventoDb == null)
                 return Results.NotFound(new { error = $"No se encontró ningún evento con el ID {eventId}" });
+            
+            var entradasResponse = await client.From<Entrada>()
+                .Select("precio") // Solo necesitamos el precio
+                .Filter("fk_evento", Operator.Equals, eventId)
+                .Get();
+
+            decimal recaudadoEntradas = entradasResponse.Models.Sum(t => t.Precio);
+            
+            decimal totalRecaudado = recaudadoEntradas + (eventoDb.RecaudacionExtra ?? 0);
 
             var eventoDto = new EventoListDto(
                 eventoDb.Id,
@@ -65,7 +101,8 @@ static class Events
                 eventoDb.Ubicacion,
                 eventoDb.Aforo ?? 0,
                 eventoDb.EntradasVendidas,
-                eventoDb.ObjetoRecaudacion ?? "Sin especificar",
+                eventoDb.ObjetivoRecaudacion ?? 0,
+                totalRecaudado,
                 eventoDb.ImagenUrl
             );
 
@@ -85,7 +122,8 @@ static class Events
         string? Ubicacion,
         int Aforo,
         int EntradasVendidas,
-        string ObjetoRecaudacion,
+        decimal ObjetivoRecaudacion,
+        decimal TotalRecaudado,
         string? ImagenUrl
     );
 
