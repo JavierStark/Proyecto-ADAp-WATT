@@ -289,6 +289,11 @@
               </span>
             </button>
           </div>
+
+          <!-- Advertencia no intrusiva -->
+          <div *ngIf="certificadoWarning" class="mt-[1vw] p-[1vw] rounded-[0.8vw] bg-yellow-100 border border-yellow-300 text-yellow-900 text-[0.95vw]">
+            ⚠️ {{ certificadoWarning }}
+          </div>
         </div>
 
         <div *ngIf="donaciones.length === 0" class="text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">

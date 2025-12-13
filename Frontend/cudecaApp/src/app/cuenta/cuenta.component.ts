@@ -31,6 +31,7 @@ export class CuentaComponent implements OnInit {
   yearSeleccionado: number = new Date().getFullYear();
   descargandoCertificado: boolean = false;
   aniosDisponibles: number[] = [];
+  certificadoWarning: string = '';
 
   // 2. NUEVA VARIABLE PARA EL ESTADO DE SOCIO
   isSocio: boolean = false;
@@ -142,6 +143,7 @@ export class CuentaComponent implements OnInit {
     if (this.descargandoCertificado) return;
 
     this.descargandoCertificado = true;
+    this.certificadoWarning = '';
 
     // Preparar los datos fiscales del usuario
     const userData = {
@@ -176,12 +178,19 @@ export class CuentaComponent implements OnInit {
       error: (error) => {
         this.descargandoCertificado = false;
         console.error('Error descargando certificado:', error);
-        
-        // Mostrar mensaje de error más específico
+
+        // Advertencia amigable en la página en vez de alerta
+        if (error.status === 404) {
+          // Sin donaciones para el año seleccionado
+          this.certificadoWarning = `No se encontraron donaciones en el ejercicio ${this.yearSeleccionado}.`;
+          return;
+        }
+
+        // Datos fiscales incompletos u otros errores del backend
         if (error.error?.error) {
-          alert(`❌ ${error.error.error}\n\n${error.error.message || ''}`);
+          this.certificadoWarning = `${error.error.error}${error.error.message ? ' — ' + error.error.message : ''}`;
         } else {
-          alert(`❌ Error al descargar el certificado. Por favor, verifica tus datos fiscales estén completos.`);
+          this.certificadoWarning = 'No se pudo generar el certificado. Verifica que tus datos fiscales estén completos.';
         }
       }
     });
