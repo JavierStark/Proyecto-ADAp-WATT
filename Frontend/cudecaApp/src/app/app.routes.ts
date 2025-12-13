@@ -15,8 +15,6 @@ import { publicGuard } from './guards/public.guard';
 import { authGuard } from './guards/auth.guard';
 import { QrValidateComponent } from './qr-validate/qr-validate.component';
 import {HazteSocioComponent} from './hazte-socio/hazte-socio.component';
-import { HacerteSocioComponent } from './hacerte-socio/hacerte-socio.component';
-import { YaEresSocioComponent } from './ya-eres-socio-component/ya-eres-socio-component.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Ruta por defecto que carga el HomeComponent
@@ -31,8 +29,6 @@ export const routes: Routes = [
   { path: 'pagos/:id', component: PagosComponent }, // Ruta para pagos
   { path: 'validar-qr', component: QrValidateComponent },
   {path: 'hazte-socio', component: HazteSocioComponent, canActivate: [authGuard] },
-  {path: 'hacerte-socio', component: HacerteSocioComponent },
-  {path: 'ya-eres-socio', component: YaEresSocioComponent}
   
 
 ];

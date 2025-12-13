@@ -1,89 +1,150 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PartnerService } from '../services/partner.service';
-import { PartnerApiService } from '../services/partner-api.service';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { CompraService } from '../services/compra.service';
+import { CompraService } from '../services/compra.service'; // Asegúrate de tener este servicio
+import { FormsModule } from '@angular/forms';
+
+// --- INTERFACES BASADAS EN TU SWAGGER ---
+interface PartnerData {
+  plan: string | null;
+  cuota: number;
+  fechaInicio: string;
+  fechaFin: string;
+  isActivo: boolean;
+  diasRestantes: number;
+}
+
+type Vista = 'CARGANDO' | 'YA_SOCIO' | 'SELECCION' | 'RESUMEN';
+type PlanType = 'mensual' | 'trimestral' | 'anual';
 
 @Component({
   selector: 'app-hazte-socio',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './hazte-socio.component.html',
-  styleUrl: './hazte-socio.component.css'
+  styleUrls: ['./hazte-socio.component.css']
 })
-export class HazteSocioComponent implements OnInit{
+export class HazteSocioComponent implements OnInit {
 
+  // Url base
+  private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
 
-    private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
-  planSeleccionado: 'mensual' | 'trimestral' | 'anual' | null = null;
+  // Estado de la vista
+  vista: Vista = 'CARGANDO';
+
+  // Datos traídos del backend (GET /partners/data)
+  datosSocio: PartnerData | null = null;
+
+  // Datos seleccionados por el usuario para NUEVA suscripción
+  planSeleccionado: PlanType | null = null;
   precioSeleccionado: number = 0;
-  isProcessing = false;
-  errorMessage = '';
-  isCheckingSuscripcion = true;
+  
+  // UI Helpers
+  isProcessing: boolean = false;
+  errorMessage: string = '';
 
-    constructor(
+  constructor(
     private router: Router,
     private compraService: CompraService,
     private http: HttpClient
-    ) {}
+  ) {}
 
-
-    ngOnInit(): void {
-
-  const renovar = sessionStorage.getItem('renovarSuscripcion') === 'true';
-
-  const token = localStorage.getItem('token');
-  const headers = token
-    ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-    : undefined;
-
-  this.http.get<any>(`${this.apiUrl}/partners/data`, { headers }).subscribe({
-    next: (data) => {
-      if (data?.isActivo && !renovar) {
-        // 🚫 Ya es socio y NO está renovando → fuera
-        this.router.navigate(['/ya-eres-socio']);
-        return;
-      }
-
-      // 🟢 Puede continuar (no es socio o está renovando)
-      this.isCheckingSuscripcion = false;
-
-      // 🔥 flag usada → se elimina
-      sessionStorage.removeItem('renovarSuscripcion');
-    },
-    error: () => {
-      // No es socio → puede continuar
-      this.isCheckingSuscripcion = false;
-      sessionStorage.removeItem('renovarSuscripcion');
+  cancelarSeleccion() {
+    if (this.datosSocio && this.datosSocio.isActivo) {
+      // Si ya era socio y le dio a "Renovar", volvemos a la vista de su perfil
+      this.vista = 'YA_SOCIO';
+    } else {
+      // Si es un usuario nuevo, volvemos al inicio
+      this.router.navigate(['/']);
     }
-  });
-}
+    // Limpiamos la selección por si acaso
+    this.planSeleccionado = null;
+    this.errorMessage = '';
+  }
 
-  seleccionarPlan(plan: 'mensual' | 'trimestral' | 'anual', precio: number) {
+  ngOnInit(): void {
+    this.checkEstadoSocio();
+  }
+
+  // 1. CONSULTAR ESTADO ACTUAL (GET /partners/data)
+  checkEstadoSocio() {
+    const token = localStorage.getItem('token');
+    
+    // Si no hay token, asumimos que no es socio y vamos directo a elegir plan
+    if (!token) {
+      this.vista = 'SELECCION';
+      return;
+    }
+
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    this.http.get<PartnerData>(`${this.apiUrl}/partners/data`, { headers }).subscribe({
+      next: (data) => {
+        // Asignamos la respuesta exacta de tu imagen
+        this.datosSocio = data;
+
+        if (data && data.isActivo) {
+          this.vista = 'YA_SOCIO';
+        } else {
+          this.vista = 'SELECCION';
+        }
+      },
+      error: (err) => {
+        console.error('Error al obtener datos de socio', err);
+        // Si da 404 o error, asumimos que no es socio
+        this.vista = 'SELECCION';
+      }
+    });
+  }
+
+  // --- ACCIONES DE VISTA ---
+
+  renovar() {
+    // Permitimos renovar aunque sea socio
+    this.vista = 'SELECCION';
+  }
+
+  volverHome() {
+    this.router.navigate(['/']);
+  }
+
+  seleccionarPlan(plan: PlanType, precio: number) {
     this.planSeleccionado = plan;
     this.precioSeleccionado = precio;
   }
 
-  hacerseSocio() {
+  irAResumen() {
     if (!this.planSeleccionado) {
-      this.errorMessage = 'Selecciona un plan';
+      this.errorMessage = 'Por favor, selecciona un plan para continuar.';
       return;
     }
+    this.errorMessage = '';
+    this.vista = 'RESUMEN';
+  }
+
+  volverASeleccion() {
+    this.vista = 'SELECCION';
+  }
+
+  // 2. PREPARAR DATOS PARA EL PAGO
+  confirmarYPagar() {
+    if (!this.planSeleccionado) return;
 
     this.isProcessing = true;
 
-    // guardamos la info si quieres usarla luego
-    sessionStorage.setItem('socioPlan', this.planSeleccionado);
-    sessionStorage.setItem('socioPrecio', this.precioSeleccionado.toString());
+    const datosParaPago = {
+      tipo: 'socio',
+      plan: this.planSeleccionado,
+      importe: this.precioSeleccionado,
+    };
 
-    // navegación al nuevo componente
-    this.goto('/hacerte-socio');
+    // Guardamos los datos en el servicio
+    this.compraService.guardarSocioCompra(datosParaPago);
+
+    // CORRECCIÓN AQUÍ: Añadimos 'socio' a la ruta
+    // Antes: this.router.navigate(['/pagos']);
+    this.router.navigate(['/pagos', 'socio']); 
   }
 
-  goto(path: string) {
-    this.router.navigate([path]);
-  }
 }
-
-

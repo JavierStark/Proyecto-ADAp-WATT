@@ -1,20 +1,14 @@
 <section class="relative w-full min-h-screen overflow-hidden font-sans flex flex-col">
 
-  <img
-    src="assets/images/fondoCudeca.png"
-    alt="Fondo decorativo"
-    class="absolute inset-0 w-full h-full object-cover z-0"
-  />
-
+  <img src="assets/images/fondoCudeca.png" alt="Fondo decorativo" class="absolute inset-0 w-full h-full object-cover z-0" />
   <div class="absolute inset-0 bg-green-400/40 z-0"></div>
 
   <div class="relative z-10 flex-grow flex items-center justify-center pt-[10vw] pb-[2vw] px-[4vw]">
 
     <div class="bg-white shadow-2xl w-full max-w-[76vw] flex flex-col md:flex-row p-[4vw] md:p-[2vw] gap-[3.2vw] md:gap-[2vw] rounded-[1.4vw]">
 
-      <!-- Evento -->
       <div class="w-full sm:flex-shrink-0 sm:basis-[30vw]">
-        <!-- Información del evento y compra (debajo de la imagen) -->
+        
         <div *ngIf="eventoCompra" class="left-event-info w-full text-left text-[3.5vw] md:text-[0.9vw] text-gray-700">
           <img 
             [src]="eventoCompra.imagen || 'assets/images/fondoCudeca.png'" 
@@ -28,62 +22,125 @@
           <p class="mb-[0.4vw] text-[3.2vw] md:text-[0.9vw]"><span class="location-icon">📍</span> {{ eventoCompra.ubicacion }}</p>
           <p class="text-[3.2vw] md:text-[0.9vw]"><span class="calendar-icon">📅</span> {{ eventoCompra.fecha }}</p>
         </div>
+
+        <div *ngIf="socioCompra" class="w-full flex flex-col h-full">
+            
+            <div class="w-full sm:flex-shrink-0 sm:basis-[30vw]">
+        
+        <div *ngIf="eventoCompra" class="left-event-info w-full text-left text-[3.5vw] md:text-[0.9vw] text-gray-700">
+          <img 
+            [src]="eventoCompra.imagen || 'assets/images/fondoCudeca.png'" 
+            alt="Evento"
+            class="w-full h-auto object-cover shadow-md rounded-[1.2vw]"
+            style="aspect-ratio:16/9; width:100%; height:auto;"
+          >
+          <p class="font-semibold mb-[0.6vw] mt-[0.8vw] text-[3.8vw] md:text-[1.3vw]">{{ eventoCompra.titulo }}</p>
+          <p class="mb-[0.6vw] text-[3.2vw] md:text-[0.9vw]">Entradas: {{ eventoCompra.numeroEntradasGeneral + eventoCompra.numeroEntradasVip }}</p>
+          <p class="font-bold text-green-700 mb-[0.8vw] text-[3.5vw] md:text-[1.1vw]">Total: €{{ eventoCompra.totalPrecio }}</p>
+          <p class="mb-[0.4vw] text-[3.2vw] md:text-[0.9vw]"><span class="location-icon">📍</span> {{ eventoCompra.ubicacion }}</p>
+          <p class="text-[3.2vw] md:text-[0.9vw]"><span class="calendar-icon">📅</span> {{ eventoCompra.fecha }}</p>
+        </div>
+
+        <div *ngIf="socioCompra" class="w-full h-full">
+            
+            <div class="bg-white border border-green-200 rounded-[1.2vw] p-[2vw] shadow-md flex flex-col gap-[1.5vw] h-full relative overflow-hidden">
+                
+                <div class="absolute top-0 left-0 w-full h-[0.6vw] bg-green-500"></div>
+
+                <div class="border-b border-gray-100 pb-[1vw]">
+                    <h3 class="text-green-800 font-bold text-[4.5vw] md:text-[1.6vw] leading-tight">
+                        Alta de Socio
+                    </h3>
+                    <p class="text-gray-500 text-[3vw] md:text-[0.9vw]">Resumen de suscripción</p>
+                </div>
+
+                <div class="flex-1 flex flex-col justify-center gap-[1vw]">
+                    <div>
+                        <p class="text-gray-400 text-[2.5vw] md:text-[0.8vw] uppercase tracking-wider font-bold mb-[0.2vw]">Plan elegido</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[4vw] md:text-[1.4vw] font-bold text-gray-800 capitalize">
+                                {{ socioCompra.plan }}
+                            </span>
+                            <span class="bg-yellow-100 text-yellow-700 text-[2.5vw] md:text-[0.8vw] font-bold px-[1vw] py-[0.3vw] rounded-full">
+                                EN PROCESO
+                            </span>
+                        </div>
+                    </div>
+
+                    <ul class="text-[3vw] md:text-[0.95vw] text-gray-600 space-y-[0.6vw] bg-gray-50 p-[1vw] rounded-[0.8vw]">
+                        <li class="flex items-center gap-[0.8vw]">
+                            <span class="text-green-500 font-bold">✓</span> Carnet digital incluido
+                        </li>
+                        <li class="flex items-center gap-[0.8vw]">
+                            <span class="text-green-500 font-bold">✓</span> Desgravación fiscal
+                        </li>
+                        <li class="flex items-center gap-[0.8vw]">
+                            <span class="text-green-500 font-bold">✓</span> Apoyo a cuidados paliativos
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="border-t border-gray-100 pt-[1.5vw] mt-auto">
+                    <div class="flex justify-between items-end">
+                        <span class="text-gray-600 text-[3vw] md:text-[1vw] font-medium">Importe total:</span>
+                        <span class="text-green-700 font-bold text-[6vw] md:text-[2.2vw] leading-none">
+                            {{ socioCompra.importe }} €
+                        </span>
+                    </div>
+                </div>
+
+              </div>
+          </div>
+
+          </div>
+        </div>
+
       </div>
 
-      <!-- SOCIO -->
-      <div *ngIf="socioCompra" class="left-event-info w-full text-left text-gray-700">
-        <img 
-          src="assets/images/fondoCudeca.png"
-          alt="Socio CUDECA"
-          class="w-full h-auto object-cover shadow-md rounded-[1.2vw]"
-          style="aspect-ratio:16/9;"
-        >
-
-        <p class="font-semibold mt-[0.8vw]">
-          Alta como socio ({{ socioCompra.plan | titlecase }})
-        </p>
-
-        <p class="font-bold text-green-700">
-          Total: €{{ socioCompra.importe }}
-        </p>
-      </div>
-
-      <!-- Formulario -->
       <div class="w-full flex flex-col items-center justify-center sm:basis-[40vw]">
 
         <h1 class="font-bold text-green-700 mb-[1.2vw] text-[5.2vw] md:text-[1.8vw]">
-          Completa el formulario:
+          Completa el pago:
         </h1>
 
         <h3 class="font-semibold text-green-600 mb-[1.2vw] text-[4vw] md:text-[1.3vw]">
-          Método de pago
+          Método de pago seguro
         </h3>
 
-        <!-- Botones de métodos de pago -->
         <div class="flex flex-col gap-[0.5vw] mb-[1vw] w-full">
           <button *ngFor="let method of paymentMethods"
                   (click)="selectPaymentMethod(method.id)"
                   [ngClass]="{
-                    'bg-green-100 border-green-600 font-bold': selectedPaymentMethod === method.id,
+                    'bg-green-100 border-green-600 font-bold ring-2 ring-green-500/20': selectedPaymentMethod === method.id,
                     'border-green-300 text-green-600 hover:border-green-500 hover:bg-green-50': selectedPaymentMethod !== method.id
                   }"
-                  class="border-[0.1vw] rounded-full transition-all duration-200 hover:shadow-sm py-[2vw] px-[2vw] md:py-[0.5vw] md:px-[1vw] text-[3vw] md:text-[1vw]">
-            {{ method.name }}
+                  class="border-[0.1vw] rounded-[1vw] transition-all duration-200 hover:shadow-sm py-[2vw] px-[3vw] md:py-[0.8vw] md:px-[1.5vw] text-[3vw] md:text-[1vw] flex items-center justify-between group">
+            
+            <span>{{ method.name }}</span>
+            
+            <div class="w-[3vw] h-[3vw] md:w-[1vw] md:h-[1vw] rounded-full border border-green-400 flex items-center justify-center"
+                 [ngClass]="selectedPaymentMethod === method.id ? 'bg-green-600 border-green-600' : 'bg-white'">
+                 <div class="w-[1vw] h-[1vw] md:w-[0.3vw] md:h-[0.3vw] bg-white rounded-full" *ngIf="selectedPaymentMethod === method.id"></div>
+            </div>
           </button>
         </div>
 
-        <!-- Mensaje de error -->
-        <div *ngIf="errorMessage" class="bg-red-50 border border-red-300 text-red-700 rounded-[0.8vw] p-[1vw] mb-[1.5vw] w-full text-[3vw] md:text-[0.9vw]">
+        <div *ngIf="errorMessage" class="bg-red-50 border border-red-300 text-red-700 rounded-[0.8vw] p-[1vw] mb-[1.5vw] w-full text-[3vw] md:text-[0.9vw] text-center">
           {{ errorMessage }}
         </div>
 
-        <!-- Botón realizar compra -->
         <button
           (click)="processPayment()"
           [disabled]="!selectedPaymentMethod || isProcessing"
-          class="w-full text-white rounded-full shadow-lg transition-transform duration-300 transform font-medium py-[4.5vw] px-[4.5vw] md:py-[1vw] md:px-[1vw] text-[4.5vw] md:text-[1.2vw] disabled:opacity-50 disabled:cursor-not-allowed pay-button"
-          [ngClass]="selectedPaymentMethod && !isProcessing ? 'bg-green-500 hover:bg-green-800' : 'bg-gray-300'">
-          {{ isProcessing ? 'Procesando...' : 'Realizar compra' }}
+          class="w-full text-white rounded-[1vw] shadow-lg transition-transform duration-300 transform font-bold py-[3vw] md:py-[1vw] text-[4vw] md:text-[1.2vw] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-[1vw]"
+          [ngClass]="selectedPaymentMethod && !isProcessing ? 'bg-green-600 hover:bg-green-700 hover:scale-[1.02]' : 'bg-gray-300'">
+          
+          <span *ngIf="!isProcessing">Pagar ahora</span>
+          
+          <svg *ngIf="isProcessing" class="animate-spin h-[4vw] w-[4vw] md:h-[1.2vw] md:w-[1.2vw] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
         </button>
 
       </div>

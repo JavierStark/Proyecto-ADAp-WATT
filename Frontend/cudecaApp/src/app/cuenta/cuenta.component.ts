@@ -1,28 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common'; // Importante para *ngIf y *ngFor
-import { FormsModule } from '@angular/forms';   // Importante para editar datos
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+// 1. IMPORTAR HTTPCLIENT Y HEADERS
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-cuenta',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './cuenta.component.html',
-  styles: `` // No necesitamos CSS por ahora, usaremos Tailwind directo en el HTML
+  styles: ``
 })
-export class CuentaComponent implements OnInit{
+export class CuentaComponent implements OnInit {
 
-  // Control de Vistas
   vistaActual: 'menu' | 'perfil' | 'tickets' | 'donaciones' = 'menu';
   isLoading: boolean = false;
   modoEdicion: boolean = false;
 
-  // Datos del Usuario
   usuario: any = {};
-  usuarioOriginal: any = {}; // Para poder cancelar edición
+  usuarioOriginal: any = {};
   
-  // Listas de datos
   tickets: any[] = [];
   donaciones: any[] = [];
   totalDonado: number = 0;
@@ -37,35 +36,51 @@ export class CuentaComponent implements OnInit{
 
   ngOnInit() {
     this.cargarDatosUsuario();
+    this.verificarEstadoSocio(); // <--- LLAMADA NUEVA
     this.generarAniosDisponibles();
   }
 
-  // NAVEGACIÓN INTERNA
+  // 4. NUEVA FUNCIÓN PARA COMPROBAR SI ES SOCIO
+  verificarEstadoSocio() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    this.http.get<any>(`${this.apiUrl}/partners/data`, { headers }).subscribe({
+      next: (data) => {
+        // Si devuelve datos y isActivo es true, mostramos el cartelito
+        this.isSocio = data && data.isActivo;
+      },
+      error: (err) => {
+        console.error('No se pudo verificar estado de socio', err);
+        this.isSocio = false;
+      }
+    });
+  }
+
+  // ... Resto de funciones (cambiarVista, entrarModoEdicion, etc.) siguen igual ...
   cambiarVista(vista: 'menu' | 'perfil' | 'tickets' | 'donaciones') {
     this.vistaActual = vista;
-    this.modoEdicion = false; // Salir de modo edición
+    this.modoEdicion = false;
     if (vista === 'tickets') this.cargarTickets();
     if (vista === 'donaciones') this.cargarDonaciones();
   }
 
-  // MODO EDICIÓN
   entrarModoEdicion() {
     this.modoEdicion = true;
-    this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario)); // Backup
+    this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario));
   }
 
   cancelarEdicion() {
-    this.usuario = JSON.parse(JSON.stringify(this.usuarioOriginal)); // Restaurar
+    this.usuario = JSON.parse(JSON.stringify(this.usuarioOriginal));
     this.modoEdicion = false;
   }
 
-  // CARGA DE DATOS
   cargarDatosUsuario() {
     this.loadingPerfil = true;
     this.authService.getProfile().subscribe({
       next: (data) => {
-        // Mapear los campos del backend al frontend
-        // Backend envía: piso (no pisoPuerta) y cp (no codigoPostal)
         this.usuario = {
           ...data,
           pisoPuerta: data.piso,
@@ -97,7 +112,6 @@ export class CuentaComponent implements OnInit{
     this.authService.getMyDonations().subscribe({
       next: (data) => {
         this.donaciones = data;
-        // Calculamos el total sumando el importe de todas las donaciones
         this.totalDonado = data.reduce((acc: number, curr: any) => acc + (curr.amount || curr.cantidad || 0), 0);
         this.isLoading = false;
       },
@@ -167,7 +181,6 @@ export class CuentaComponent implements OnInit{
   // --- ACCIONES ---
   guardarCambios() {
     this.isLoading = true;
-    // Mapear los campos al formato esperado por el backend
     const datosAEnviar = {
       ...this.usuario,
       piso: this.usuario.pisoPuerta,
@@ -188,10 +201,7 @@ export class CuentaComponent implements OnInit{
   }
 
   onLogout() {
-    // 1. Borramos el token
     this.authService.logout();
-    
-    // 2. Redirigimos al home
     this.router.navigate(['/']);
   }
 }
