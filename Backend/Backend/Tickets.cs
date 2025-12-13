@@ -489,8 +489,6 @@ static class Tickets
             if (string.IsNullOrEmpty(dto.Dni)) camposFaltantes.Add("DNI");
             if (string.IsNullOrEmpty(dto.Nombre)) camposFaltantes.Add("Nombre");
             if (string.IsNullOrEmpty(dto.Apellidos)) camposFaltantes.Add("Apellidos");
-            if (string.IsNullOrEmpty(dto.Calle)) camposFaltantes.Add("Calle");
-            if (string.IsNullOrEmpty(dto.Numero)) camposFaltantes.Add("Número");
             
             if (camposFaltantes.Count != 0)
             {
