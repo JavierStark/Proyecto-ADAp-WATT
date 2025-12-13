@@ -253,6 +253,37 @@
           <p class="text-[3vw] font-bold">{{ totalDonado | currency:'EUR' }}</p>
         </div>
 
+        <!-- Sección de Descarga de Certificado -->
+        <div *ngIf="donaciones.length > 0" class="bg-blue-50 border-2 border-blue-300 rounded-[1.5vw] p-[2vw] mb-[2vw] shadow-md">
+          <h2 class="text-[1.3vw] font-bold text-blue-900 mb-[1vw]">📄 Descargar Certificado de Donaciones</h2>
+          <p class="text-[0.95vw] text-gray-700 mb-[1.5vw]">Obtén un certificado fiscal en PDF con tus donaciones anuales</p>
+          
+          <div class="flex items-center gap-[1.5vw] flex-wrap">
+            <!-- Selector de año -->
+            <div class="flex items-center gap-[0.8vw]">
+              <label for="yearSelect" class="text-[1vw] font-semibold text-gray-800">Año:</label>
+              <select 
+                id="yearSelect"
+                [(ngModel)]="yearSeleccionado"
+                class="p-[0.7vw] text-[0.95vw] border-2 border-gray-300 rounded-[0.6vw] bg-white focus:outline-none focus:border-blue-500 font-medium">
+                <option *ngFor="let anio of aniosDisponibles" [value]="anio">{{ anio }}</option>
+              </select>
+            </div>
+
+            <!-- Botón de descarga -->
+            <button 
+              (click)="descargarCertificado()"
+              [disabled]="descargandoCertificado"
+              class="bg-blue-600 text-white text-[0.95vw] font-bold py-[0.7vw] px-[2vw] rounded-[0.6vw] hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-[0.5vw]">
+              <span *ngIf="!descargandoCertificado">📥 Descargar PDF</span>
+              <span *ngIf="descargandoCertificado" class="flex items-center gap-[0.5vw]">
+                <span class="animate-spin inline-block w-[1vw] h-[1vw] border-2 border-white border-t-transparent rounded-full"></span>
+                Generando...
+              </span>
+            </button>
+          </div>
+        </div>
+
         <div *ngIf="donaciones.length === 0" class="text-center text-[1.2vw] text-gray-600 bg-white p-[3vw] rounded-[1.5vw] shadow-lg">
           <p>Aún no has realizado donaciones.</p>
         </div>

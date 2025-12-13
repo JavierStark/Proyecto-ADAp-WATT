@@ -175,4 +175,28 @@ export class AuthService {
     return this.http.delete(`${this.apiUrl}/admin/events/${eventId}`, { headers: this.getHeaders() });
   }
 
+  // 11. Descargar certificado de donaciones (POST /donations/certificate/annual)
+  downloadDonationCertificate(year: number, userData: any = {}): Observable<Blob> {
+    const body = {
+      Year: year,
+      Dni: userData.dni,
+      Calle: userData.calle,
+      Numero: userData.numero,
+      PisoPuerta: userData.pisoPuerta,
+      CodigoPostal: userData.codigoPostal,
+      Ciudad: userData.ciudad,
+      Provincia: userData.provincia,
+      Pais: userData.pais
+    };
+
+    return this.http.post(
+      `${this.apiUrl}/donations/certificate/annual`,
+      body,
+      {
+        headers: this.getHeaders(),
+        responseType: 'blob'
+      }
+    );
+  }
+
 }
