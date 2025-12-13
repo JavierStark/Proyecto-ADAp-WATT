@@ -78,12 +78,14 @@
         </div>
 
         <!-- Botón pagar -->
-        <button 
+        <button
           (click)="processPayment()"
-          class="w-full bg-[#8FBD9F] hover:bg-[#7da88c] disabled:bg-gray-400 text-white rounded-full shadow-lg 
-                 transition-transform duration-300 transform hover:scale-[1.02] font-medium
-                 py-[0.8vw] text-[5vw] md:text-[1.1vw]">
-          Pagar
+          [disabled]="!hasValidAmount"
+          class="pay-button w-full text-white rounded-[1vw] shadow-lg transition-transform duration-300 transform font-bold
+                 py-[3vw] md:py-[1vw] text-[4vw] md:text-[1.2vw] disabled:opacity-50 disabled:cursor-not-allowed flex
+                 justify-center items-center gap-[1vw]"
+          [ngClass]="hasValidAmount ? 'bg-green-600 hover:bg-green-700 hover:scale-[1.02]' : 'bg-gray-300'">
+          Pagar ahora
         </button>
 
       </div>

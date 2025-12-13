@@ -36,9 +36,14 @@ export class DonationComponent {
     this.isCustomAmountMode = true;
   }
 
+  get hasValidAmount(): boolean {
+    const amount = this.isCustomAmountMode ? Number(this.customAmountValue) : this.selectedAmount;
+    return !!amount && amount > 0;
+  }
+
   // Función del botón Pagar
   processPayment() {
-    const finalAmount = this.isCustomAmountMode ? this.customAmountValue : this.selectedAmount;
+    const finalAmount = this.isCustomAmountMode ? Number(this.customAmountValue) : this.selectedAmount;
 
     if (!finalAmount || finalAmount <= 0) {
       alert('Por favor selecciona o introduce una cantidad válida.');
