@@ -14,14 +14,14 @@ static class Donations
         try
         {
             var userId = (string)httpContext.Items["user_id"]!;
-
-            var donaciones = await client
+            
+            var response = await client
                 .From<Donacion>()
-                .Select("*, Pago:fk_pago!inner(*, Cliente:fk_cliente!inner(*))")
-                .Filter("Pago.Cliente.id", Operator.Equals, userId)
+                .Select("*, Pago:fk_pago!inner(*)") 
+                .Filter("Pago.fk_usuario", Operator.Equals, userId)
                 .Get();
-
-            var historial = donaciones.Models
+            
+            var historial = response.Models
                 .Select(d => new DonationHistoryDto(
                     d.Id,
                     d.Pago?.Monto ?? 0,
