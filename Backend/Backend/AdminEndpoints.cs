@@ -12,7 +12,7 @@ public static class AdminEndpoints
         {
             var eventos = (await client
                 .From<Evento>()
-                .Order(e => e.FechaEvento, Constants.Ordering.Descending)
+                .Order(e => e.FechaEvento, Constants.Ordering.Ascending)
                 .Get()).Models;
 
             var entradasTipos = (await client
