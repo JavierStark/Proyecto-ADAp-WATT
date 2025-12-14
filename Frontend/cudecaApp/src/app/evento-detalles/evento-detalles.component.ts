@@ -15,7 +15,8 @@ interface Evento {
   ubicacion: string;
   capacidad: number;
   inscritos: number;
-  objetoRecaudacion?: string;
+  objetivoRecaudacion?: number;
+  totalRecaudado?: number;
 }
 
 @Component({
@@ -73,7 +74,8 @@ export class EventoDetalleComponent implements OnInit {
           ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
           capacidad: item.capacity || item.capacidad || item.aforo || 50,
           inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
-          objetoRecaudacion: item.goalDescription || item.objetoRecaudacion
+          objetivoRecaudacion: item.ObjetivoRecaudacion || item.objetivoRecaudacion || 0,
+          totalRecaudado: item.TotalRecaudado || item.totalRecaudado || 0
         };
       })
     ).subscribe({
@@ -94,7 +96,7 @@ export class EventoDetalleComponent implements OnInit {
   usarMock(id: string) {
     // Lista falsa de respaldo
     const mocks: Evento[] = [
-      { id: '1', titulo: 'Carrera Solidaria Cudeca', descripcion: 'Descripción larga de la carrera...', fecha: new Date('2025-12-15'), imagen: 'assets/images/fondoCudeca.png', imageUrl: undefined, ubicacion: 'Parque Central', capacidad: 200, inscritos: 145, objetoRecaudacion: 'Equipamiento médico' },
+      { id: '1', titulo: 'Carrera Solidaria Cudeca', descripcion: 'Descripción larga de la carrera...', fecha: new Date('2025-12-15'), imagen: 'assets/images/fondoCudeca.png', imageUrl: undefined, ubicacion: 'Parque Central', capacidad: 200, inscritos: 145, objetivoRecaudacion: 5000, totalRecaudado: 1250 },
       { id: '2', titulo: 'Concierto Benéfico', descripcion: 'Descripción del concierto...', fecha: new Date('2025-12-20'), imagen: 'assets/images/fondoCudeca.png', imageUrl: undefined, ubicacion: 'Teatro Municipal', capacidad: 150, inscritos: 150 },
     ];
     this.evento = mocks.find(e => e.id === id) || mocks[0]; // Si no encuentra el ID, muestra el primero

@@ -19,7 +19,12 @@ export interface Evento {
   ubicacion?: string;
   capacidad?: number;
   inscritos?: number;
-  objetoRecaudacion?: string;
+
+  // Recaudación
+  objetivoRecaudacion?: number;
+  recaudacionExtra?: number;
+  totalRecaudado?: number;
+
   visible?: boolean;
   precioGeneral?: number;
   cantidadGeneral?: number;
@@ -144,7 +149,8 @@ export class EventosComponent implements OnInit {
       fecha: '',
       ubicacion: '',
       eventoVisible: true,
-      objetoRecaudacion: '',
+      objetivoRecaudacion: 0,
+      recaudacionExtra: 0,
       precioGeneral: 0,
       cantidadGeneral: 0,
       precioVip: null,
@@ -169,7 +175,8 @@ export class EventosComponent implements OnInit {
       fecha: evento.fecha ? new Date(evento.fecha).toISOString().slice(0,16) : '',
       ubicacion: evento.ubicacion,
       eventoVisible: evento.visible ?? true,
-      objetoRecaudacion: evento.objetoRecaudacion || '',
+      objetivoRecaudacion: evento.objetivoRecaudacion || 0,
+      recaudacionExtra: evento.recaudacionExtra || 0,
       precioGeneral: evento.precioGeneral ?? 0,
       cantidadGeneral: evento.cantidadGeneral ?? 0,
       precioVip: evento.precioVip ?? null,
@@ -246,7 +253,8 @@ export class EventosComponent implements OnInit {
     formData.append('Fecha', this.formData.fecha ? new Date(this.formData.fecha).toISOString() : '');
     formData.append('Ubicacion', this.formData.ubicacion);
     formData.append('EventoVisible', String(!!this.formData.eventoVisible));
-    formData.append('ObjetoRecaudacion', this.formData.objetoRecaudacion || '');
+    formData.append('ObjetivoRecaudacion', String(Number(this.formData.objetivoRecaudacion) || 0));
+    formData.append('RecaudacionExtra', String(Number(this.formData.recaudacionExtra) || 0));
     formData.append('PrecioGeneral', String(Number(this.formData.precioGeneral) || 0));
     formData.append('CantidadGeneral', String(Number(this.formData.cantidadGeneral) || 0));
     if (this.formData.precioVip !== null && this.formData.precioVip !== '') {
@@ -327,7 +335,9 @@ export class EventosComponent implements OnInit {
           ubicacion: item.location || item.ubicacion || 'Ubicación pendiente',
           capacidad: item.capacity || item.capacidad || item.aforo || 50,
           inscritos: item.enrolled || item.inscritos || item.entradasVendidas || 0,
-          objetoRecaudacion: item.goalDescription || item.objetoRecaudacion || item.objetivo || null,
+          objetivoRecaudacion: item.ObjetivoRecaudacion || item.objetivoRecaudacion || 0,
+          totalRecaudado: item.TotalRecaudado || item.totalRecaudado || 0,
+          recaudacionExtra: 0,
           visible: item.eventoVisible ?? true
         };
       });
@@ -361,7 +371,9 @@ export class EventosComponent implements OnInit {
           ubicacion: item.ubicacion || 'Ubicación pendiente',
           capacidad: item.aforo || item.capacity || 50,
           inscritos: item.entradasVendidas || item.inscritos || 0,
-          objetoRecaudacion: item.objetoRecaudacion || null,
+          objetivoRecaudacion: item.ObjetivoRecaudacion || item.objetivoRecaudacion || 0,
+          recaudacionExtra: item.RecaudacionExtra || item.recaudacionExtra || 0,
+          totalRecaudado: item.TotalRecaudado || item.totalRecaudado || 0,
           visible: item.eventoVisible ?? true,
           precioGeneral: item.precioGeneral ?? item.PrecioGeneral ?? null,
           cantidadGeneral: item.cantidadGeneral ?? item.CantidadGeneral ?? null,
@@ -386,7 +398,8 @@ export class EventosComponent implements OnInit {
         ubicacion: 'Parque Central',
         capacidad: 200,
         inscritos: 145,
-        objetoRecaudacion: 'Recaudar fondos para equipamiento médico'
+        objetivoRecaudacion: 10000, 
+        totalRecaudado: 7250
       },
       {
         id: '2',
@@ -407,7 +420,8 @@ export class EventosComponent implements OnInit {
         ubicacion: 'Centro Cudeca',
         capacidad: 30,
         inscritos: 22,
-        objetoRecaudacion: 'Apoyo a programas de atención domiciliaria'
+        objetivoRecaudacion: 5000, 
+        totalRecaudado: 1250
       },
       {
         id: '4',
