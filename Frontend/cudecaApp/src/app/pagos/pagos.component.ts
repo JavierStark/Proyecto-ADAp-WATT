@@ -120,6 +120,7 @@ private procesarPagoEvento(): void {
     nombre: this.eventoCompra.nombreCliente,
     apellidos: this.eventoCompra.apellidosCliente,
     telefono: this.eventoCompra.telefonoCliente,
+    email: this.eventoCompra.email || null,
     calle: this.eventoCompra.calle,
     numero: this.eventoCompra.numero,
     pisoPuerta: this.eventoCompra.pisoPuerta,

@@ -39,6 +39,7 @@ export class CuentaComponent implements OnInit {
 
   empresa: string = ''; // El nombre de la empresa
   esEmpresa: boolean = false; // Checkbox visual para el formulario
+  empresaYaRegistrada: boolean = false;
 
   constructor(
     private authService: AuthService, 
@@ -201,70 +202,57 @@ export class CuentaComponent implements OnInit {
   cargarDatosEmpresa() {
     this.companyService.getCompanyProfile().subscribe({
       next: (data) => {
-        // Si devuelve datos (200 OK), guardamos el nombre
         if (data && data.nombreEmpresa) {
           this.empresa = data.nombreEmpresa;
-          this.esEmpresa = true; // Activamos el check visualmente
+          this.esEmpresa = true;
+          
+          // Si ya viene del servidor, marcamos que ya está registrada
+          this.empresaYaRegistrada = true; 
+        } else {
+          this.esEmpresa = false;
+          this.empresa = '';
+          this.empresaYaRegistrada = false;
         }
       },
       error: (err) => {
-        // Si da 404 (Not Found) es que NO es empresa aún, no pasa nada
-        if (err.status !== 404) {
-          console.error('Error cargando datos empresa', err);
-        }
+        // ... (manejo de errores igual)
         this.esEmpresa = false;
-        this.empresa = '';
+        this.empresaYaRegistrada = false;
       }
     });
   }
 
   guardarCambios() {
+    if (this.esEmpresa && !this.empresaYaRegistrada) {
+      const confirmar = confirm('⚠️ ATENCIÓN: Estás a punto de convertir tu cuenta en un perfil de Empresa. Esta acción NO se puede deshacer. ¿Deseas continuar?');
+      if (!confirmar) {
+        this.isLoading = false;
+        return; // Cancelamos el guardado
+      }
+    }
+
     this.isLoading = true;
 
-    // 1. Datos de usuario normal
     const datosUsuario = {
       ...this.usuario,
       piso: this.usuario.pisoPuerta,
       cp: this.usuario.codigoPostal
     };
 
-    // 2. Actualizar perfil de usuario
     this.authService.updateProfile(datosUsuario).subscribe({
       next: () => {
         
-        // --- LÓGICA EMPRESA ---
-        
-        // CASO A: Es empresa y hay texto -> Guardamos
         if (this.esEmpresa && this.empresa.trim() !== '') {
           this.companyService.saveCompanyProfile(this.empresa).subscribe({
-            next: () => this.finalizarGuardado(true), // true = recargar datos para confirmar
+            next: () => this.finalizarGuardado(true),
             error: () => {
-              alert('Datos de usuario guardados, pero error al guardar empresa.');
+              alert('Datos guardados, pero error al actualizar empresa.');
               this.isLoading = false;
             }
           });
-        } 
-        
-        // CASO B: Check desmarcado o texto vacío -> Borrar
-        else {
-          // Intentamos enviar cadena vacía
-          this.companyService.saveCompanyProfile('').subscribe({
-            next: () => {
-              // Éxito al borrar: Limpiamos localmente y NO recargamos del server
-              this.empresa = '';
-              this.esEmpresa = false;
-              this.finalizarGuardado(false); 
-            },
-            error: (err) => {
-              // Si el backend da error (ej: no permite vacíos), forzamos el borrado visual
-              console.warn('Backend rechazó nombre vacío, forzando limpieza local', err);
-              this.empresa = '';
-              this.esEmpresa = false;
-              this.finalizarGuardado(false);
-            }
-          });
+        } else {
+          this.finalizarGuardado(true);
         }
-
       },
       error: () => {
         alert('❌ Error al actualizar perfil');

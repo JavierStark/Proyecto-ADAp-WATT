@@ -227,30 +227,46 @@
               </div>
               <div class="col-span-2 mt-[2vw] pt-[2vw] border-t border-gray-200">
     
-                    <div class="flex items-center gap-[1vw] mb-[1.5vw]">
-                        <input 
-                            type="checkbox" 
-                            id="checkEmpresa"
-                            [(ngModel)]="esEmpresa" 
-                            name="esEmpresa"
-                            class="w-[4vw] h-[4vw] md:w-[1.2vw] md:h-[1.2vw] text-green-600 rounded focus:ring-green-500 border-gray-300">
-                        <label for="checkEmpresa" class="text-gray-800 font-bold text-[3.5vw] md:text-[1vw]">
-                            Soy una empresa / Quiero facturar a nombre de empresa
-                        </label>
-                    </div>
+                  <div class="flex items-start gap-[1vw] mb-[1.5vw]">
+                      <input 
+                          type="checkbox" 
+                          id="checkEmpresa"
+                          [(ngModel)]="esEmpresa" 
+                          name="esEmpresa"
+                          [disabled]="empresaYaRegistrada" 
+                          class="w-[4vw] h-[4vw] md:w-[1.2vw] md:h-[1.2vw] text-green-600 rounded focus:ring-green-500 border-gray-300 mt-[0.2vw] disabled:opacity-50 disabled:cursor-not-allowed">
+                      
+                      <div class="flex flex-col">
+                          <label for="checkEmpresa" class="text-gray-800 font-bold text-[3.5vw] md:text-[1vw] cursor-pointer" [class.cursor-not-allowed]="empresaYaRegistrada">
+                              Soy una empresa / Quiero facturar a nombre de empresa
+                          </label>
+                          <span *ngIf="empresaYaRegistrada" class="text-gray-500 text-[0.8vw]">
+                              (Esta cuenta ya está vinculada a una empresa y no se puede revertir)
+                          </span>
+                      </div>
+                  </div>
 
-                    <div *ngIf="esEmpresa" class="animate-fade-in-up bg-green-50 p-[2vw] rounded-[1vw] border border-green-200">
-                        <label class="block text-green-800 font-bold text-[0.9vw] mb-[0.3vw]">Razón Social / Nombre Empresa</label>
-                        <input 
-                            [(ngModel)]="empresa" 
-                            name="nombreEmpresa" 
-                            type="text" 
-                            placeholder="Ej: Construcciones S.L."
-                            class="w-full p-[0.8vw] text-[1vw] border border-green-300 rounded-[0.5vw] bg-white focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600">
-                        <p class="text-gray-500 text-[0.8vw] mt-[0.5vw]">Este nombre aparecerá en tus certificados y recibos.</p>
-                    </div>
+                  <div *ngIf="esEmpresa" class="animate-fade-in-up bg-green-50 p-[2vw] rounded-[1vw] border border-green-200">
+                      
+                      <div *ngIf="!empresaYaRegistrada" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-[1vw] mb-[1.5vw] rounded-[0.5vw] flex items-start gap-[0.8vw]">
+                          <span class="text-[1.2vw]">⚠️</span>
+                          <div class="text-[0.9vw]">
+                              <p class="font-bold">Importante:</p>
+                              <p>Al guardar estos datos, tu cuenta pasará a ser un <strong>perfil corporativo</strong> de forma permanente. Esta acción <strong>no se puede revertir</strong>.</p>
+                          </div>
+                      </div>
 
-                </div>
+                      <label class="block text-green-800 font-bold text-[0.9vw] mb-[0.3vw]">Nombre Empresa</label>
+                      <input 
+                          [(ngModel)]="empresa" 
+                          name="nombreEmpresa" 
+                          type="text" 
+                          placeholder="Ej: Construcciones S.L."
+                          class="w-full p-[0.8vw] text-[1vw] border border-green-300 rounded-[0.5vw] bg-white focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600">
+                      <p class="text-gray-500 text-[0.8vw] mt-[0.5vw]">Este nombre aparecerá en tus certificados y recibos.</p>
+                  </div>
+
+              </div>
 
               <div class="col-span-2 flex gap-[1vw] pt-[1vw] border-t border-gray-100 mt-[1vw]">
                 <button type="submit" [disabled]="isLoading" class="flex-1 bg-green-600 text-white text-[1vw] font-bold py-[0.8vw] rounded-[0.5vw] hover:bg-green-700 transition shadow-md">
