@@ -8,7 +8,7 @@ import { HelpModalComponent } from './help-modal/help-modal.component';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [RouterOutlet, NgClass, CommonModule, HelpModalComponent],
+  imports: [RouterOutlet, CommonModule, HelpModalComponent],
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
