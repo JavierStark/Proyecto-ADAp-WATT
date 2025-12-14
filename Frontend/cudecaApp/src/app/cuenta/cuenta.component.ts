@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 // 1. IMPORTAR HTTPCLIENT Y HEADERS
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { CompanyService } from '../services/company.service';
 
 @Component({
   selector: 'app-cuenta',
@@ -33,24 +34,26 @@ export class CuentaComponent implements OnInit {
   aniosDisponibles: number[] = [];
   certificadoWarning: string = '';
 
-  // 2. NUEVA VARIABLE PARA EL ESTADO DE SOCIO
   isSocio: boolean = false;
   private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
 
-  // 3. INYECTAR HTTPCLIENT
+  empresa: string = ''; // El nombre de la empresa
+  esEmpresa: boolean = false; // Checkbox visual para el formulario
+
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private http: HttpClient 
+    private http: HttpClient,
+    private companyService: CompanyService
   ) {}
 
   ngOnInit() {
     this.cargarDatosUsuario();
-    this.verificarEstadoSocio(); // <--- LLAMADA NUEVA
+    this.verificarEstadoSocio();
+    this.cargarDatosEmpresa();
     this.generarAniosDisponibles();
   }
 
-  // 4. NUEVA FUNCIÓN PARA COMPROBAR SI ES SOCIO
   verificarEstadoSocio() {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -69,7 +72,6 @@ export class CuentaComponent implements OnInit {
     });
   }
 
-  // ... Resto de funciones (cambiarVista, entrarModoEdicion, etc.) siguen igual ...
   cambiarVista(vista: 'menu' | 'perfil' | 'tickets' | 'donaciones') {
     this.vistaActual = vista;
     this.modoEdicion = false;
@@ -196,25 +198,92 @@ export class CuentaComponent implements OnInit {
     });
   }
 
+  cargarDatosEmpresa() {
+    this.companyService.getCompanyProfile().subscribe({
+      next: (data) => {
+        // Si devuelve datos (200 OK), guardamos el nombre
+        if (data && data.nombreEmpresa) {
+          this.empresa = data.nombreEmpresa;
+          this.esEmpresa = true; // Activamos el check visualmente
+        }
+      },
+      error: (err) => {
+        // Si da 404 (Not Found) es que NO es empresa aún, no pasa nada
+        if (err.status !== 404) {
+          console.error('Error cargando datos empresa', err);
+        }
+        this.esEmpresa = false;
+        this.empresa = '';
+      }
+    });
+  }
+
   guardarCambios() {
     this.isLoading = true;
-    const datosAEnviar = {
+
+    // 1. Datos de usuario normal
+    const datosUsuario = {
       ...this.usuario,
       piso: this.usuario.pisoPuerta,
       cp: this.usuario.codigoPostal
     };
-    this.authService.updateProfile(datosAEnviar).subscribe({
+
+    // 2. Actualizar perfil de usuario
+    this.authService.updateProfile(datosUsuario).subscribe({
       next: () => {
-        alert('✅ Datos actualizados correctamente');
-        this.isLoading = false;
-        this.modoEdicion = false;
-        this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario));
+        
+        // --- LÓGICA EMPRESA ---
+        
+        // CASO A: Es empresa y hay texto -> Guardamos
+        if (this.esEmpresa && this.empresa.trim() !== '') {
+          this.companyService.saveCompanyProfile(this.empresa).subscribe({
+            next: () => this.finalizarGuardado(true), // true = recargar datos para confirmar
+            error: () => {
+              alert('Datos de usuario guardados, pero error al guardar empresa.');
+              this.isLoading = false;
+            }
+          });
+        } 
+        
+        // CASO B: Check desmarcado o texto vacío -> Borrar
+        else {
+          // Intentamos enviar cadena vacía
+          this.companyService.saveCompanyProfile('').subscribe({
+            next: () => {
+              // Éxito al borrar: Limpiamos localmente y NO recargamos del server
+              this.empresa = '';
+              this.esEmpresa = false;
+              this.finalizarGuardado(false); 
+            },
+            error: (err) => {
+              // Si el backend da error (ej: no permite vacíos), forzamos el borrado visual
+              console.warn('Backend rechazó nombre vacío, forzando limpieza local', err);
+              this.empresa = '';
+              this.esEmpresa = false;
+              this.finalizarGuardado(false);
+            }
+          });
+        }
+
       },
       error: () => {
-        alert('❌ Error al actualizar');
+        alert('❌ Error al actualizar perfil');
         this.isLoading = false;
       }
     });
+  }
+
+  // Modificamos esta función para aceptar el parámetro
+  finalizarGuardado(recargarEmpresa: boolean = true) {
+    alert('✅ Datos actualizados correctamente');
+    this.isLoading = false;
+    this.modoEdicion = false;
+    this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario));
+    
+    // Solo recargamos si no acabamos de borrarla
+    if (recargarEmpresa) {
+      this.cargarDatosEmpresa();
+    }
   }
 
   onLogout() {
