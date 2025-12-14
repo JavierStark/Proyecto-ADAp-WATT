@@ -1,4 +1,4 @@
-<section class="w-full min-h-screen pt-[10vw] pb-[4vw] overflow-hidden font-sans bg-green-50 relative">
+<section class="w-full min-h-screen pt-[22vw] sm:pt-[10vw] pb-[10vw] sm:pb-[4vw] overflow-hidden font-sans bg-green-50 relative">
   <img
     src="assets/images/fondoCudeca.png"
     alt="Fondo"
@@ -6,78 +6,78 @@
   />
   <div class="absolute inset-0 bg-green-400 opacity-30 -z-5"></div>
 
-  <div class="max-w-[95vw] mx-auto relative z-10">
+  <div class="max-w-[98vw] sm:max-w-[95vw] mx-auto relative z-10">
     
     <div *ngIf="isLoading" class="flex flex-col items-center justify-center h-[50vh]">
-      <div class="animate-spin rounded-full h-[5vw] w-[5vw] border-b-[0.4vw] border-green-700 mb-[2vw]"></div>
-      <p class="text-green-800 text-[1.5vw] font-bold">Cargando evento...</p>
+      <div class="animate-spin rounded-full h-[12vw] w-[12vw] sm:h-[5vw] sm:w-[5vw] border-b-[1vw] sm:border-b-[0.4vw] border-green-700 mb-[4vw] sm:mb-[2vw]"></div>
+      <p class="text-green-800 text-[4vw] sm:text-[1.5vw] font-bold">Cargando evento...</p>
     </div>
 
-    <div *ngIf="!isLoading && evento" class="bg-white rounded-[2vw] shadow-2xl overflow-hidden p-[2vw]">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-[2.5vw]">
+    <div *ngIf="!isLoading && evento" class="bg-white rounded-[5vw] sm:rounded-[2vw] shadow-2xl overflow-hidden p-[5vw] sm:p-[2vw]">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-[6vw] sm:gap-[2.5vw]">
         
         <div class="lg:col-span-1">
-          <h1 class="text-[1.6vw] font-bold text-green-700 mb-[1.5vw]">Has seleccionado:</h1>
+          <h1 class="text-[5vw] sm:text-[1.6vw] font-bold text-green-700 mb-[4vw] sm:mb-[1.5vw]">Has seleccionado:</h1>
           
           <div class="bg-green-50 border border-green-200 rounded-[1.5vw] p-[1.5vw] shadow-sm">
-            <img [src]="evento.imagen" alt="Evento" class="w-full h-[12vw] object-cover rounded-[1vw] mb-[1vw]">
-            <h3 class="text-[1.3vw] font-bold text-green-800 mb-[1vw]">{{ evento.titulo }}</h3>
+            <img [src]="evento.imagen" alt="Evento" class="w-full h-[45vw] sm:h-[12vw] object-cover rounded-[4vw] sm:rounded-[1vw] mb-[3vw] sm:mb-[1vw]">
+            <h3 class="text-[4.5vw] sm:text-[1.3vw] font-bold text-green-800 mb-[3vw] sm:mb-[1vw]">{{ evento.titulo }}</h3>
             
-            <div class="flex items-center gap-[0.5vw] text-[0.95vw] text-gray-700 mb-[1vw]">
+            <div class="flex items-center gap-[2vw] sm:gap-[0.5vw] text-[3.8vw] sm:text-[0.95vw] text-gray-700 mb-[3vw] sm:mb-[1vw]">
               <span>📍</span><span>{{ evento.ubicacion }}</span>
             </div>
-            <div class="flex items-center gap-[0.5vw] text-[0.95vw] text-gray-700 mb-[1.5vw]">
+            <div class="flex items-center gap-[2vw] sm:gap-[0.5vw] text-[3.8vw] sm:text-[0.95vw] text-gray-700 mb-[3vw] sm:mb-[1.5vw]">
               <span>📅</span><span>{{ evento.fecha | date:'d MMMM yyyy':'':'es-ES' }}</span>
             </div>
 
             <div class="bg-white rounded-[1vw] p-[1.2vw] mb-[1.5vw]">
               <div class="mb-[1vw]">
-                <div class="text-[0.85vw] text-gray-600 mb-[0.3vw]">Entradas General:</div>
-                <div class="text-[1.2vw] font-bold text-green-700">
+                <div class="text-[3.5vw] sm:text-[0.85vw] text-gray-600 mb-[0.3vw]">Entradas General:</div>
+                <div class="text-[4vw] sm:text-[1.2vw] font-bold text-green-700">
                   {{ numeroEntradasGeneral }} × {{ precioGeneral | number:'1.0-2' }}€ = {{ totalGeneral | number:'1.0-2' }}€
                 </div>
               </div>
               
               <div *ngIf="tieneEntradasVip" class="mb-[1vw]">
-                <div class="text-[0.85vw] text-gray-600 mb-[0.3vw]">Entradas VIP:</div>
-                <div class="text-[1.2vw] font-bold text-amber-700">
+                <div class="text-[3.5vw] sm:text-[0.85vw] text-gray-600 mb-[0.3vw]">Entradas VIP:</div>
+                <div class="text-[4vw] sm:text-[1.2vw] font-bold text-amber-700">
                   {{ numeroEntradasVip }} × {{ precioVip | number:'1.0-2' }}€ = {{ totalVip | number:'1.0-2' }}€
                 </div>
               </div>
 
               <div *ngIf="codigoValido && importeDescuento > 0" class="mb-[1vw] border-t border-dashed border-gray-300 pt-[0.5vw] animate-pulse">
-                <div class="text-[0.85vw] text-green-600 mb-[0.3vw]">Descuento aplicado ({{ valorDescuento }}{{ tipoDescuento === 'porcentaje' ? '%' : '€' }}):</div>
-                <div class="text-[1.2vw] font-bold text-green-600">- {{ importeDescuento | number:'1.0-2' }}€</div>
+                <div class="text-[3.5vw] sm:text-[0.85vw] text-green-600 mb-[0.3vw]">Descuento aplicado ({{ valorDescuento }}{{ tipoDescuento === 'porcentaje' ? '%' : '€' }}):</div>
+                <div class="text-[4vw] sm:text-[1.2vw] font-bold text-green-600">- {{ importeDescuento | number:'1.0-2' }}€</div>
               </div>
 
               <div class="border-t border-gray-300 pt-[1vw] mt-[1vw]">
-                <div class="text-[0.9vw] text-gray-600 mb-[0.3vw]">Total Final:</div>
-                <div class="text-[1.6vw] font-bold text-green-900">{{ totalPrecio | number:'1.0-2' }}€</div>
+                <div class="text-[3.5vw] sm:text-[0.9vw] text-gray-600 mb-[0.3vw]">Total Final:</div>
+                <div class="text-[5vw] sm:text-[1.6vw] font-bold text-green-900">{{ totalPrecio | number:'1.0-2' }}€</div>
               </div>
             </div>
 
-            <button (click)="goBack()" class="w-full bg-gray-400 text-white text-[1vw] font-semibold py-[0.8vw] rounded-[0.8vw] hover:bg-gray-500 transition-colors">Volver</button>
+            <button (click)="goBack()" class="w-full bg-gray-400 text-white text-[4vw] sm:text-[1vw] font-semibold py-[3vw] sm:py-[0.8vw] rounded-[3vw] sm:rounded-[0.8vw] hover:bg-gray-500 transition-colors">Volver</button>
           </div>
         </div>
 
-        <div class="lg:col-span-2">
-          <h1 class="text-[1.6vw] font-bold text-green-700 mb-[1.5vw]">Completa el formulario:</h1>
+        <div class="lg:col-span-2 flex flex-col gap-[6vw] sm:gap-0">
+          <h1 class="text-[5vw] sm:text-[1.6vw] font-bold text-green-700 mb-[1.5vw]">Completa el formulario:</h1>
 
-          <div class="mb-[2vw] grid gap-[1.5vw]" [ngClass]="tieneEntradasVip ? 'grid-cols-2' : 'grid-cols-1'">
-            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-[1.5vw] p-[1.5vw] border border-green-200">
-              <label class="block text-[0.95vw] text-gray-700 font-semibold mb-[0.8vw]">
+          <div class="mb-[2vw] grid gap-[1.5vw]" [ngClass]="tieneEntradasVip ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'">
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-[4vw] sm:rounded-[1.5vw] p-[5vw] sm:p-[1.5vw] border border-green-200">
+              <label class="block text-[3.5vw] sm:text-[0.95vw] text-gray-700 font-semibold mb-[0.8vw]">
                 Entradas General ({{ precioGeneral }}€ c/u)
-                <span class="text-gray-500 text-[0.85vw] font-normal">- {{ cantidadGeneralDisponible }} disponibles</span>
+                <span class="text-gray-500 text-[3.4vw] sm:text-[0.85vw] font-normal">- {{ cantidadGeneralDisponible }} disponibles</span>
               </label>
-              <input type="number" min="0" [max]="cantidadGeneralDisponible" [(ngModel)]="numeroEntradasGeneral" class="w-full border-2 border-green-300 rounded-[0.8vw] px-[1vw] py-[0.7vw] text-[1.1vw] font-semibold text-green-800 text-center"/>
+              <input type="number" min="0" [max]="cantidadGeneralDisponible" [(ngModel)]="numeroEntradasGeneral"class="w-full border-2 border-green-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[1vw] py-[2.5vw] sm:py-[0.7vw] text-[4vw] sm:text-[1.1vw] font-semibold text-green-800 text-center"/>
             </div>
 
-            <div *ngIf="tieneEntradasVip" class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[1.5vw] p-[1.5vw] border border-amber-200">
-              <label class="block text-[0.95vw] text-gray-700 font-semibold mb-[0.8vw]">
+            <div *ngIf="tieneEntradasVip" class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[4vw] sm:rounded-[1.5vw] p-[5vw] sm:p-[1.5vw] border border-amber-200">
+              <label class="block text-[3.5vw] sm:text-[0.95vw] text-gray-700 font-semibold mb-[0.8vw]">
                 Entradas VIP ({{ precioVip }}€ c/u)
-                <span class="text-gray-500 text-[0.85vw] font-normal">- {{ cantidadVipDisponible }} disponibles</span>
+                <span class="text-gray-500 text-[3.4vw] sm:text-[0.85vw] font-normal">- {{ cantidadVipDisponible }} disponibles</span>
               </label>
-              <input type="number" min="0" [max]="cantidadVipDisponible" [(ngModel)]="numeroEntradasVip" class="w-full border-2 border-amber-300 rounded-[0.8vw] px-[1vw] py-[0.7vw] text-[1.1vw] font-semibold text-amber-800 text-center"/>
+              <input type="number" min="0" [max]="cantidadVipDisponible" [(ngModel)]="numeroEntradasVip" class="w-full border-2 border-amber-300  rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[1vw] py-[2.5vw] sm:py-[0.7vw] text-[4vw] sm:text-[1.1vw] font-semibold text-amber-800 text-center"/>
             </div>
           </div>
 
@@ -92,7 +92,7 @@
               [class.text-white]="!esEmpresa"
               [class.bg-gray-200]="esEmpresa" 
               [class.text-gray-700]="esEmpresa"
-              class="py-[0.8vw] rounded-[0.8vw] text-[1vw] font-semibold transition-all relative group">
+              class="py-[3vw] sm:py-[0.8vw] rounded-[3vw] sm:rounded-[0.8vw] text-[4vw] sm:text-[1vw] font-semibold transition-all relative group">
               
               Soy persona
 
@@ -107,91 +107,92 @@
               [class.text-white]="esEmpresa"
               [class.bg-gray-200]="!esEmpresa" 
               [class.text-gray-700]="!esEmpresa"
-              class="py-[0.8vw] rounded-[0.8vw] text-[1vw] font-semibold transition-all flex flex-col items-center justify-center">
+              class="py-[3vw] sm:py-[0.8vw] rounded-[3vw] sm:rounded-[0.8vw] text-[4vw] sm:text-[1vw] font-semibold transition-all flex flex-col items-center justify-center">
               <span>Soy empresa</span>
-              <span *ngIf="!isLoggedIn" class="text-[0.7vw] font-normal opacity-70">(Requiere login)</span>
+              <span *ngIf="!isLoggedIn" class="text-[3vw] sm:text-[0.7vw] font-normal opacity-70">(Requiere login)</span>
             </button>
           </div>
           
-          <div *ngIf="esEmpresaRegistrada" class="mb-[1.5vw] -mt-[1vw] text-[0.85vw] text-gray-500 italic text-center">
+          <div *ngIf="esEmpresaRegistrada" class="mb-[4vw] sm:mb-[1.5vw] mt-[2vw] sm:-mt-[1vw] text-[3.5vw] sm:text-[0.85vw] text-gray-500 italic text-center px-[2vw] sm:px-0">
              ℹ️ Tu cuenta está registrada como empresa, la facturación se realizará a nombre de <strong>{{ nombreEmpresa }}</strong>.
           </div>
 
-          <div *ngIf="errorMessage" class="bg-red-50 border border-red-300 text-red-700 rounded-[1vw] p-[1.2vw] mb-[1.5vw] text-[0.95vw]">
+          <div *ngIf="errorMessage" class="bg-red-50 border border-red-300 text-red-700 rounded-[4vw] sm:rounded-[1vw] p-[4vw] sm:p-[1.2vw] mb-[4vw] sm:mb-[1.5vw] text-[4vw] sm:text-[0.95vw]">
             {{ errorMessage }}
           </div>
 
           <div class="bg-gray-50 rounded-[1.5vw] p-[1.5vw] mb-[1.5vw]">
-            <h3 class="text-[1.2vw] font-bold text-gray-800 mb-[1vw]">Datos personales:</h3>
+            <h3 class="text-[5vw] sm:text-[1.3vw] font-bold text-gray-800 mb-[1vw]">Datos personales:</h3>
             
-            <div *ngIf="!isLoggedIn" class="mb-[1vw] animate-fade-in-up">
-              <label class="block text-[0.95vw] text-gray-700 mb-[0.3vw]">Correo Electrónico <span class="text-red-500">*</span></label>
+            <div *ngIf="!isLoggedIn" class="mb-[4vw] sm:mb-[1vw] animate-fade-in-up">
+              <label class="block text-[4vw] sm:text-[0.95vw] text-gray-700 mb-[1vw] sm:mb-[0.3vw]">Correo Electrónico <span class="text-red-500">*</span></label>
               <input 
                 type="email" 
                 [(ngModel)]="email"
                 placeholder="tu@email.com"
-                class="w-full border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+                class="w-full border border-gray-300 rounded-[4vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"
               />
             </div>
 
-            <div *ngIf="esEmpresa" class="mb-[1vw] animate-fade-in-up">
-              <label class="block text-[0.95vw] text-green-700 font-bold mb-[0.3vw]">Nombre de la Empresa <span class="text-red-500">*</span></label>
+            <div *ngIf="esEmpresa" class="mb-[4vw] sm:mb-[1vw] animate-fade-in-up">
+              <label class="block text-[4vw] sm:text-[0.95vw] text-green-700 font-bold mb-[1vw] sm:mb-[0.3vw]">Nombre de la Empresa <span class="text-red-500">*</span></label>
               <input 
                 type="text" 
                 [(ngModel)]="nombreEmpresa"
                 placeholder="Razón Social / Nombre"
-                class="w-full border-2 border-green-200 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"
+                class="w-full border-2 border-green-200 rounded-[4vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"
               />
             </div>
 
-            <div class="grid grid-cols-2 gap-[1vw] mb-[1vw]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-[4vw] sm:gap-[1vw] mb-[4vw] sm:mb-[1vw]">
               <div>
-                <label class="block text-[0.85vw] text-gray-600 mb-[0.2vw]">Nombre <span class="text-red-500">*</span></label>
-                <input type="text" [(ngModel)]="nombre" class="w-full border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
+                <label class="block text-[3.5vw] sm:text-[0.85vw] text-gray-600 mb-[1vw] sm:mb-[0.2vw]">Nombre <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="nombre" class="w-full border border-gray-300 rounded-[4vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
               </div>
               <div>
-                <label class="block text-[0.85vw] text-gray-600 mb-[0.2vw]">Apellidos <span class="text-red-500">*</span></label>
-                <input type="text" [(ngModel)]="apellidos" class="w-full border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
+                <label class="block text-[3.5vw] sm:text-[0.85vw] text-gray-600 mb-[1vw] sm:mb-[0.2vw]">Apellidos <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="apellidos" class="w-full border border-gray-300 rounded-[4vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-[1vw] mb-[1vw]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-[4vw] sm:gap-[1vw] mb-[4vw] sm:mb-[1vw]">
               <div>
-                <label class="block text-[0.85vw] text-gray-600 mb-[0.2vw]">Teléfono <span class="text-red-500">*</span></label>
-                <input type="tel" [(ngModel)]="telefono" class="w-full border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
+                <label class="block text-[3.5vw] sm:text-[0.85vw] text-gray-600 mb-[1vw] sm:mb-[0.2vw]">Teléfono <span class="text-red-500">*</span></label>
+                <input type="tel" [(ngModel)]="telefono" class="w-full border border-gray-300  rounded-[4vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
               </div>
               <div>
-                <label class="block text-[0.85vw] text-gray-600 mb-[0.2vw]">DNI <span class="text-red-500">*</span></label>
-                <input type="text" [(ngModel)]="dni" class="w-full border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
+                <label class="block text-[3.5vw] sm:text-[0.85vw] text-gray-600 mb-[1vw] sm:mb-[0.2vw]">DNI <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="dni" class="w-full border border-gray-300  rounded-[4vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
               </div>
             </div>
 
             <div class="border-t border-gray-200 pt-[1vw] mt-[1vw]">
-               <p class="text-[0.9vw] text-gray-500 mb-[0.8vw] italic">Dirección (Opcional)</p>
+               <p class="text-[4vw] sm:text-[0.9vw] text-gray-500 mb-[3vw] sm:mb-[0.8vw] italic">Dirección (Opcional)</p>
                
                <div class="grid grid-cols-1 gap-[1vw] mb-[1vw]">
-                 <input type="text" [(ngModel)]="calle" placeholder="Calle" class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
+                 <input type="text" [(ngModel)]="calle" placeholder="Calle" class="border border-gray-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
                </div>
 
                <div class="grid grid-cols-3 gap-[1vw] mb-[1vw]">
-                 <input type="text" [(ngModel)]="numero" placeholder="Número" class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
-                 <input type="text" [(ngModel)]="pisoPuerta" placeholder="Piso/Puerta" class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
-                 <input type="text" [(ngModel)]="codigoPostal" placeholder="Código Postal" class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
+                 <input type="text" [(ngModel)]="numero" placeholder="Número" class="border border-gray-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
+                 <input type="text" [(ngModel)]="pisoPuerta" placeholder="Piso/Puerta" class="border border-gray-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
+                 <input type="text" [(ngModel)]="codigoPostal" placeholder="Código Postal" class="border border-gray-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
                </div>
 
                <div class="grid grid-cols-3 gap-[1vw]">
-                 <input type="text" [(ngModel)]="ciudad" placeholder="Ciudad" class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
-                 <input type="text" [(ngModel)]="provincia" placeholder="Provincia" class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
-                 <input type="text" [(ngModel)]="pais" placeholder="País" class="border border-gray-300 rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw]"/>
+                 <input type="text" [(ngModel)]="ciudad" placeholder="Ciudad" class="border border-gray-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
+                 <input type="text" [(ngModel)]="provincia" placeholder="Provincia" class="border border-gray-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"/>
+                 <input type="text" [(ngModel)]="pais" placeholder="País" class="border border-gray-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw]"
+/>
                </div>
             </div>
           </div>
 
-          <div class="mb-[1.5vw]">
-            <label class="block text-[0.95vw] text-gray-700 font-semibold mb-[0.5vw]">¿Tienes código de descuento?</label>
+          <div class="mb-[4vw] sm:mb-[1.5vw]">
+            <label class="block text-[4vw] sm:text-[0.95vw] text-gray-700 font-semibold mb-[2vw] sm:mb-[0.5vw]">¿Tienes código de descuento?</label>
             <div class="flex gap-[1vw]">
                 <input type="text" [(ngModel)]="codigoDescuento" placeholder="Ej: DESCUENTO2025" [disabled]="codigoValido || validandoCodigo"
-                  class="flex-grow border rounded-[0.8vw] px-[0.8vw] py-[0.6vw] text-[0.95vw] uppercase focus:outline-none transition-all duration-300"
+                  class="flex-grow border rounded-[4vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[0.8vw] py-[2.5vw] sm:py-[0.6vw] text-[4vw] sm:text-[0.95vw] uppercase focus:outline-none transition-all duration-300"
                   [class.border-gray-300]="!codigoValido && !mensajeDescuento"
                   [class.border-green-500]="codigoValido"
                   [class.border-red-500]="!codigoValido && mensajeDescuento"
@@ -199,13 +200,13 @@
                   (keyup.enter)="!codigoValido ? validarCodigo() : null" />
                 
                 <button *ngIf="!codigoValido" (click)="validarCodigo()" [disabled]="validandoCodigo || !codigoDescuento"
-                  class="bg-gray-800 text-white font-semibold rounded-[0.8vw] px-[1.5vw] hover:bg-gray-900 transition-colors text-[0.95vw] flex items-center gap-[0.5vw] disabled:opacity-50 disabled:cursor-not-allowed">
-                  <span *ngIf="validandoCodigo" class="animate-spin h-[1vw] w-[1vw] border-2 border-white border-t-transparent rounded-full"></span>
+                  class="bg-gray-800 text-white font-semibold rounded-[4vw] sm:rounded-[0.8vw] px-[4vw] sm:px-[1.5vw] py-[2.5vw] sm:py-[0.6vw] hover:bg-gray-900 transition-colors text-[4vw] sm:text-[0.95vw] flex items-center gap-[0.5vw] disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span *ngIf="validandoCodigo" class="animate-spin h-[4vw] w-[4vw] sm:h-[1vw] sm:w-[1vw] border-2 border-white border-t-transparent rounded-full"></span>
                   <span>{{ validandoCodigo ? 'Verificando...' : 'Aplicar' }}</span>
                 </button>
-                <button *ngIf="codigoValido" (click)="quitarDescuento()" class="bg-red-100 text-red-600 border border-red-200 font-semibold rounded-[0.8vw] px-[1.5vw] hover:bg-red-200 transition-colors text-[0.95vw]">Quitar</button>
+                <button *ngIf="codigoValido" (click)="quitarDescuento()" class="bg-red-100 text-red-600 border border-red-200 font-semibold  rounded-[4vw] sm:rounded-[0.8vw] px-[4vw] sm:px-[1.5vw] py-[2.5vw] sm:py-[0.6vw] hover:bg-red-200 transition-colors  text-[4vw] sm:text-[0.95vw]">Quitar</button>
             </div>
-            <div *ngIf="mensajeDescuento" class="mt-[0.5vw] text-[0.9vw] font-medium flex items-center gap-[0.4vw] animate-fade-in"
+            <div *ngIf="mensajeDescuento" class="mt-[2vw] sm:mt-[0.5vw] text-[4vw] sm:text-[0.9vw] font-medium flex items-center gap-[1vw] animate-fade-in"
                  [ngClass]="codigoValido ? 'text-green-600' : 'text-red-500'">
                  <span *ngIf="codigoValido">✅</span><span *ngIf="!codigoValido">⚠️</span> {{ mensajeDescuento }}
             </div>
@@ -213,7 +214,7 @@
 
           <button (click)="procesarCompra()" [disabled]="isProcessing || totalEntradas === 0"
             [class.opacity-50]="isProcessing || totalEntradas === 0" [class.cursor-not-allowed]="isProcessing || totalEntradas === 0"
-            class="w-full bg-green-600 text-white text-[1.2vw] font-bold py-[1vw] rounded-[1vw] hover:bg-green-700 transition-colors shadow-lg">
+            class="w-full bg-green-600 text-white text-[4.5vw] sm:text-[1.2vw] font-bold py-[4vw] sm:py-[1vw] rounded-[3vw] sm:rounded-[1vw] hover:bg-green-700 transition-colors shadow-lg">
             {{ isProcessing ? 'Procesando...' : 'Enviar' }}
           </button>
         </div>
