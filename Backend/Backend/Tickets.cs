@@ -86,7 +86,7 @@ static class Tickets
 
 
     public static async Task<IResult> SendTestEmail(string ticketId, string email, Client client,
-        IEmailService emailService, IConfiguration config)
+        IEmailService emailService)
     {
         try
         {
@@ -94,7 +94,7 @@ static class Tickets
 
             var html = GetTicketEmailHtml(ticketId);
 
-            var emailResponse = await emailService.SendEmailAsync(email, "Your Ticket", html, qr, config);
+            var emailResponse = await emailService.SendEmailAsync(email, "Your Ticket", html, qr);
 
             return emailResponse.IsSuccessful
                 ? Results.Ok(new { message = "Ticket enviado por email correctamente." })
@@ -210,7 +210,7 @@ static class Tickets
     }
 
     public static async Task<IResult> PurchaseTickets(BuyTicketDto dto, Client client,
-        IPaymentService paymentService, HttpContext httpContext, IEmailService emailService, IConfiguration config)
+        IPaymentService paymentService, HttpContext httpContext, IEmailService emailService)
     {
         // Router method: check if user is authenticated
         var userIdString = httpContext.Items["user_id"]?.ToString();
@@ -218,17 +218,17 @@ static class Tickets
         if (!string.IsNullOrEmpty(userIdString))
         {
             // Authenticated purchase
-            return await PurchaseTicketsAuthenticated(dto, client, paymentService, emailService, config, Guid.Parse(userIdString));
+            return await PurchaseTicketsAuthenticated(dto, client, paymentService, emailService, Guid.Parse(userIdString));
         }
         else
         {
             // Anonymous purchase
-            return await PurchaseTicketsAnonymous(dto, client, paymentService, emailService, config);
+            return await PurchaseTicketsAnonymous(dto, client, paymentService, emailService);
         }
     }
 
     private static async Task<IResult> PurchaseTicketsAuthenticated(BuyTicketDto dto, Client client,
-        IPaymentService paymentService, IEmailService emailService, IConfiguration config, Guid userGuid)
+        IPaymentService paymentService, IEmailService emailService, Guid userGuid)
     {
         try
         {
@@ -438,8 +438,7 @@ static class Tickets
                         usuario.Email!,
                         $"Tu Entrada ({tipoDb.Tipo}) - {nombreEvento}",
                         GetTicketEmailHtml(nuevaEntrada.CodigoQr),
-                        GenerateQr(nuevaEntrada.CodigoQr),
-                        config
+                        GenerateQr(nuevaEntrada.CodigoQr)
                     );
                 }
             }
@@ -467,7 +466,7 @@ static class Tickets
     }
 
     private static async Task<IResult> PurchaseTicketsAnonymous(BuyTicketDto dto, Client client,
-        IPaymentService paymentService, IEmailService emailService, IConfiguration config)
+        IPaymentService paymentService, IEmailService emailService)
     {
         try
         {
@@ -644,8 +643,7 @@ static class Tickets
                         dto.Email!,
                         $"Tu Entrada ({tipoDb.Tipo}) - {nombreEvento}",
                         GetTicketEmailHtml(nuevaEntrada.CodigoQr),
-                        GenerateQr(nuevaEntrada.CodigoQr),
-                        config
+                        GenerateQr(nuevaEntrada.CodigoQr)
                     );
                 }
             }

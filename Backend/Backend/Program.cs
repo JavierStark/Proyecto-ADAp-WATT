@@ -53,6 +53,19 @@ builder.Services.AddSingleton<Supabase.Client>(_ =>
     return client;
 });
 
+var mailGunSettings = builder.Configuration.GetSection("MailGun").Get<MailGunSettings>();
+
+if (mailGunSettings == null || string.IsNullOrEmpty(mailGunSettings.ApiKey) ||
+    string.IsNullOrEmpty(mailGunSettings.Domain))
+{
+    throw new InvalidOperationException(
+        "MailGun configuration is missing. Please configure MailGun:ApiKey and MailGun:Domain in user secrets:\n" +
+        "  dotnet user-secrets set \"MailGun:ApiKey\" \"your-api-key\"\n" +
+        "  dotnet user-secrets set \"MailGun:Domain\" \"your-domain.mailgun.org\"");
+}
+
+builder.Services.AddSingleton(mailGunSettings);
+
 // Payment logic
 // if (builder.Environment.IsDevelopment())
 // {
@@ -195,4 +208,3 @@ void SwaggerAuthSetup(SwaggerGenOptions swaggerGenOptions)
     });
 }
 
-record SupabaseSettings(string Url, string Key);
