@@ -562,6 +562,7 @@ static class Tickets
             // Crear o actualizar usuario no registrado usando upsert con OnConflict en email
             var nuevoUsuarioNoRegistrado = new UsuarioNoRegistrado
             {
+                Id = Guid.NewGuid(),
                 Email = dto.Email,
                 Dni = dto.Dni,
                 Nombre = dto.Nombre,
@@ -571,7 +572,7 @@ static class Tickets
 
             var upsertOptions = new Supabase.Postgrest.QueryOptions
             {
-                OnConflict = "email"
+                OnConflict = "email",
             };
 
             var upsertRes = await client.From<UsuarioNoRegistrado>()
