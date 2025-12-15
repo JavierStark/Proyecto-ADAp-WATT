@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface EventoCompra {
   id: string;
@@ -13,6 +13,10 @@ export interface EventoCompra {
   apellidosCliente: string;
   telefonoCliente: string;
   dniCliente: string;
+  
+  // ✅ NUEVO CAMPO: Email (para invitados)
+  email?: string;
+
   ubicacion?: string;
   fecha?: string;
   imagen?: string;
@@ -28,8 +32,6 @@ export interface EventoCompra {
   codigoDescuento?: string;
 }
 
-
-
 @Injectable({
   providedIn: 'root'
 })
@@ -38,13 +40,11 @@ export class CompraService {
   public eventoCompra$ = this.eventoCompraSubject.asObservable();
   private readonly STORAGE_KEY = 'eventoCompra';
 
-  //Socio
-
+  // --- LÓGICA DE SOCIOS Y DONACIONES (Se mantiene igual) ---
   private readonly SOCIO_KEY = 'socioCompra';
-  private socioCompra: SocioCompra | null = null;
+  private socioCompraSubject = new BehaviorSubject<SocioCompra | null>(null);
 
   constructor() {
-    // Recuperar datos del sessionStorage al inicializar el servicio
     this.recuperarDatosAlmacenados();
   }
 
@@ -52,21 +52,25 @@ export class CompraService {
     try {
       const datosGuardados = sessionStorage.getItem(this.STORAGE_KEY);
       if (datosGuardados) {
-        const evento = JSON.parse(datosGuardados);
-        this.eventoCompraSubject.next(evento);
+        this.eventoCompraSubject.next(JSON.parse(datosGuardados));
+      }
+      
+      // Recuperar socio también
+      const socioGuardado = sessionStorage.getItem(this.SOCIO_KEY);
+      if (socioGuardado) {
+        this.socioCompraSubject.next(JSON.parse(socioGuardado));
       }
     } catch (error) {
-      console.error('Error al recuperar datos de compra:', error);
+      console.error('Error al recuperar datos:', error);
     }
   }
 
   guardarEventoCompra(evento: EventoCompra): void {
     this.eventoCompraSubject.next(evento);
-    // Guardar en sessionStorage para persistencia
     try {
       sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(evento));
     } catch (error) {
-      console.error('Error al guardar datos de compra:', error);
+      console.error('Error al guardar evento:', error);
     }
   }
 
@@ -76,45 +80,43 @@ export class CompraService {
 
   limpiarEventoCompra(): void {
     this.eventoCompraSubject.next(null);
-    // Limpiar del sessionStorage
     try {
       sessionStorage.removeItem(this.STORAGE_KEY);
     } catch (error) {
-      console.error('Error al limpiar datos de compra:', error);
+      console.error('Error al limpiar evento:', error);
     }
   }
 
-private socioCompraSubject = new BehaviorSubject<SocioCompra | null>(null);
+  // --- MÉTODOS DE SOCIO ---
+  guardarSocioCompra(data: SocioCompra): void {
+    this.socioCompraSubject.next(data);
+    sessionStorage.setItem(this.SOCIO_KEY, JSON.stringify(data));
+  }
 
-guardarSocioCompra(data: SocioCompra): void {
-  this.socioCompraSubject.next(data);
-  sessionStorage.setItem('socioCompra', JSON.stringify(data));
+  obtenerSocioCompra(): SocioCompra | null {
+    // Intentar leer de memoria o storage si está vacío
+    if (!this.socioCompraSubject.value) {
+       const raw = sessionStorage.getItem(this.SOCIO_KEY);
+       if (raw) this.socioCompraSubject.next(JSON.parse(raw));
+    }
+    return this.socioCompraSubject.value;
+  }
+
+  limpiarSocioCompra(): void {
+    this.socioCompraSubject.next(null);
+    sessionStorage.removeItem(this.SOCIO_KEY);
+  }
 }
 
-obtenerSocioCompra(): SocioCompra | null {
-  return this.socioCompraSubject.value;
-}
-
-limpiarSocioCompra(): void {
-  this.socioCompraSubject.next(null);
-  sessionStorage.removeItem('socioCompra');
-}
-
-
-}
-
-  
 export interface SocioCompra {
   plan: string;
   importe: number;
 }
 
-// Donación
 export interface DonacionCompra {
   importe: number;
 }
 
-// Añadimos almacenamiento de donación en el mismo servicio
 export class DonacionState {
   private static readonly DONACION_KEY = 'donacionCompra';
   static guardar(d: DonacionCompra) {
@@ -128,5 +130,3 @@ export class DonacionState {
     sessionStorage.removeItem(DonacionState.DONACION_KEY);
   }
 }
-
-

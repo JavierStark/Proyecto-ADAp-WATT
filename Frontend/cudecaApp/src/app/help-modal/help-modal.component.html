@@ -1,10 +1,10 @@
 <div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-[1.5vw]">
-  <div class="bg-white shadow-2xl w-full max-w-[95vw] md:max-w-[60vw] max-h-[85vh] overflow-y-auto relative">
+  <div class="bg-white shadow-2xl w-full max-w-[95vw] md:max-w-[60vw] max-h-[85vh] overflow-y-auto relative md:rounded-[0.5vw]">
     
     <!-- Botón cerrar fijo en esquina superior derecha -->
     <button (click)="closeModal()" class="sticky top-0 right-0 z-10 float-right m-[1vw] text-gray-500 hover:text-gray-700 text-[6vw] md:text-[1.5vw] font-bold transition bg-white rounded-full w-[8vw] h-[8vw] md:w-[2.5vw] md:h-[2.5vw] flex items-center justify-center shadow-lg hover:shadow-xl">✕</button>
     
-    <div class="p-[4vw] md:p-[2vw] space-y-[4vw] md:space-y-[1.5vw] clear-both">
+    <div class="p-[4vw] md:p-[2vw] space-y-[4vw] md:space-y-[1.5vw] rounded-[2vw] md:rounded-[13vw]">
     <div class="mb-[1vw]">
       <h1 class="text-[5vw] md:text-[2vw] font-bold text-green-800">¿Necesitas ayuda?</h1>
     </div>
@@ -122,13 +122,6 @@
 
     </div>
 
-    <div class="flex justify-end pt-[1vw] border-t border-gray-200">
-      <button 
-        (click)="closeModal()"
-        class="bg-green-700 text-white font-semibold py-[3vw] px-[6vw] md:py-[0.8vw] md:px-[2vw] rounded-[2vw] md:rounded-[0.8vw] hover:bg-green-800 transition-colors">
-        Cerrar
-      </button>
-    </div>
     </div>
 
   </div>

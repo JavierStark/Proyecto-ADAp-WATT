@@ -73,5 +73,9 @@ jobs:
           app-settings-json: |
             [
               { "name": "Supabase__Url", "value": "${{ secrets.SUPABASE_URL }}", "slotSetting": false },
-              { "name": "Supabase__Key", "value": "${{ secrets.SUPABASE_KEY }}", "slotSetting": false }
+              { "name": "Supabase__Key", "value": "${{ secrets.SUPABASE_KEY }}", "slotSetting": false },
+              { "name": "Mailgun__ApiKey", "value": "${{ secrets.MAILGUN_APIKEY }}", "slotSetting": false},
+              { "name": "Mailgun__Domain", "value": "${{ secrets.MAILGUN_DOMAIN }}", "slotSetting": false}
             ]
+
+

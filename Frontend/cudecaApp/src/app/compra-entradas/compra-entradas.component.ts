@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { CompraService } from '../services/compra.service';
+import { CompanyService } from '../services/company.service'; // Asegúrate de importar esto
 
 interface Evento {
   id: string;
@@ -40,7 +40,6 @@ export class CompraEntradasComponent implements OnInit {
   numeroEntradasGeneral: number = 0;
   numeroEntradasVip: number = 0;
 
-  // Precios y cantidades disponibles (del backend)
   precioGeneral: number = 0;
   cantidadGeneralDisponible: number = 0;
   precioVip: number = 0;
@@ -50,6 +49,7 @@ export class CompraEntradasComponent implements OnInit {
   vipTicketEventId: string | null = null;
 
   // Datos personales
+  email: string = ''; // Nuevo campo para invitados
   nombre: string = '';
   apellidos: string = '';
   telefono: string = '';
@@ -62,20 +62,22 @@ export class CompraEntradasComponent implements OnInit {
   provincia: string = '';
   pais: string = '';
 
+  // Empresa
   esEmpresa: boolean = false;
+  nombreEmpresa: string = ''; // Nuevo campo
+  esEmpresaRegistrada: boolean = false;
 
-  // --- VARIABLES PARA EL DESCUENTO ---
-  codigoDescuento: string = '';       // Lo que escribe el usuario en el input
-  codigoValido: boolean = false;      // Si el backend dice que es OK
-  validandoCodigo: boolean = false;   // Para mostrar la ruedita de carga mientras comprueba
-  mensajeDescuento: string = '';      // "¡Código válido!" o "Error..."
-
-  tipoDescuento: 'porcentaje' | 'fijo' | null = null; // Backend usa 'porcentaje' según Tickets.cs
-  valorDescuento: number = 0;         // El número del porcentaje (ej: 15, 25, 10)
-  // ------------------------------------
+  // Descuentos
+  codigoDescuento: string = '';
+  codigoValido: boolean = false;
+  validandoCodigo: boolean = false;
+  mensajeDescuento: string = '';
+  tipoDescuento: 'porcentaje' | 'fijo' | null = null;
+  valorDescuento: number = 0;
 
   isProcessing: boolean = false;
   errorMessage: string = '';
+  private readonly maxEntradasPorCompra = 10;
 
   private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
 
@@ -84,29 +86,37 @@ export class CompraEntradasComponent implements OnInit {
     private router: Router,
     private http: HttpClient,
     private authService: AuthService,
-    private compraService: CompraService
+    private compraService: CompraService,
+    private companyService: CompanyService // Inyectamos servicio de empresa
   ) {}
+
+  // Getter auxiliar para el HTML
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    console.log(`🎫 Compra Entradas - Evento ID: ${id}`);
     if (id) {
       this.cargarEvento(id);
-      // Cargar datos del perfil si está logueado
-      if (this.authService.isLoggedIn()) {
+      if (this.isLoggedIn) {
         this.cargarDatosUsuario();
       }
     }
   }
 
   private cargarDatosUsuario(): void {
+    // 1. Cargar perfil personal
     this.authService.getProfile().subscribe({
       next: (perfil: any) => {
-        console.log('👤 Datos del perfil cargados:', perfil);
         this.nombre = perfil.nombre || '';
         this.apellidos = perfil.apellidos || '';
         this.telefono = perfil.telefono || '';
         this.dni = perfil.dni || '';
+        // El email del usuario logueado lo maneja el backend por el token, 
+        // pero podemos guardarlo si queremos mostrarlo (opcional)
+        
+        // Direcciones (opcionales ahora)
         this.calle = perfil.calle || '';
         this.numero = perfil.numero || '';
         this.pisoPuerta = perfil.piso || '';
@@ -114,18 +124,32 @@ export class CompraEntradasComponent implements OnInit {
         this.ciudad = perfil.ciudad || '';
         this.provincia = perfil.provincia || '';
         this.pais = perfil.pais || '';
+
+        // 2. Intentar cargar datos de empresa si existen
+        this.companyService.getCompanyProfile().subscribe({
+          next: (comp) => {
+            if (comp && comp.nombreEmpresa) {
+              this.nombreEmpresa = comp.nombreEmpresa;
+              
+              // 1. Forzamos la selección a Empresa
+              this.esEmpresa = true;
+              
+              // 2. Activamos el bloqueo para que no pueda cambiar a Persona
+              this.esEmpresaRegistrada = true;
+            }
+          },
+          error: () => { /* No es empresa o error, ignoramos */ }
+        });
       },
-      error: (err) => {
-        console.warn('⚠️ Error cargando datos del perfil:', err);
-        // No es crítico, continuamos sin prellenar
-      }
+      error: (err) => console.warn('Error cargando perfil:', err)
     });
   }
 
+  // ... (cargarEvento, cargarEventoPublico, cargarTiposEntrada, cargarEventoDesdeAdmin, mapearEvento... SIN CAMBIOS) ...
+  // [Mantén todo el código de carga de eventos igual que antes]
+  
   cargarEvento(id: string): void {
     this.isLoading = true;
-
-    // Primero intentamos cargar desde admin (si estamos logueados)
     if (this.authService.isLoggedIn()) {
       this.cargarEventoDesdeAdmin(id);
     } else {
@@ -134,24 +158,18 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private cargarEventoPublico(id: string): void {
-    console.log(`🌐 Cargando evento PÚBLICO: ${id}`);
     this.http.get<any>(`${this.apiUrl}/events/${id}`).subscribe({
       next: (item) => {
-        console.log(`📊 Respuesta del backend (público):`, item);
-        console.log(`   - imageUrl: ${item.imageUrl || 'undefined'}`);
         this.evento = this.mapearEvento(item);
-        // Sin datos de admin, usamos valores por defecto
         this.precioGeneral = item.precioGeneral || 25;
         this.precioVip = item.precioVip || 45;
         this.cantidadGeneralDisponible = item.cantidadGeneral || (item.aforo || 50);
         this.cantidadVipDisponible = item.cantidadVip || 0;
         this.tieneEntradasVip = this.cantidadVipDisponible > 0;
         this.cargarTiposEntrada(id);
-        console.log(`✅ Evento público cargado: ${this.evento?.titulo}`);
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error(`❌ Error cargando evento público:`, err);
+      error: () => {
         this.isLoading = false;
         this.errorMessage = 'Error cargando el evento';
       }
@@ -159,13 +177,11 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private cargarTiposEntrada(eventId: string): void {
-    this.http.get<any>(`${this.apiUrl}/tickets/type/event/${eventId}`).subscribe({
+     // ... (mismo código que tenías)
+     this.http.get<any>(`${this.apiUrl}/tickets/type/event/${eventId}`).subscribe({
       next: (res) => {
         const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-        if (!data.length) {
-          console.warn(`⚠️ No se encontraron tipos de entrada para el evento ${eventId}`);
-          return;
-        }
+        if (!data.length) return;
 
         const normalizados = data.map((t: any) => ({
           id: t.TicketEventId || t.ticketEventId || t.id || null,
@@ -188,33 +204,19 @@ export class CompraEntradasComponent implements OnInit {
           this.precioVip = vip.precio ?? this.precioVip;
           this.cantidadVipDisponible = vip.stock ?? this.cantidadVipDisponible;
         }
-
         this.tieneEntradasVip = !!this.vipTicketEventId && (this.cantidadVipDisponible ?? 0) > 0;
-      },
-      error: (err) => {
-        console.error(`❌ Error cargando tipos de entrada para el evento ${eventId}:`, err);
       }
     });
   }
 
   private cargarEventoDesdeAdmin(id: string): void {
-    console.log(`🔐 Cargando evento ADMIN: ${id}`);
+    // ... (mismo código que tenías)
     this.http.get<any[]>(`${this.apiUrl}/admin/events`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     }).subscribe({
       next: (items) => {
-        console.log(`📊 Respuesta del backend (admin) - Total eventos:`, items.length);
         const item = items.find((e) => `${e.id}` === `${id}`);
-
-        if (!item) {
-          console.warn(`⚠️ Evento ${id} no encontrado en admin, intentando endpoint público`);
-          // Si no se encuentra en admin, usamos el público
-          this.cargarEventoPublico(id);
-          return;
-        }
-
-        console.log(`📸 Evento encontrado en admin:`, item);
-        console.log(`   - imageUrl: ${item.imageUrl || 'undefined'}`);
+        if (!item) { this.cargarEventoPublico(id); return; }
         this.evento = this.mapearEventoAdmin(item);
         this.precioGeneral = item.precioGeneral ?? item.PrecioGeneral ?? 25;
         this.precioVip = item.precioVip ?? item.PrecioVip ?? 0;
@@ -222,26 +224,15 @@ export class CompraEntradasComponent implements OnInit {
         this.cantidadVipDisponible = item.cantidadVip ?? item.CantidadVip ?? 0;
         this.tieneEntradasVip = (this.precioVip ?? 0) > 0 && this.cantidadVipDisponible > 0;
         this.cargarTiposEntrada(id);
-        console.log(`✅ Evento admin cargado: ${this.evento?.titulo}`);
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error(`❌ Error cargando eventos admin, intentando endpoint público:`, err);
-        // Si falla admin, intentamos público
-        this.cargarEventoPublico(id);
-      }
+      error: () => this.cargarEventoPublico(id)
     });
   }
 
   private mapearEvento(item: any): Evento {
+    // ... (mismo código)
     const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagenURL || item.imagen || 'assets/images/fondoCudeca.png';
-    console.log(`🎫 Mapeando evento (público): ${item.nombre || 'Sin título'}`);
-    console.log(`   - Raw item keys:`, Object.keys(item));
-    console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
-    console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
-    console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
-    console.log(`   - item.imagenURL: ${item.imagenURL || 'undefined'}`);
-    console.log(`   - Imagen final: ${imagenUrl}`);
     return {
       id: item.id,
       titulo: item.nombre || item.titulo || 'Evento sin título',
@@ -261,18 +252,12 @@ export class CompraEntradasComponent implements OnInit {
   }
 
   private mapearEventoAdmin(item: any): Evento {
+    // ... (mismo código)
     const imagenUrl = item.imageUrl || item.imagenUrl || item.ImagenUrl || item.imagenURL || item.imagen || 'assets/images/fondoCudeca.png';
-    console.log(`🎫 Mapeando evento (admin): ${item.nombre || 'Sin título'}`);
-    console.log(`   - Raw item keys:`, Object.keys(item));
-    console.log(`   - item.imageUrl: ${item.imageUrl || 'undefined'}`);
-    console.log(`   - item.imagenUrl: ${item.imagenUrl || 'undefined'}`);
-    console.log(`   - item.ImagenUrl: ${item.ImagenUrl || 'undefined'}`);
-    console.log(`   - item.imagenURL: ${item.imagenURL || 'undefined'}`);
-    console.log(`   - Imagen final: ${imagenUrl}`);
     return {
       id: item.id,
       titulo: item.nombre || item.titulo || 'Evento sin título',
-      descripcion: item.descripcion || item.description || 'Sin descripción',
+      descripcion: item.description || item.descripcion || 'Sin descripción',
       fecha: new Date(item.fechaEvento || item.fecha || Date.now()),
       imagen: imagenUrl,
       imageUrl: imagenUrl,
@@ -286,86 +271,119 @@ export class CompraEntradasComponent implements OnInit {
       cantidadVip: item.cantidadVip ?? item.CantidadVip
     };
   }
+  // ... Fin mapeadores
 
-
-  get totalGeneral(): number {
-    return this.numeroEntradasGeneral * this.precioGeneral;
-  }
-
-  get totalVip(): number {
-    return this.numeroEntradasVip * this.precioVip;
-  }
-
-  get totalEntradas(): number {
-    return this.numeroEntradasGeneral + this.numeroEntradasVip;
-  }
-
-  // 1. Calculamos el Subtotal (Precio sin descuento)
-  get subtotalPrecio(): number {
-    return this.totalGeneral + this.totalVip;
-  }
-
-  // 2. Calculamos cuánto descontamos
+  get totalGeneral(): number { return this.numeroEntradasGeneral * this.precioGeneral; }
+  get totalVip(): number { return this.numeroEntradasVip * this.precioVip; }
+  get totalEntradas(): number { return this.numeroEntradasGeneral + this.numeroEntradasVip; }
+  get subtotalPrecio(): number { return this.totalGeneral + this.totalVip; }
   get importeDescuento(): number {
     if (!this.codigoValido) return 0;
-
-    // Si el backend dice que es porcentaje (ej: 10), calculamos el 10% del subtotal
     return (this.subtotalPrecio * this.valorDescuento) / 100;
   }
+  get totalPrecio(): number { return Math.max(0, this.subtotalPrecio - this.importeDescuento); }
 
-  // 3. Precio Final (Subtotal - Descuento)
-  get totalPrecio(): number {
-    // Math.max(0, ...) evita que el precio sea negativo
-    return Math.max(0, this.subtotalPrecio - this.importeDescuento);
+  get maxGeneralPermitido(): number {
+    return Math.max(0, Math.min(this.cantidadGeneralDisponible, this.maxEntradasPorCompra - this.numeroEntradasVip));
+  }
+
+  get maxVipPermitido(): number {
+    return Math.max(0, Math.min(this.cantidadVipDisponible, this.maxEntradasPorCompra - this.numeroEntradasGeneral));
+  }
+
+  // Lógica para cambiar entre persona/empresa
+  seleccionarTipoComprador(empresa: boolean) {
+    if (!empresa && this.esEmpresaRegistrada) {
+      return; 
+    }
+
+    if (empresa && !this.isLoggedIn) {
+      alert('Debes iniciar sesión para comprar como empresa.');
+      // this.router.navigate(['/login']); // Descomentar si quieres redirigir
+      return;
+    }
+    this.esEmpresa = empresa;
+  }
+
+  private validarEmail(email: string): boolean {
+    // Esta expresión regular comprueba: texto + @ + texto + . + texto
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(email);
   }
 
   procesarCompra(): void {
     this.errorMessage = '';
 
-    // Validaciones básicas
+    // Validaciones de entradas
     if (this.totalEntradas <= 0) {
       this.errorMessage = 'Debes seleccionar al menos una entrada.';
       return;
     }
-
+    if (this.totalEntradas > this.maxEntradasPorCompra) {
+      this.errorMessage = `Solo puedes comprar hasta ${this.maxEntradasPorCompra} entradas por operación.`;
+      return;
+    }
     if (this.numeroEntradasGeneral > this.cantidadGeneralDisponible) {
       this.errorMessage = `Solo hay ${this.cantidadGeneralDisponible} entradas General disponibles.`;
       return;
     }
-
     if (this.numeroEntradasVip > this.cantidadVipDisponible) {
       this.errorMessage = `Solo hay ${this.cantidadVipDisponible} entradas VIP disponibles.`;
       return;
+    }
+
+    if (!this.isLoggedIn) {
+        if (!this.email.trim()) {
+            this.errorMessage = 'El correo electrónico es obligatorio.';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        
+        // Comprobamos si tiene formato real
+        if (!this.validarEmail(this.email)) {
+            this.errorMessage = 'Por favor, introduce un correo electrónico válido (ej: nombre@gmail.com).';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
     }
 
     if (!this.nombre.trim() || !this.apellidos.trim()) {
       this.errorMessage = 'El nombre y apellidos son obligatorios.';
       return;
     }
-
     if (!this.telefono.trim() || !this.dni.trim()) {
       this.errorMessage = 'El teléfono y DNI son obligatorios.';
       return;
     }
 
-    if (!this.calle.trim() || !this.numero.trim() || !this.codigoPostal.trim() || !this.ciudad.trim()) {
-      this.errorMessage = 'La dirección completa es obligatoria (calle, número, código postal y ciudad).';
+    if (this.esEmpresa && !this.nombreEmpresa.trim()) {
+      this.errorMessage = 'El nombre de la empresa es obligatorio.';
       return;
     }
 
-    if (this.numeroEntradasGeneral > 0 && !this.generalTicketEventId) {
-      this.errorMessage = 'No se pudieron cargar las entradas General. Recarga la página e inténtalo de nuevo.';
-      return;
-    }
-
-    if (this.numeroEntradasVip > 0 && this.tieneEntradasVip && !this.vipTicketEventId) {
-      this.errorMessage = 'No se pudieron cargar las entradas VIP. Recarga la página e inténtalo de nuevo.';
-      return;
-    }
 
     this.isProcessing = true;
 
-    // Guardar los datos de la compra en el servicio
+    // LÓGICA DE EMPRESA: Si es empresa, actualizamos primero el perfil
+    if (this.esEmpresa && this.isLoggedIn) {
+      this.companyService.saveCompanyProfile(this.nombreEmpresa).subscribe({
+        next: () => {
+          // Perfil actualizado, procedemos a guardar compra y navegar
+          this.finalizarProcesamientoCompra();
+        },
+        error: (err) => {
+          console.error('Error guardando empresa:', err);
+          this.errorMessage = 'Error al actualizar los datos de empresa.';
+          this.isProcessing = false;
+        }
+      });
+    } else {
+      // Flujo normal (Persona o Invitado)
+      this.finalizarProcesamientoCompra();
+    }
+  }
+
+  private finalizarProcesamientoCompra() {
     if (this.evento) {
       this.compraService.guardarEventoCompra({
         id: this.evento.id,
@@ -375,15 +393,17 @@ export class CompraEntradasComponent implements OnInit {
         precioGeneral: this.precioGeneral,
         precioVip: this.precioVip,
         totalPrecio: this.totalPrecio,
+        
+        // Datos cliente
         nombreCliente: this.nombre,
         apellidosCliente: this.apellidos,
         telefonoCliente: this.telefono,
         dniCliente: this.dni,
-        ubicacion: this.evento.ubicacion || (this.evento as any).ubicacion || '',
-        fecha: this.evento.fecha ? (this.evento.fecha instanceof Date ? this.evento.fecha.toLocaleDateString() : String(this.evento.fecha)) : '',
-        imagen: this.evento.imagen || 'assets/images/fondoCudeca.png',
-        generalTicketEventId: this.generalTicketEventId || undefined,
-        vipTicketEventId: this.vipTicketEventId || undefined,
+
+        // ✅ AÑADIR ESTA LÍNEA (Si no está logueado, mandamos el email)
+        email: !this.isLoggedIn ? this.email : undefined,
+
+        // ... resto de campos (calle, ciudad, etc.) ...
         calle: this.calle,
         numero: this.numero,
         pisoPuerta: this.pisoPuerta,
@@ -391,17 +411,20 @@ export class CompraEntradasComponent implements OnInit {
         ciudad: this.ciudad,
         provincia: this.provincia,
         pais: this.pais,
+        ubicacion: this.evento.ubicacion,
+        fecha: this.evento.fecha ? (this.evento.fecha instanceof Date ? this.evento.fecha.toLocaleDateString() : String(this.evento.fecha)) : '',
+        imagen: this.evento.imagen,
+        generalTicketEventId: this.generalTicketEventId || undefined,
+        vipTicketEventId: this.vipTicketEventId || undefined,
         codigoDescuento: this.codigoDescuento || undefined
       });
 
-      // Navegar a la página de pagos con el ID del evento
       this.router.navigate(['/pagos', this.evento.id]);
     }
-
     this.isProcessing = false;
   }
 
-  // Limpiar descuento
+  // Descuentos y GoBack igual...
   quitarDescuento(): void {
     this.codigoValido = false;
     this.mensajeDescuento = '';
@@ -412,35 +435,21 @@ export class CompraEntradasComponent implements OnInit {
 
   validarCodigo() {
     const codigo = this.codigoDescuento.trim().toUpperCase();
-
-    if (!codigo) {
-      this.quitarDescuento();
-      return;
-    }
-
+    if (!codigo) { this.quitarDescuento(); return; }
     this.validandoCodigo = true;
     this.mensajeDescuento = '';
-
-    const url = `${this.apiUrl}/discounts/validate`;
-
-    this.http.post<any>(url, { code: codigo }).subscribe({
+    this.http.post<any>(`${this.apiUrl}/discounts/validate`, { code: codigo }).subscribe({
       next: (response) => {
-        console.log('Respuesta Descuento:', response);
-
         const data = response.discount;
-
         if (data && data.valido) {
           this.codigoValido = true;
           this.tipoDescuento = 'porcentaje';
           this.valorDescuento = data.porcentaje || data.descuento * 100;
-
           this.mensajeDescuento = `¡Éxito! Descuento del ${this.valorDescuento}% aplicado.`;
         }
-
         this.validandoCodigo = false;
       },
       error: (error) => {
-        console.error('Error descuento:', error);
         this.codigoValido = false;
         this.mensajeDescuento = error.error?.error || 'El código no existe o ha expirado.';
         this.tipoDescuento = null;
@@ -452,5 +461,21 @@ export class CompraEntradasComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/eventos']);
+  }
+
+  onCambioEntradasGeneral(value: number): void {
+    this.numeroEntradasGeneral = this.clampCantidad(value, this.maxGeneralPermitido);
+  }
+
+  onCambioEntradasVip(value: number): void {
+    this.numeroEntradasVip = this.clampCantidad(value, this.maxVipPermitido);
+  }
+
+  private clampCantidad(value: number, max: number): number {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      return 0;
+    }
+    return Math.min(parsed, Math.max(0, max));
   }
 }

@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 // 1. IMPORTAR HTTPCLIENT Y HEADERS
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { CompanyService } from '../services/company.service';
 
 @Component({
   selector: 'app-cuenta',
@@ -33,24 +34,27 @@ export class CuentaComponent implements OnInit {
   aniosDisponibles: number[] = [];
   certificadoWarning: string = '';
 
-  // 2. NUEVA VARIABLE PARA EL ESTADO DE SOCIO
   isSocio: boolean = false;
   private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
 
-  // 3. INYECTAR HTTPCLIENT
+  empresa: string = ''; // El nombre de la empresa
+  esEmpresa: boolean = false; // Checkbox visual para el formulario
+  empresaYaRegistrada: boolean = false;
+
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private http: HttpClient 
+    private http: HttpClient,
+    private companyService: CompanyService
   ) {}
 
   ngOnInit() {
     this.cargarDatosUsuario();
-    this.verificarEstadoSocio(); // <--- LLAMADA NUEVA
+    this.verificarEstadoSocio();
+    this.cargarDatosEmpresa();
     this.generarAniosDisponibles();
   }
 
-  // 4. NUEVA FUNCIÓN PARA COMPROBAR SI ES SOCIO
   verificarEstadoSocio() {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -69,7 +73,6 @@ export class CuentaComponent implements OnInit {
     });
   }
 
-  // ... Resto de funciones (cambiarVista, entrarModoEdicion, etc.) siguen igual ...
   cambiarVista(vista: 'menu' | 'perfil' | 'tickets' | 'donaciones') {
     this.vistaActual = vista;
     this.modoEdicion = false;
@@ -196,25 +199,79 @@ export class CuentaComponent implements OnInit {
     });
   }
 
+  cargarDatosEmpresa() {
+    this.companyService.getCompanyProfile().subscribe({
+      next: (data) => {
+        if (data && data.nombreEmpresa) {
+          this.empresa = data.nombreEmpresa;
+          this.esEmpresa = true;
+          
+          // Si ya viene del servidor, marcamos que ya está registrada
+          this.empresaYaRegistrada = true; 
+        } else {
+          this.esEmpresa = false;
+          this.empresa = '';
+          this.empresaYaRegistrada = false;
+        }
+      },
+      error: (err) => {
+        // ... (manejo de errores igual)
+        this.esEmpresa = false;
+        this.empresaYaRegistrada = false;
+      }
+    });
+  }
+
   guardarCambios() {
+    if (this.esEmpresa && !this.empresaYaRegistrada) {
+      const confirmar = confirm('⚠️ ATENCIÓN: Estás a punto de convertir tu cuenta en un perfil de Empresa. Esta acción NO se puede deshacer. ¿Deseas continuar?');
+      if (!confirmar) {
+        this.isLoading = false;
+        return; // Cancelamos el guardado
+      }
+    }
+
     this.isLoading = true;
-    const datosAEnviar = {
+
+    const datosUsuario = {
       ...this.usuario,
       piso: this.usuario.pisoPuerta,
       cp: this.usuario.codigoPostal
     };
-    this.authService.updateProfile(datosAEnviar).subscribe({
+
+    this.authService.updateProfile(datosUsuario).subscribe({
       next: () => {
-        alert('✅ Datos actualizados correctamente');
-        this.isLoading = false;
-        this.modoEdicion = false;
-        this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario));
+        
+        if (this.esEmpresa && this.empresa.trim() !== '') {
+          this.companyService.saveCompanyProfile(this.empresa).subscribe({
+            next: () => this.finalizarGuardado(true),
+            error: () => {
+              alert('Datos guardados, pero error al actualizar empresa.');
+              this.isLoading = false;
+            }
+          });
+        } else {
+          this.finalizarGuardado(true);
+        }
       },
       error: () => {
-        alert('❌ Error al actualizar');
+        alert('❌ Error al actualizar perfil');
         this.isLoading = false;
       }
     });
+  }
+
+  // Modificamos esta función para aceptar el parámetro
+  finalizarGuardado(recargarEmpresa: boolean = true) {
+    alert('✅ Datos actualizados correctamente');
+    this.isLoading = false;
+    this.modoEdicion = false;
+    this.usuarioOriginal = JSON.parse(JSON.stringify(this.usuario));
+    
+    // Solo recargamos si no acabamos de borrarla
+    if (recargarEmpresa) {
+      this.cargarDatosEmpresa();
+    }
   }
 
   onLogout() {
