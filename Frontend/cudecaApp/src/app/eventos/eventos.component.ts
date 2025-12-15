@@ -297,34 +297,16 @@ export class EventosComponent implements OnInit {
     });
   }
 
-  toggleVisible(evento: any, event: Event) {
-    // 1. Detener propagación para que no afecte a otros clicks en la tarjeta
-    event.stopPropagation();
-
-    // 2. Calcular nuevo estado y guardamos el estado anterior por si falla
-    const estadoAnterior = evento.visible;
-    const nuevoVisible = !estadoAnterior;
-
-    // 3. Actualización Optimista: Cambiamos visualmente YA
-    evento.visible = nuevoVisible;
-
-    // 4. Preparar datos para backend
+  toggleVisible(evento: any) {
+    const nuevoVisible = !(evento.visible ?? true);
     const formData = new FormData();
-    // Nota: El backend espera 'EventoVisible' (Case sensitive en FormData a veces importa)
     formData.append('EventoVisible', String(nuevoVisible));
-
-    // 5. Llamada al servicio
     this.authService.updateAdminEvent(evento.id, formData).subscribe({
       next: () => {
-        console.log(`✅ Visibilidad guardada en servidor: ${nuevoVisible}`);
-        // No hace falta recargar toda la lista (cargarEventosAdmin), ya lo actualizamos visualmente arriba
+        console.log(`✅ Visibilidad cambiada: ${nuevoVisible ? 'visible' : 'oculto'}`);
+        this.cargarEventosAdmin();
       },
-      error: (err) => {
-        console.error('❌ Error cambiando visibilidad, revirtiendo cambios', err);
-        // Si falla, revertimos el cambio visual para que el usuario sepa que no funcionó
-        evento.visible = estadoAnterior;
-        alert('No se pudo cambiar la visibilidad del evento.');
-      }
+      error: (err) => console.error('Error cambiando visibilidad', err)
     });
   }
 
