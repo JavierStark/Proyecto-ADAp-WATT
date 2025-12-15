@@ -301,17 +301,34 @@ export class EventosComponent implements OnInit {
     const nuevoVisible = !(evento.visible ?? true);
     const formData = new FormData();
     
+    console.log('🔄 Toggle visible - Estado del evento:', {
+      id: evento.id,
+      titulo: evento.titulo,
+      fecha: evento.fecha,
+      visibleActual: evento.visible,
+      nuevoVisible: nuevoVisible
+    });
+    
     // Enviar campos obligatorios para que el backend acepte la actualización
     formData.append('Nombre', evento.titulo);
     formData.append('Fecha', new Date(evento.fecha).toISOString());
-    formData.append('EventoVisible', String(nuevoVisible));
+    formData.append('EventoVisible', nuevoVisible ? 'true' : 'false');
+    
+    console.log('📤 FormData a enviar:', {
+      Nombre: evento.titulo,
+      Fecha: new Date(evento.fecha).toISOString(),
+      EventoVisible: nuevoVisible ? 'true' : 'false'
+    });
     
     this.authService.updateAdminEvent(evento.id, formData).subscribe({
-      next: () => {
-        console.log(`✅ Visibilidad cambiada: ${nuevoVisible ? 'visible' : 'oculto'}`);
+      next: (response) => {
+        console.log(`✅ Visibilidad cambiada exitosamente:`, response);
         this.cargarEventosAdmin();
       },
-      error: (err) => console.error('Error cambiando visibilidad', err)
+      error: (err) => {
+        console.error('❌ Error cambiando visibilidad:', err);
+        console.error('Error details:', err.error);
+      }
     });
   }
 
