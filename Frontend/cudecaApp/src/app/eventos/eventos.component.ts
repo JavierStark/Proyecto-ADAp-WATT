@@ -443,6 +443,12 @@ export class EventosComponent implements OnInit {
     this.router.navigate(['/compra-entradas', eventoId]);
   }
 
+  esEventoPasado(fecha: Date | string): boolean {
+  const fechaEvento = new Date(fecha);
+  const ahora = new Date();
+  return fechaEvento < ahora;
+  }
+
   irAdminEventos(): void {
     alert('Gestión de eventos (crear/editar/eliminar) pendiente de UI.');
   }

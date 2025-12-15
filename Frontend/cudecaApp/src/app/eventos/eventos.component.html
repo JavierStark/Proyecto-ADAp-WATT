@@ -124,11 +124,16 @@
             
             <button 
               (click)="inscribirseEvento(evento.id)"
-              [disabled]="evento.inscritos === evento.capacidad"
-              [class.opacity-50]="evento.inscritos === evento.capacidad"
-              [class.cursor-not-allowed]="evento.inscritos === evento.capacidad"
-              class="flex-1 md:flex-none bg-green-800 text-white text-[3.8vw] sm:text-[2.8vw] md:text-[1vw] font-semibold py-[2.5vw] px-[4vw] sm:py-[1.5vw] sm:px-[3vw] md:py-[0.7vw] md:px-[2vw] rounded-lg hover:bg-green-900 transition-colors shadow-sm">
-              Inscribirse
+              [disabled]="esEventoPasado(evento.fecha) || evento.inscritos === evento.capacidad"
+              [ngClass]="{
+                'opacity-50 cursor-not-allowed bg-gray-500 hover:bg-gray-500': esEventoPasado(evento.fecha) || evento.inscritos === evento.capacidad,
+                'bg-green-800 hover:bg-green-900': !esEventoPasado(evento.fecha) && evento.inscritos !== evento.capacidad
+              }"
+              class="flex-1 md:flex-none text-white text-[3.8vw] sm:text-[2.8vw] md:text-[1vw] font-semibold py-[2.5vw] px-[4vw] sm:py-[1.5vw] sm:px-[3vw] md:py-[0.7vw] md:px-[2vw] rounded-lg transition-colors shadow-sm">
+              
+              <span *ngIf="esEventoPasado(evento.fecha)">Finalizado</span>
+              <span *ngIf="!esEventoPasado(evento.fecha) && evento.inscritos === evento.capacidad">Aforo Completo</span>
+              <span *ngIf="!esEventoPasado(evento.fecha) && evento.inscritos !== evento.capacidad">Inscribirse</span>
             </button>
 
             <ng-container *ngIf="adminMode">
