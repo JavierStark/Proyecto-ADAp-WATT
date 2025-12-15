@@ -77,6 +77,7 @@ export class CompraEntradasComponent implements OnInit {
 
   isProcessing: boolean = false;
   errorMessage: string = '';
+  private readonly maxEntradasPorCompra = 10;
 
   private apiUrl = 'https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net';
 
@@ -282,6 +283,14 @@ export class CompraEntradasComponent implements OnInit {
   }
   get totalPrecio(): number { return Math.max(0, this.subtotalPrecio - this.importeDescuento); }
 
+  get maxGeneralPermitido(): number {
+    return Math.max(0, Math.min(this.cantidadGeneralDisponible, this.maxEntradasPorCompra - this.numeroEntradasVip));
+  }
+
+  get maxVipPermitido(): number {
+    return Math.max(0, Math.min(this.cantidadVipDisponible, this.maxEntradasPorCompra - this.numeroEntradasGeneral));
+  }
+
   // Lógica para cambiar entre persona/empresa
   seleccionarTipoComprador(empresa: boolean) {
     if (!empresa && this.esEmpresaRegistrada) {
@@ -308,6 +317,10 @@ export class CompraEntradasComponent implements OnInit {
     // Validaciones de entradas
     if (this.totalEntradas <= 0) {
       this.errorMessage = 'Debes seleccionar al menos una entrada.';
+      return;
+    }
+    if (this.totalEntradas > this.maxEntradasPorCompra) {
+      this.errorMessage = `Solo puedes comprar hasta ${this.maxEntradasPorCompra} entradas por operación.`;
       return;
     }
     if (this.numeroEntradasGeneral > this.cantidadGeneralDisponible) {
@@ -448,5 +461,21 @@ export class CompraEntradasComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/eventos']);
+  }
+
+  onCambioEntradasGeneral(value: number): void {
+    this.numeroEntradasGeneral = this.clampCantidad(value, this.maxGeneralPermitido);
+  }
+
+  onCambioEntradasVip(value: number): void {
+    this.numeroEntradasVip = this.clampCantidad(value, this.maxVipPermitido);
+  }
+
+  private clampCantidad(value: number, max: number): number {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      return 0;
+    }
+    return Math.min(parsed, Math.max(0, max));
   }
 }

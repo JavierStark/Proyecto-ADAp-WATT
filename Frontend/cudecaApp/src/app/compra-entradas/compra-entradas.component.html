@@ -67,17 +67,17 @@
             <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-[4vw] sm:rounded-[1.5vw] p-[5vw] sm:p-[1.5vw] border border-green-200">
               <label class="block text-[3.5vw] sm:text-[0.95vw] text-gray-700 font-semibold mb-[0.8vw]">
                 Entradas General ({{ precioGeneral }}€ c/u)
-                <span class="text-gray-500 text-[3.4vw] sm:text-[0.85vw] font-normal">- {{ cantidadGeneralDisponible }} disponibles</span>
+                <span class="text-gray-500 text-[3.4vw] sm:text-[0.85vw] font-normal">- {{ cantidadGeneralDisponible }} disponibles - Máximo {{ maxGeneralPermitido }}</span>
               </label>
-              <input type="number" min="0" [max]="cantidadGeneralDisponible" [(ngModel)]="numeroEntradasGeneral"class="w-full border-2 border-green-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[1vw] py-[2.5vw] sm:py-[0.7vw] text-[4vw] sm:text-[1.1vw] font-semibold text-green-800 text-center"/>
+              <input type="number" min="0" [max]="maxGeneralPermitido" [(ngModel)]="numeroEntradasGeneral" (ngModelChange)="onCambioEntradasGeneral($event)" class="w-full border-2 border-green-300 rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[1vw] py-[2.5vw] sm:py-[0.7vw] text-[4vw] sm:text-[1.1vw] font-semibold text-green-800 text-center"/>
             </div>
 
             <div *ngIf="tieneEntradasVip" class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[4vw] sm:rounded-[1.5vw] p-[5vw] sm:p-[1.5vw] border border-amber-200">
               <label class="block text-[3.5vw] sm:text-[0.95vw] text-gray-700 font-semibold mb-[0.8vw]">
                 Entradas VIP ({{ precioVip }}€ c/u)
-                <span class="text-gray-500 text-[3.4vw] sm:text-[0.85vw] font-normal">- {{ cantidadVipDisponible }} disponibles</span>
+                <span class="text-gray-500 text-[3.4vw] sm:text-[0.85vw] font-normal">- {{ cantidadVipDisponible }} disponibles - Máximo {{ maxVipPermitido }}</span>
               </label>
-              <input type="number" min="0" [max]="cantidadVipDisponible" [(ngModel)]="numeroEntradasVip" class="w-full border-2 border-amber-300  rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[1vw] py-[2.5vw] sm:py-[0.7vw] text-[4vw] sm:text-[1.1vw] font-semibold text-amber-800 text-center"/>
+              <input type="number" min="0" [max]="maxVipPermitido" [(ngModel)]="numeroEntradasVip" (ngModelChange)="onCambioEntradasVip($event)" class="w-full border-2 border-amber-300  rounded-[3vw] sm:rounded-[0.8vw] px-[3vw] sm:px-[1vw] py-[2.5vw] sm:py-[0.7vw] text-[4vw] sm:text-[1.1vw] font-semibold text-amber-800 text-center"/>
             </div>
           </div>
 
