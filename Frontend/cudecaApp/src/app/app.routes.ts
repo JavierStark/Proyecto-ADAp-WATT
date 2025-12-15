@@ -30,7 +30,7 @@ export const routes: Routes = [
   { path: 'validar-qr', component: QrValidateComponent },
   {path: 'hazte-socio', component: HazteSocioComponent, canActivate: [authGuard] },
   
-
+  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
 
 @NgModule({
