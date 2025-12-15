@@ -235,10 +235,6 @@ export class EventosComponent implements OnInit {
       this.formError = 'La fecha es obligatoria.';
       return;
     }
-    if (new Date(this.formData.fecha) < new Date()) {
-      this.formError = 'La fecha no puede ser en el pasado.';
-      return;
-    }
     if (Number(this.formData.precioGeneral) < 0) {
       this.formError = 'El precio General no puede ser negativo.';
       return;
