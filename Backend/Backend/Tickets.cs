@@ -90,11 +90,11 @@ static class Tickets
     {
         try
         {
-            byte[] qr = GenerateQr(ticketId);
+            var qrList = new List<byte[]> { GenerateQr(ticketId) };
 
             var html = GetTicketEmailHtml(ticketId);
 
-            var emailResponse = await emailService.SendEmailAsync(email, "Your Ticket", html, qr);
+            var emailResponse = await emailService.SendEmailAsync(email, "Your Ticket", html, qrList);
 
             return emailResponse.IsSuccessful
                 ? Results.Ok(new { message = "Ticket enviado por email correctamente." })
@@ -128,7 +128,7 @@ static class Tickets
                               </p>
 
                               <div style="margin:30px 0;">
-                                <img src="cid:qr.png" alt="QR Code" 
+                                <img src="cid:qr0.png" alt="QR Code" 
                                      style="width:180px; height:180px; border-radius:8px; 
                                             box-shadow:0 4px 12px rgba(0,0,0,0.15);" />
                               </div>
@@ -144,6 +144,70 @@ static class Tickets
 
                               <p style="font-size:14px; color:#6b7280;">
                                 Si tienes algún problema con tu ticket o necesitas asistencia,
+                                ponte en contacto con nuestro equipo de soporte.
+                              </p>
+
+                              <p style="font-size:13px; color:#9ca3af; margin-top:25px;">
+                                Gracias por confiar en nosotros. ¡Disfruta del evento!
+                              </p>
+
+                            </td>
+                          </tr>
+                        </table>
+                      </body>
+                    </html>
+                    """;
+        return html;
+    }
+
+    private static string GetTicketEmailHtml(List<string> ticketIds)
+    {
+        var ticketsHtml = new System.Text.StringBuilder();
+        
+        for (int i = 0; i < ticketIds.Count; i++)
+        {
+            ticketsHtml.Append($"""
+                              <div style="margin:30px 0; padding:20px; background:#f9fafb; border-radius:8px;">
+                                <div style="margin-bottom:15px;">
+                                  <img src="cid:qr{i}.png" alt="QR Code" 
+                                       style="width:180px; height:180px; border-radius:8px; 
+                                              box-shadow:0 4px 12px rgba(0,0,0,0.15);" />
+                                </div>
+                                <p style="font-size:16px; color:#1e1e1e; margin-bottom:5px; font-weight:600;">
+                                  Ticket ID:
+                                </p>
+                                <p style="font-size:18px; color:#4f46e5; margin-bottom:0; font-weight:bold;">
+                                  {ticketIds[i]}
+                                </p>
+                              </div>
+            """);
+        }
+        
+        var html = $"""
+
+                    <!DOCTYPE html>
+                    <html lang="es" style="margin:0; padding:0; font-family: Arial, Helvetica, sans-serif;">
+                      <body style="background-color:#f5f7fa; margin:0; padding:40px 0;">
+                        <table width="100%" cellspacing="0" cellpadding="0" 
+                               style="max-width:600px; margin:auto; background:white; border-radius:12px; 
+                                      box-shadow:0 4px 16px rgba(0,0,0,0.08); padding:40px;">
+                          <tr>
+                            <td style="text-align:center;">
+
+                              <h1 style="font-size:28px; color:#1e1e1e; margin-bottom:10px; font-weight:600;">
+                                ¡Aquí tienes tus entradas! 🎫
+                              </h1>
+
+                              <p style="font-size:16px; color:#4a4a4a; margin-bottom:25px;">
+                                Gracias por tu compra. Presenta estos códigos QR en la entrada para acceder al evento.
+                              </p>
+
+                              {ticketsHtml}
+
+                              <hr style="border:none; border-top:1px solid #e5e7eb; margin:40px 0;">
+
+                              <p style="font-size:14px; color:#6b7280;">
+                                Si tienes algún problema con tus tickets o necesitas asistencia,
                                 ponte en contacto con nuestro equipo de soporte.
                               </p>
 
@@ -432,16 +496,19 @@ static class Tickets
                         CodigoQr = Guid.NewGuid().ToString()
                     };
                     ticketsGenerados.Add(nuevaEntrada);
-
-                    // Enviar email individual
-                    await emailService.SendEmailAsync(
-                        usuario.Email!,
-                        $"Tu Entrada ({tipoDb.Tipo}) - {nombreEvento}",
-                        GetTicketEmailHtml(nuevaEntrada.CodigoQr),
-                        GenerateQr(nuevaEntrada.CodigoQr)
-                    );
                 }
             }
+
+            // Send all tickets in a single email
+            var ticketIds = ticketsGenerados.Select(t => t.CodigoQr!).ToList();
+            var qrs = ticketIds.Select(id => GenerateQr(id)).ToList();
+            
+            await emailService.SendEmailAsync(
+                usuario.Email!,
+                $"Tu(s) Entrada(s) - {nombreEvento}",
+                GetTicketEmailHtml(ticketIds),
+                qrs
+            );
 
             // Insertar todas las entradas
             await client.From<Entrada>().Insert(ticketsGenerados);
@@ -638,15 +705,19 @@ static class Tickets
                     };
                     ticketsGenerados.Add(nuevaEntrada);
 
-                    // Enviar email individual al email proporcionado
-                    await emailService.SendEmailAsync(
-                        dto.Email!,
-                        $"Tu Entrada ({tipoDb.Tipo}) - {nombreEvento}",
-                        GetTicketEmailHtml(nuevaEntrada.CodigoQr),
-                        GenerateQr(nuevaEntrada.CodigoQr)
-                    );
+                    
                 }
             }
+            
+            var ticketIds = ticketsGenerados.Select(t => t.CodigoQr!).ToList();
+            var qrs = ticketIds.Select(id => GenerateQr(id)).ToList();
+            
+            await emailService.SendEmailAsync(
+                dto.Email!,
+                $"Tu(s) Entrada(s) - {nombreEvento}",
+                GetTicketEmailHtml(ticketIds),
+                qrs
+            );
 
             // Insertar todas las entradas
             await client.From<Entrada>().Insert(ticketsGenerados);

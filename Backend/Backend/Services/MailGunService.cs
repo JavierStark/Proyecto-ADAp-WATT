@@ -8,13 +8,13 @@ public class MailGunService : IEmailService
     private readonly string _apiKey;
     private readonly string _domain;
 
-    public MailGunService(Backend.MailGunSettings settings)
+    public MailGunService(MailGunSettings settings)
     {
         _apiKey = settings.ApiKey;
         _domain = settings.Domain;
     }
 
-    public async Task<RestResponse> SendEmailAsync(string to, string subject, string htmlBody, byte[] qrBytes)
+    public async Task<RestResponse> SendEmailAsync(string to, string subject, string htmlBody, List<byte[]> qrBytesList)
     {
         var options = new RestClientOptions("https://api.mailgun.net")
         {
@@ -34,8 +34,11 @@ public class MailGunService : IEmailService
         // Send HTML instead of plain text
         request.AddParameter("html", htmlBody);
 
-        // Attach the QR code as inline image
-        request.AddFile("inline", qrBytes, "qr.png", "image/png");
+        // Attach all QR codes as inline images
+        for (int i = 0; i < qrBytesList.Count; i++)
+        {
+            request.AddFile("inline", qrBytesList[i], $"qr{i}.png", "image/png");
+        }
 
         return await client.ExecuteAsync(request);
     }
