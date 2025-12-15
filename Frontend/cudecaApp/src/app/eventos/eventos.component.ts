@@ -308,10 +308,6 @@ export class EventosComponent implements OnInit {
       visibleActual: evento.visible,
       nuevoVisible: nuevoVisible
     });
-    
-    // Enviar campos obligatorios para que el backend acepte la actualización
-    formData.append('Nombre', evento.titulo);
-    formData.append('Fecha', new Date(evento.fecha).toISOString());
     formData.append('EventoVisible', nuevoVisible ? 'true' : 'false');
     
     console.log('📤 FormData a enviar:', {
@@ -319,7 +315,6 @@ export class EventosComponent implements OnInit {
       Fecha: new Date(evento.fecha).toISOString(),
       EventoVisible: nuevoVisible ? 'true' : 'false'
     });
-    
     this.authService.updateAdminEvent(evento.id, formData).subscribe({
       next: (response) => {
         console.log(`✅ Visibilidad cambiada exitosamente:`, response);
