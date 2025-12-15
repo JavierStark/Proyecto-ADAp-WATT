@@ -143,11 +143,9 @@
                 Editar
               </button>
               <button 
-                (click)="toggleVisible(evento, $event)"
-                [class.bg-amber-500]="evento.visible"
-                [class.bg-gray-500]="!evento.visible"
-                class="text-white text-[0.95vw] font-semibold py-[0.6vw] px-[1.2vw] rounded-lg transition-colors hover:opacity-90">
-                {{ evento.visible ? 'Ocultar' : 'Mostrar' }}
+                (click)="toggleVisible(evento)"
+                class="bg-amber-500 text-white text-[0.95vw] font-semibold py-[0.6vw] px-[1.2vw] rounded-lg hover:bg-amber-600 transition-colors">
+                {{ evento.visible === false ? 'Mostrar' : 'Ocultar' }}
               </button>
               <button 
                 (click)="eliminarEvento(evento.id)"
