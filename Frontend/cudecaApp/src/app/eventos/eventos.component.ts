@@ -300,7 +300,12 @@ export class EventosComponent implements OnInit {
   toggleVisible(evento: any) {
     const nuevoVisible = !(evento.visible ?? true);
     const formData = new FormData();
+    
+    // Enviar campos obligatorios para que el backend acepte la actualización
+    formData.append('Nombre', evento.titulo);
+    formData.append('Fecha', new Date(evento.fecha).toISOString());
     formData.append('EventoVisible', String(nuevoVisible));
+    
     this.authService.updateAdminEvent(evento.id, formData).subscribe({
       next: () => {
         console.log(`✅ Visibilidad cambiada: ${nuevoVisible ? 'visible' : 'oculto'}`);
