@@ -213,9 +213,6 @@ public static class AdminEndpoints
 
         if (!dto.Fecha.HasValue)
             return Results.BadRequest(new { error = "La fecha es obligatoria." });
-            
-        if (dto.Fecha < DateTime.UtcNow)
-            return Results.BadRequest(new { error = "La fecha del evento no puede ser en el pasado." });
 
         if ((dto.PrecioGeneral ?? 0) < 0 || (dto.PrecioVip ?? 0) < 0)
             return Results.BadRequest(new { error = "Los precios no pueden ser negativos." });
