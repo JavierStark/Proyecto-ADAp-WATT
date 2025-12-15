@@ -1,4 +1,12 @@
 <div *ngIf="vista === 'CARGANDO'" class="min-h-screen flex items-center justify-center bg-green-50">
+  
+    <div class="absolute inset-0 bg-green-400 opacity-50 z-0"></div>
+  <img
+    src="assets/images/socio.jpg"
+    class="absolute inset-0 w-full h-full object-cover opacity-50
+           md:absolute
+           max-md:fixed max-md:-z-10"
+  />
   <div class="flex flex-col items-center gap-[1vw]">
     <svg class="animate-spin h-[4vw] w-[4vw] text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -8,8 +16,17 @@
   </div>
 </div>
 
-<section *ngIf="vista === 'YA_SOCIO'" class="min-h-screen pt-[7vw] flex items-center justify-center bg-green-50 px-[4vw]">
-  <div class="bg-white rounded-[2vw] shadow-2xl p-[3vw] max-w-[55vw] w-full animate-fade-in-up text-center">
+<section *ngIf="vista === 'YA_SOCIO'" class="relative min-h-screen pt-[7vw] flex items-center justify-center bg-green-50 px-[4vw] overflow-hidden">
+
+  <div class="absolute inset-0 bg-green-400 opacity-50 z-0"></div>
+  <img
+    src="assets/images/socio.jpg"
+    class="absolute inset-0 w-full h-full object-cover opacity-50
+           md:absolute
+           max-md:fixed max-md:-z-10"
+  />
+
+  <div class="bg-white rounded-[2vw] shadow-2xl p-[3vw] max-w-[55vw] w-full animate-fade-in-up text-center relative z-10">
     
     <h1 class="text-[2.2vw] font-bold text-green-800 mb-[1vw]">
       💚 Hola, socio
@@ -49,84 +66,88 @@
   </div>
 </section>
 
-<section *ngIf="vista === 'SELECCION'" class="relative w-full bg-green-50 font-sans pt-[10vw] pb-[6vw] px-[4vw] overflow-hidden min-h-screen">
+<section *ngIf="vista === 'SELECCION'" class="relative w-full bg-green-50 font-sans pt-[9vw] pb-[5.4vw] px-[3.6vw] overflow-hidden min-h-screen">
   
-  <img src="assets/images/fondoCudeca.png" class="absolute inset-0 w-full h-full object-cover z-0" />
-  <div class="absolute inset-0 bg-green-400/30 z-10"></div>
-
+  <div class="absolute inset-0 bg-green-400 opacity-50 z-0"></div>
+  <img
+    src="assets/images/socio.jpg"
+    class="absolute inset-0 w-full h-full object-cover opacity-50
+           md:absolute
+           max-md:fixed max-md:-z-10"
+  />
   <div class="relative z-20 flex items-center justify-center min-h-[calc(100vh-20vw)]">
-    <div class="bg-white rounded-[2.5vw] shadow-2xl p-[3vw] max-w-[65vw] w-full animate-fade-in-up">
+    <div class="bg-white rounded-[2.2vw] shadow-2xl p-[2.7vw] max-w-[63vw] w-full animate-fade-in-up">
 
-      <h1 class="text-[2.2vw] font-bold text-green-800 mb-[0.8vw] text-center">
+      <h1 class="text-[2vw] font-bold text-green-800 mb-[0.7vw] text-center">
         Hazte socio de CUDECA
       </h1>
-      <p class="text-gray-600 text-[1.1vw] mb-[2.5vw] text-center">
+      <p class="text-gray-600 text-[1vw] mb-[2.2vw] text-center">
         Tu apoyo permite que sigamos cuidando a quienes más lo necesitan.
       </p>
 
-      <div class="grid grid-cols-3 gap-[1.5vw] mb-[3vw]">
-        <div class="bg-green-50 rounded-[1.2vw] p-[1.6vw] text-center hover:scale-105 transition-transform">
-          <div class="text-[2vw] mb-[0.6vw]">🎟️</div>
-          <p class="font-semibold text-green-800 text-[1vw]">Descuentos en eventos</p>
+      <div class="grid grid-cols-3 gap-[1.35vw] mb-[2.7vw]">
+        <div class="bg-green-50 rounded-[1.1vw] p-[1.4vw] text-center hover:scale-105 transition-transform">
+          <div class="text-[1.8vw] mb-[0.55vw]">🎟️</div>
+          <p class="font-semibold text-green-800 text-[0.95vw]">Descuentos en eventos</p>
         </div>
-        <div class="bg-green-50 rounded-[1.2vw] p-[1.6vw] text-center hover:scale-105 transition-transform">
-          <div class="text-[2vw] mb-[0.6vw]">⭐</div>
-          <p class="font-semibold text-green-800 text-[1vw]">Acceso prioritario</p>
+        <div class="bg-green-50 rounded-[1.1vw] p-[1.4vw] text-center hover:scale-105 transition-transform">
+          <div class="text-[1.8vw] mb-[0.55vw]">⭐</div>
+          <p class="font-semibold text-green-800 text-[0.95vw]">Acceso prioritario</p>
         </div>
-        <div class="bg-green-50 rounded-[1.2vw] p-[1.6vw] text-center hover:scale-105 transition-transform">
-          <div class="text-[2vw] mb-[0.6vw]">💚</div>
-          <p class="font-semibold text-green-800 text-[1vw]">Apoyo directo</p>
+        <div class="bg-green-50 rounded-[1.1vw] p-[1.4vw] text-center hover:scale-105 transition-transform">
+          <div class="text-[1.8vw] mb-[0.55vw]">💚</div>
+          <p class="font-semibold text-green-800 text-[0.95vw]">Apoyo directo</p>
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-[1.5vw] mb-[3vw]">
+      <div class="grid grid-cols-3 gap-[1.35vw] mb-[2.7vw]">
         
         <button (click)="seleccionarPlan('mensual', 10)"
-          class="border-2 rounded-[1.2vw] p-[1.5vw] text-center transition-all duration-300 group"
+          class="border-2 rounded-[1.1vw] p-[1.35vw] text-center transition-all duration-300 group"
           [ngClass]="planSeleccionado === 'mensual' 
              ? 'bg-green-600 border-green-600 text-white shadow-lg scale-105' 
              : 'bg-white border-gray-200 hover:border-green-500 hover:bg-green-50'">
           
-          <div class="text-[1.2vw] font-semibold"
+          <div class="text-[1.1vw] font-semibold"
                [ngClass]="planSeleccionado === 'mensual' ? 'text-white' : 'text-gray-800 group-hover:text-green-700'">
                Mensual
           </div>
-          <div class="text-[1.8vw] font-bold mt-[0.5vw]">10 €</div>
+          <div class="text-[1.65vw] font-bold mt-[0.45vw]">10 €</div>
         </button>
 
         <button (click)="seleccionarPlan('trimestral', 25)"
-          class="border-2 rounded-[1.2vw] p-[1.5vw] text-center transition-all duration-300 group relative overflow-hidden"
+          class="border-2 rounded-[1.1vw] p-[1.35vw] text-center transition-all duration-300 group relative overflow-hidden"
           [ngClass]="planSeleccionado === 'trimestral' 
              ? 'bg-green-600 border-green-600 text-white shadow-lg scale-105' 
              : 'bg-white border-gray-200 hover:border-green-500 hover:bg-green-50'">
           
-          <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[0.7vw] font-bold px-[1vw] py-[0.2vw] rounded-bl-lg z-10">
+          <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[0.65vw] font-bold px-[0.9vw] py-[0.18vw] rounded-bl-lg z-10">
             POPULAR
           </div>
 
-          <div class="text-[1.2vw] font-semibold"
+          <div class="text-[1.1vw] font-semibold"
                [ngClass]="planSeleccionado === 'trimestral' ? 'text-white' : 'text-gray-800 group-hover:text-green-700'">
                Trimestral
           </div>
-          <div class="text-[1.8vw] font-bold mt-[0.5vw]">25 €</div>
-          <div class="text-[0.8vw] mt-[0.5vw]"
+          <div class="text-[1.65vw] font-bold mt-[0.45vw]">25 €</div>
+          <div class="text-[0.75vw] mt-[0.45vw]"
                [ngClass]="planSeleccionado === 'trimestral' ? 'text-green-100' : 'text-gray-500'">
                Ahorras 5€ al año
           </div>
         </button>
 
         <button (click)="seleccionarPlan('anual', 90)"
-          class="border-2 rounded-[1.2vw] p-[1.5vw] text-center transition-all duration-300 group"
+          class="border-2 rounded-[1.1vw] p-[1.35vw] text-center transition-all duration-300 group"
           [ngClass]="planSeleccionado === 'anual' 
              ? 'bg-green-600 border-green-600 text-white shadow-lg scale-105' 
              : 'bg-white border-gray-200 hover:border-green-500 hover:bg-green-50'">
           
-          <div class="text-[1.2vw] font-semibold"
+          <div class="text-[1.1vw] font-semibold"
                [ngClass]="planSeleccionado === 'anual' ? 'text-white' : 'text-gray-800 group-hover:text-green-700'">
                Anual
           </div>
-          <div class="text-[1.8vw] font-bold mt-[0.5vw]">90 €</div>
-          <div class="text-[0.8vw] mt-[0.5vw]"
+          <div class="text-[1.65vw] font-bold mt-[0.45vw]">90 €</div>
+          <div class="text-[0.75vw] mt-[0.45vw]"
                [ngClass]="planSeleccionado === 'anual' ? 'text-green-100' : 'text-gray-500'">
                Ahorras 30€ al año
           </div>
@@ -135,26 +156,26 @@
 
       <button (click)="irAResumen()" 
         [disabled]="!planSeleccionado"
-        class="w-full bg-green-600 text-white font-bold py-[1.2vw] rounded-[1.2vw] hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[1.2vw] shadow-md">
+        class="w-full bg-green-600 text-white font-bold py-[1.05vw] rounded-[1.1vw] hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[1.1vw] shadow-md">
         Continuar
       </button>
 
-      <p *ngIf="errorMessage" class="text-red-600 mt-[1.2vw] text-center text-[1vw] animate-pulse">
+      <p *ngIf="errorMessage" class="text-red-600 mt-[1vw] text-center text-[0.95vw] animate-pulse">
         {{ errorMessage }}
       </p>
 
       <button (click)="cancelarSeleccion()" 
-        class="w-full mt-[1vw] bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-[0.9vw] rounded-[1vw] text-[1vw] transition-colors">
+        class="w-full mt-[0.9vw] bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-[0.85vw] rounded-[0.95vw] text-[0.95vw] transition-colors">
           Volver
       </button>
 
       
 
-      <p *ngIf="errorMessage" class="text-red-600 mt-[1.2vw] text-center text-[1vw] animate-pulse">
+      <p *ngIf="errorMessage" class="text-red-600 mt-[1vw] text-center text-[0.95vw] animate-pulse">
         {{ errorMessage }}
       </p>
 
-      <button *ngIf="!datosSocio" (click)="volverHome()" class="w-full mt-[1vw] text-gray-500 hover:text-gray-700 text-[1vw]">
+      <button *ngIf="!datosSocio" (click)="volverHome()" class="w-full mt-[0.9vw] text-gray-500 hover:text-gray-700 text-[0.95vw]">
           Cancelar y volver al inicio
       </button>
     </div>
@@ -163,8 +184,13 @@
 
 <section *ngIf="vista === 'RESUMEN'" class="w-full min-h-screen pt-[10vw] pb-[4vw] bg-green-50 relative font-sans">
   
-  <img src="assets/images/fondoCudeca.png" class="absolute inset-0 w-full h-full object-cover -z-10" />
-  <div class="absolute inset-0 bg-green-400/30 -z-5"></div>
+  <div class="absolute inset-0 bg-green-400 opacity-50 z-0"></div>
+  <img
+    src="assets/images/socio.jpg"
+    class="absolute inset-0 w-full h-full object-cover opacity-50
+           md:absolute
+           max-md:fixed max-md:-z-10"
+  />
 
   <div class="max-w-[70vw] mx-auto relative z-10">
     <div class="bg-white rounded-[2vw] shadow-2xl p-[3vw] animate-fade-in-up">
