@@ -300,17 +300,33 @@ export class EventosComponent implements OnInit {
     console.log('🔄 Toggle visible - Estado del evento:', {
       id: evento.id,
       titulo: evento.titulo,
-      fecha: evento.fecha,
       visibleActual: evento.visible,
       nuevoVisible: nuevoVisible
     });
+    
+    // Enviar los campos necesarios como en guardarEvento()
+    formData.append('Nombre', evento.titulo);
+    formData.append('Fecha', new Date(evento.fecha).toISOString());
+    formData.append('Descripcion', evento.descripcion || '');
+    formData.append('Ubicacion', evento.ubicacion || '');
     formData.append('EventoVisible', nuevoVisible ? 'true' : 'false');
+    formData.append('ObjetivoRecaudacion', String(evento.objetivoRecaudacion || 0));
+    formData.append('RecaudacionExtra', String(evento.recaudacionExtra || 0));
+    formData.append('PrecioGeneral', String(evento.precioGeneral || 0));
+    formData.append('CantidadGeneral', String(evento.cantidadGeneral || 0));
+    if (evento.precioVip) {
+      formData.append('PrecioVip', String(evento.precioVip));
+    }
+    if (evento.cantidadVip) {
+      formData.append('CantidadVip', String(evento.cantidadVip));
+    }
     
     console.log('📤 FormData a enviar:', {
       Nombre: evento.titulo,
       Fecha: new Date(evento.fecha).toISOString(),
       EventoVisible: nuevoVisible ? 'true' : 'false'
     });
+    
     this.authService.updateAdminEvent(evento.id, formData).subscribe({
       next: (response) => {
         console.log(`✅ Visibilidad cambiada exitosamente:`, response);
