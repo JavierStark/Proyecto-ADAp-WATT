@@ -1,4 +1,4 @@
-<section class="w-full min-h-screen pt-[25vw] sm:pt-[15vw] md:pt-[10vw] pb-8 md:pb-[3vw] overflow-hidden font-sans bg-green-50 relative">
+<section class="w-full min-h-screen pt-[30vw] sm:pt-[15vw] md:pt-[9vw] pb-[8vw] md:pb-[2.7vw] overflow-hidden font-sans bg-green-50 relative">
   <!-- Fondo -->
   <img
     src="assets/images/fondoCudeca.png"
@@ -7,39 +7,39 @@
   />
   <div class="absolute inset-0 bg-green-400 opacity-30 -z-5"></div>
 
-  <div class="max-w-[95vw] md:max-w-[90vw] mx-auto relative z-10 px-4 md:px-0">
+  <div class="max-w-[95vw] md:max-w-[90vw] mx-auto relative z-10 px-[4vw] md:px-0">
     
     <!-- Loading -->
     <div *ngIf="isLoading" class="flex flex-col items-center justify-center h-[50vh]">
-      <div class="animate-spin rounded-full h-12 w-12 md:h-[5vw] md:w-[5vw] border-b-4 md:border-b-[0.4vw] border-green-700 mb-4 md:mb-[2vw]"></div>
-      <p class="text-green-800 text-xl md:text-[1.5vw] font-bold">Cargando detalles...</p>
+      <div class="animate-spin rounded-full h-[8vw] w-[8vw] md:h-[4.5vw] md:w-[4.5vw] border-b-[1.2vw] md:border-b-[0.36vw] border-green-700 mb-[4vw] md:mb-[1.8vw]"></div>
+      <p class="text-green-800 text-[5vw] md:text-[1.35vw] font-bold">Cargando detalles...</p>
     </div>
 
     <!-- Contenido principal -->
-    <div *ngIf="!isLoading && evento" class="bg-white rounded-3xl md:rounded-[2vw] shadow-2xl overflow-hidden p-6 md:p-[2.5vw]">
+    <div *ngIf="!isLoading && evento" class="bg-white rounded-[6vw] md:rounded-[1.8vw] shadow-2xl overflow-hidden p-[6vw] md:p-[2.25vw]">
       
       <!-- IZQUIERDA: Imagen + título + inscripción -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-[3vw] items-start">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-[6vw] md:gap-[2.7vw] items-start">
         
         <!-- Imagen -->
         <div class="md:col-span-1 flex flex-col items-start w-full">
-          <div class="w-full h-64 md:h-[18vw] rounded-2xl md:rounded-[1.5vw] overflow-hidden shadow-md">
+          <div class="w-full h-[45vw] md:h-[16.5vw] rounded-[5vw] md:rounded-[1.35vw] overflow-hidden shadow-md">
             <img [src]="evento.imagen" alt="Imagen del evento" class="w-full h-full object-cover">
           </div>
           
           <!-- Título -->
-          <h1 class="text-2xl md:text-[2vw] font-bold text-green-600 mt-4 md:mt-[1vw] leading-tight">
+          <h1 class="text-[5vw] md:text-[1.8vw] font-bold text-green-600 mt-[4vw] md:mt-[0.9vw] leading-tight">
             {{ evento.titulo }}
           </h1>
           
           <!-- Información de inscripción -->
-          <div class="mt-6 md:mt-[2vw] w-full">
-            <div class="space-y-4 md:space-y-[1.5vw] mb-4 md:mb-[1.5vw] text-base md:text-[1.1vw]">
-              <div class="flex items-start gap-2">
+          <div class="mt-[6vw] md:mt-[1.8vw] w-full">
+            <div class="space-y-[4vw] md:space-y-[1.35vw] mb-[4vw] md:mb-[1.35vw] text-[4vw] md:text-[1vw]">
+              <div class="flex items-start gap-[2vw]">
                 <span class="text-gray-600 shrink-0">🗺️📌:</span>
                 <span class="font-bold text-green-600 break-words">{{ evento.ubicacion }}</span>
               </div>
-              <div class="flex justify-between items-center border-b border-gray-100 pb-2 md:border-none md:pb-0">
+              <div class="flex justify-between items-center border-b border-gray-100 pb-[2vw] md:border-none md:pb-0">
                 <span class="text-gray-600">Aforo total:</span>
                 <span class="font-bold text-gray-900">{{ evento.capacidad }} pers.</span>
               </div>
@@ -49,11 +49,11 @@
               </div>
             </div>
             
-            <div class="w-full bg-gray-200 rounded-full h-4 md:h-[1vw] mb-2 md:mb-[0.5vw] overflow-hidden">
+            <div class="w-full bg-gray-200 rounded-full h-[4vw] md:h-[0.9vw] mb-[2vw] md:mb-[0.45vw] overflow-hidden">
               <div class="bg-green-600 h-full rounded-full transition-all duration-500" 
                    [style.width.%]="(evento.inscritos / evento.capacidad) * 100"></div>
             </div>
-            <p class="text-sm md:text-[0.9vw] text-gray-500 text-right">
+            <p class="text-[3.5vw] md:text-[0.85vw] text-gray-500 text-right">
               {{ evento.capacidad - evento.inscritos }} plazas disponibles
             </p>
           </div>
@@ -62,58 +62,58 @@
         <!-- DERECHA: Descripción + causa solidaria + botones -->
         <div class="md:col-span-2 flex flex-col w-full">
           <!-- Descripción -->
-          <h3 class="text-xl md:text-[2vw] font-bold text-green-600 mb-4 md:mb-[1.5vw] border-b border-gray-200 pb-2 md:pb-[1vw]">
+          <h3 class="text-[4.5vw] md:text-[1.8vw] font-bold text-green-600 mb-[4vw] md:mb-[1.35vw] border-b border-gray-200 pb-[2vw] md:pb-[0.9vw]">
             Descripción
           </h3>
-          <p class="text-gray-700 text-base md:text-[1.2vw] leading-relaxed whitespace-pre-line mb-8 md:mb-[3vw]">
+          <p class="text-gray-700 text-[4vw] md:text-[1.1vw] leading-relaxed whitespace-pre-line mb-[8vw] md:mb-[2.7vw]">
             {{ evento.descripcion }}
           </p>
 
           <!-- Objetivo recaudacion / total recaudado -->
-          <div *ngIf="evento.objetivoRecaudacion && evento.objetivoRecaudacion > 0" 
-              class="bg-green-50 p-4 md:p-[2vw] rounded-xl md:rounded-[1.5vw] border border-green-200 mb-8 md:mb-[3vw]">
+            <div *ngIf="evento.objetivoRecaudacion && evento.objetivoRecaudacion > 0" 
+              class="bg-green-50 p-[4vw] md:p-[1.8vw] rounded-[4vw] md:rounded-[1.35vw] border border-green-200 mb-[8vw] md:mb-[2.7vw]">
             
-            <div class="flex items-center gap-3 md:gap-[1vw] mb-4 md:mb-[1.5vw]">
-              <div class="bg-green-200 p-2 md:p-[0.8vw] rounded-lg md:rounded-[1vw] text-xl md:text-[1.5vw]">🎯</div>
+            <div class="flex items-center gap-[3vw] md:gap-[1vw] mb-[4vw] md:mb-[1.5vw]">
+              <div class="bg-green-200 p-[2vw] md:p-[0.8vw] rounded-[3vw] md:rounded-[1vw] text-[4.5vw] md:text-[1.5vw]">🎯</div>
               <div>
-                <h3 class="font-bold md:pb-[0.5vw] text-green-800 text-base md:text-[1.3vw]">Objetivo Solidario</h3>
-                <p class="text-green-700 text-sm md:text-[1vw]">Ayúdanos a alcanzar nuestra meta</p>
+                <h3 class="font-bold md:pb-[0.5vw] text-green-800 text-[4vw] md:text-[1.3vw]">Objetivo Solidario</h3>
+                <p class="text-green-700 text-[3.2vw] md:text-[1vw]">Ayúdanos a alcanzar nuestra meta</p>
               </div>
             </div>
 
-            <div class="w-full bg-white border border-green-100 rounded-full h-6 md:h-[1.5vw] relative overflow-hidden mb-2 md:mb-[0.5vw]">
+            <div class="w-full bg-white border border-green-100 rounded-full h-[6vw] md:h-[1.35vw] relative overflow-hidden mb-[2vw] md:mb-[0.45vw]">
               <div class="bg-gradient-to-r from-green-500 to-green-600 h-full rounded-full transition-all duration-1000"
                    [style.width.%]="(evento.totalRecaudado! / evento.objetivoRecaudacion!) * 100 > 100 ? 100 : (evento.totalRecaudado! / evento.objetivoRecaudacion!) * 100">
               </div>
-              <div class="absolute inset-0 flex items-center justify-center text-xs md:text-[0.9vw] font-bold text-green-900 drop-shadow-sm px-2">
+              <div class="absolute inset-0 flex items-center justify-center text-[3vw] md:text-[0.8vw] font-bold text-green-900 drop-shadow-sm px-[2vw]">
                 {{ (evento.totalRecaudado! / evento.objetivoRecaudacion!) | percent:'1.0-0' }} completado
               </div>
             </div>
 
-            <div class="flex justify-between items-center text-sm md:text-[1vw]">
+            <div class="flex justify-between items-center text-[3.5vw] md:text-[0.9vw]">
               <span class="font-bold text-green-700">Recaudado: {{ evento.totalRecaudado | currency:'EUR' }}</span>
               <span class="text-gray-500">Objetivo: {{ evento.objetivoRecaudacion | currency:'EUR' }}</span>
             </div>
             
-            <p *ngIf="evento.totalRecaudado! >= evento.objetivoRecaudacion!" class="text-center mt-3 md:mt-[1vw] font-bold text-green-600 text-sm md:text-[1.2vw]">
+            <p *ngIf="evento.totalRecaudado! >= evento.objetivoRecaudacion!" class="text-center mt-[3vw] md:mt-[0.9vw] font-bold text-green-600 text-[3.5vw] md:text-[1.1vw]">
               ¡Gracias! Hemos superado el objetivo ❤️
             </p>
           </div>
 
           <!-- Botones de acción -->
-          <div class="flex flex-col sm:flex-row gap-4 md:gap-[1vw] mt-auto">
+          <div class="flex flex-col sm:flex-row gap-[4vw] md:gap-[0.9vw] mt-auto">
             <button (click)="inscribirse()"
               [disabled]="evento.inscritos >= evento.capacidad"
               [class.opacity-50]="evento.inscritos >= evento.capacidad"
               [class.cursor-not-allowed]="evento.inscritos >= evento.capacidad"
-              class="flex-1 bg-green-600 text-white font-bold text-lg md:text-[1.2vw] py-4 md:py-[1vw] rounded-xl md:rounded-[1vw] hover:bg-green-700 transition shadow-md justify-center items-center gap-2 md:gap-[0.5vw] flex">
+              class="flex-1 bg-green-600 text-white font-bold text-[4.5vw] md:text-[1.1vw] py-[4vw] md:py-[0.9vw] rounded-[3vw] md:rounded-[0.9vw] hover:bg-green-700 transition shadow-md justify-center items-center gap-[2vw] md:gap-[0.45vw] flex">
               <span *ngIf="evento.inscritos < evento.capacidad">Comprar entradas</span>
               <span *ngIf="evento.inscritos >= evento.capacidad">⛔ Aforo Completo</span>
             </button>
             
             </div>
 
-          <p class="text-center text-sm md:text-[0.9vw] text-gray-400 mt-6 md:mt-[1.5vw]">
+          <p class="text-center text-[3.5vw] md:text-[0.8vw] text-gray-400 mt-[6vw] md:mt-[1.35vw]">
             Gracias por colaborar con la Fundación Cudeca.
           </p>
         </div>
