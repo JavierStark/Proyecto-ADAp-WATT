@@ -110,7 +110,15 @@ export class EventoDetalleComponent implements OnInit {
     // Navegar a página de compra de entradas
     this.router.navigate(['/compra-entradas', this.evento?.id]);
   }
- goToDonation() {
+
+  esEventoPasado(fecha: Date | string): boolean {
+  if (!fecha) return false;
+  const fechaEvento = new Date(fecha);
+  const ahora = new Date();
+  return fechaEvento < ahora;
+  }
+
+  goToDonation() {
     this.router.navigate(['/donation']);
   }
 
