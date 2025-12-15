@@ -103,12 +103,18 @@
           <!-- Botones de acción -->
           <div class="flex flex-col sm:flex-row gap-[4vw] md:gap-[0.9vw] mt-auto">
             <button (click)="inscribirse()"
-              [disabled]="evento.inscritos >= evento.capacidad"
-              [class.opacity-50]="evento.inscritos >= evento.capacidad"
-              [class.cursor-not-allowed]="evento.inscritos >= evento.capacidad"
-              class="flex-1 bg-green-600 text-white font-bold text-[4.5vw] md:text-[1.1vw] py-[4vw] md:py-[0.9vw] rounded-[3vw] md:rounded-[0.9vw] hover:bg-green-700 transition shadow-md justify-center items-center gap-[2vw] md:gap-[0.45vw] flex">
-              <span *ngIf="evento.inscritos < evento.capacidad">Comprar entradas</span>
-              <span *ngIf="evento.inscritos >= evento.capacidad">⛔ Aforo Completo</span>
+              [disabled]="esEventoPasado(evento.fecha) || evento.inscritos >= evento.capacidad"
+              [ngClass]="{
+                'opacity-50 cursor-not-allowed bg-gray-500 hover:bg-gray-500': esEventoPasado(evento.fecha) || evento.inscritos >= evento.capacidad,
+                'bg-green-600 hover:bg-green-700': !esEventoPasado(evento.fecha) && evento.inscritos < evento.capacidad
+              }"
+              class="flex-1 text-white font-bold text-[4.5vw] md:text-[1.1vw] py-[4vw] md:py-[0.9vw] rounded-[3vw] md:rounded-[0.9vw] transition shadow-md justify-center items-center gap-[2vw] md:gap-[0.45vw] flex">
+              
+              <span *ngIf="esEventoPasado(evento.fecha)">Evento Finalizado</span>
+              
+              <span *ngIf="!esEventoPasado(evento.fecha) && evento.inscritos >= evento.capacidad">⛔ Aforo Completo</span>
+              
+              <span *ngIf="!esEventoPasado(evento.fecha) && evento.inscritos < evento.capacidad">Comprar entradas</span>
             </button>
             
             </div>
