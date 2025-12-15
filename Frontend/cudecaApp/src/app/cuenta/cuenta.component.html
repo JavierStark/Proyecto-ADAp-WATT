@@ -342,11 +342,6 @@
                       {{ ticket.estado || 'Activo' }}
                     </span>
                   </div>
-
-                  <a *ngIf="ticket.codigoQrUrl" [href]="ticket.codigoQrUrl" target="_blank"
-                    class="ticket-qr text-green-700 text-[0.95vw] font-semibold hover:underline mt-[0.4vw] inline-flex items-center gap-[0.4vw]">
-                    Ver QR
-                  </a>
                 </div>
               </div>
             </div>
