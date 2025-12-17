@@ -112,6 +112,8 @@
               <span *ngIf="!isLoggedIn" class="text-[3vw] sm:text-[0.7vw] font-normal opacity-70">(Requiere login)</span>
             </button>
           </div>
+
+          
           
           <div *ngIf="esEmpresaRegistrada" class="mb-[4vw] sm:mb-[1.5vw] mt-[2vw] sm:-mt-[1vw] text-[3.5vw] sm:text-[0.85vw] text-gray-500 italic text-center px-[2vw] sm:px-0">
              ℹ️ Tu cuenta está registrada como empresa, la facturación se realizará a nombre de <strong>{{ nombreEmpresa }}</strong>.
@@ -135,6 +137,15 @@
             </div>
 
             <div *ngIf="esEmpresa" class="mb-[4vw] sm:mb-[1vw] animate-fade-in-up">
+              
+              <div *ngIf="!esEmpresaRegistrada" class="bg-yellow-50 border-l-4 border-yellow-400 p-[3vw] sm:p-[1vw] mb-[3vw] sm:mb-[1vw] rounded-r-[1vw] flex items-start gap-[2vw] sm:gap-[0.8vw]">
+                <span class="text-[5vw] sm:text-[1.5vw]">⚠️</span>
+                <div class="text-yellow-800 text-[3.5vw] sm:text-[0.9vw]">
+                  <p class="font-bold">Información Importante:</p>
+                  <p>Al guardar, tu cuenta pasará a ser un <strong>perfil corporativo</strong> de forma permanente. Esta acción <strong>no se puede revertir</strong>.</p>
+                </div>
+              </div>
+
               <label class="block text-[4vw] sm:text-[0.95vw] text-green-700 font-bold mb-[1vw] sm:mb-[0.3vw]">Nombre de la Empresa <span class="text-red-500">*</span></label>
               <input 
                 type="text" 
