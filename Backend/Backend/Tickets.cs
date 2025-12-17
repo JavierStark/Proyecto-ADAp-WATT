@@ -395,32 +395,10 @@ static class Tickets
                 datosUsuarioActualizados = true;
             }
             
-            // Actualizar dirección de cliente
-            if (!string.IsNullOrEmpty(dto.Calle) && cliente.Calle != dto.Calle) 
-            { 
-                cliente.Calle = dto.Calle; 
-                datosClienteActualizados = true; 
-            }
-
-            if (!string.IsNullOrEmpty(dto.Numero) && cliente.Numero != dto.Numero) 
-            { 
-                cliente.Numero = dto.Numero; 
-                datosClienteActualizados = true; 
-            }
-
-            if (!string.IsNullOrEmpty(dto.PisoPuerta) && cliente.PisoPuerta != dto.PisoPuerta) 
-            { 
-                cliente.PisoPuerta = dto.PisoPuerta; 
-                datosClienteActualizados = true; 
-            }
-            
             // Validar datos fiscales requeridos
             var camposFaltantes = new List<string>();
             
             if (string.IsNullOrEmpty(usuario.Dni)) camposFaltantes.Add("DNI");
-            
-            if (string.IsNullOrEmpty(cliente.Calle) || string.IsNullOrEmpty(cliente.Numero)) 
-                camposFaltantes.Add("Dirección completa");
             
             if (camposFaltantes.Count != 0)
             {
