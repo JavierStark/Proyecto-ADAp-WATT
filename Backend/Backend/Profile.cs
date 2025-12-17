@@ -53,8 +53,7 @@ static class Profile
         {
             var userId = (string)httpContext.Items["user_id"]!;
             var parsed = Guid.Parse(userId);
-
-            // 1. Optimización: Cargar ambos datos en paralelo para ser más rápido
+            
             var usuarioTask = client.From<Usuario>().Where(u => u.Id == parsed).Single();
             var clienteTask = client.From<Cliente>().Where(c => c.Id == parsed).Single();
 
@@ -66,20 +65,17 @@ static class Profile
             if (usuario == null || cliente == null)
                 return Results.NotFound("Usuario o Cliente no encontrados.");
 
-            // 2. Actualizar Tabla USUARIO
-            // Modificamos directamente el objeto 'usuario' descargado.
-            // Si el DTO es nulo o vacío, NO tocamos la propiedad, conservando el valor original.
+            // Si el DTO es nulo o vacío, no tocamos la propiedad, conservando el valor original
+            // Actualizar tabla Usuario
             if (!string.IsNullOrEmpty(dto.Nombre)) usuario.Nombre = dto.Nombre;
             if (!string.IsNullOrEmpty(dto.Apellidos)) usuario.Apellidos = dto.Apellidos;
             if (!string.IsNullOrEmpty(dto.Dni)) usuario.Dni = dto.Dni;
             if (!string.IsNullOrEmpty(dto.Telefono)) usuario.Telefono = dto.Telefono;
 
-            // Nota: No hace falta asignar usuario.Email ni Id, ya vienen en el objeto original.
-
             var usuarioResponse = await client.From<Usuario>().Update(usuario);
             var usuarioNuevo = usuarioResponse.Models.First();
 
-            // 3. Actualizar Tabla CLIENTE
+            // Actualizar tabla Cliente
             if (!string.IsNullOrEmpty(dto.Calle)) cliente.Calle = dto.Calle;
             if (!string.IsNullOrEmpty(dto.Numero)) cliente.Numero = dto.Numero;
             if (!string.IsNullOrEmpty(dto.PisoPuerta)) cliente.PisoPuerta = dto.PisoPuerta;
