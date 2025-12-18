@@ -45,9 +45,11 @@ npm install
 Update the API URL in service files (`src/app/services/*.service.ts`) to point to your backend:
 
 ```typescript
-private apiUrl = 'http://localhost:5000/'; // Development
+private apiUrl = 'https://localhost:5001/'; // Development (HTTPS)
 // private apiUrl = 'https://your-backend.azurewebsites.net/'; // Production
 ```
+
+**Note**: The backend uses HTTPS by default on port 5001. Use HTTP on port 5000 only if explicitly configured.
 
 ### Development server
 

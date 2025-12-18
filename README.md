@@ -158,17 +158,16 @@ Proyecto-ADAp-WATT/
 │       │   ├── ValeDescuento.cs
 │       │   └── UsuarioNoRegistrado.cs
 │       │
-│       ├── Endpoints/                 # API endpoint definitions
-│       │   ├── AdminEndpoints.cs
-│       │   ├── Donations.cs
-│       │   ├── Events.cs
-│       │   ├── Tickets.cs
-│       │   ├── Profile.cs
-│       │   ├── Auth.cs
-│       │   ├── Partner.cs
-│       │   ├── Corporate.cs
-│       │   ├── DevTools.cs
-│       │   └── Test.cs
+│       ├── AdminEndpoints.cs         # Admin API endpoints
+│       ├── Donations.cs             # Donation endpoints
+│       ├── Events.cs                # Event endpoints
+│       ├── Tickets.cs               # Ticket endpoints
+│       ├── Profile.cs               # Profile endpoints
+│       ├── Auth.cs                  # Authentication endpoints
+│       ├── Partner.cs               # Partner endpoints
+│       ├── Corporate.cs             # Corporate endpoints
+│       ├── DevTools.cs              # Development tools
+│       ├── Test.cs                  # Test endpoints
 │       │
 │       ├── Filters/                   # Authentication filters
 │       │   ├── SupabaseAuthFilter.cs
@@ -226,10 +225,11 @@ Proyecto-ADAp-WATT/
 │           ├── styles.css            # Global styles
 │           └── index.html            # Main HTML file
 │
-├── DiagramClase.xmi                  # UML class diagram
-├── DiagramSequence.xmi               # UML sequence diagram
-├── EntityRelationship.xmi            # Entity relationship diagram
-└── UseCase.xmi                       # Use case diagram
+├── DiagramClase.xmi                  # UML class diagram (root level)
+├── DiagramSequence.xmi               # UML sequence diagram (root level)
+├── EntityRelationship.xmi            # Entity relationship diagram (root level)
+├── UseCase.xmi                       # Use case diagram (root level)
+└── README.md                         # This file
 ```
 
 ## 🚀 Getting Started
