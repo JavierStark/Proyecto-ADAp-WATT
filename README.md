@@ -463,8 +463,7 @@ cd Backend
 docker-compose up --build
 ```
 
-The application is currently deployed on **Azure App Service** at:
-`https://cudecabackend-c7hhc5ejeygfb4ah.spaincentral-01.azurewebsites.net/`
+The application is deployed on **Azure App Service**. Configure your production URL in environment variables.
 
 ### Frontend Deployment
 
